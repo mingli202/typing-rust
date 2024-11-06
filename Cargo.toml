@@ -1,0 +1,3 @@
+[workspace]
+members = ["data_provider", "screen", "typer"]
+resolver = "2"

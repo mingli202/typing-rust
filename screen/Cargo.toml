@@ -1,0 +1,8 @@
+[package]
+name = "screen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+data_provider = { path = "../data_provider" }
+macroquad = "0.4.13"
