@@ -4,7 +4,7 @@ use macroquad::text::{self, TextDimensions};
 
 use crate::theme::Theme;
 
-use super::{Component, Shape};
+use super::{Component, Shape, Value};
 
 pub struct TextBox {
     text: String,
@@ -17,10 +17,10 @@ impl TextBox {
     pub fn new(
         text: String,
         font_size: f32,
-        x: f32,
-        y: f32,
-        width: f32,
-        height: f32,
+        x: Value<f32>,
+        y: Value<f32>,
+        width: Value<f32>,
+        height: Value<f32>,
         color: Rc<Theme>,
     ) -> TextBox {
         TextBox {
@@ -37,7 +37,6 @@ impl TextBox {
     }
 
     fn print_text_wrap(&self) {
-        let mut size = 0.0;
         let mut i = -1;
         let mut k: i32 = 0;
         let mut last = i;
@@ -53,17 +52,15 @@ impl TextBox {
                 1.0,
             );
 
-            size += width;
-
-            let y = self.shape.y + lines as f32 * self.font_size;
-            if y > self.shape.y + self.shape.height {
+            let y = self.shape.y.get() + lines as f32 * self.font_size;
+            if y > self.shape.y.get() + self.shape.height.get() {
                 return;
             }
 
-            if size > self.shape.width {
+            if width > self.shape.width.get() {
                 text::draw_text(
                     &self.text[k as usize..last as usize],
-                    self.shape.x,
+                    self.shape.x.get(),
                     y,
                     self.font_size,
                     self.color.text,
@@ -71,14 +68,6 @@ impl TextBox {
 
                 lines += 1;
                 k = last + 1;
-
-                size = text::measure_text(
-                    &self.text[k as usize..i as usize],
-                    None,
-                    self.font_size as u16,
-                    1.0,
-                )
-                .width;
             }
 
             last = i;
@@ -86,8 +75,8 @@ impl TextBox {
 
         text::draw_text(
             &self.text[k as usize..last as usize],
-            self.shape.x,
-            self.shape.y + lines as f32 * self.font_size,
+            self.shape.x.get(),
+            self.shape.y.get() + lines as f32 * self.font_size,
             self.font_size,
             self.color.text,
         );

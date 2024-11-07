@@ -1,4 +1,5 @@
 mod textbox;
+
 pub use textbox::TextBox;
 
 pub trait Component {
@@ -6,14 +7,23 @@ pub trait Component {
     fn update(&self);
 }
 
-enum Value {
-    Relative(Box<dyn Fn(f32) -> f32>),
-    Absolute(f32),
+pub enum Value<T> {
+    Relative(Box<dyn Fn() -> T>),
+    Absolute(T),
+}
+
+impl<T: Clone> Value<T> {
+    fn get(&self) -> T {
+        match self {
+            Self::Absolute(v) => v.clone(),
+            Self::Relative(v) => v(),
+        }
+    }
 }
 
 struct Shape {
-    x: f32,
-    y: f32,
-    width: f32,
-    height: f32,
+    x: Value<f32>,
+    y: Value<f32>,
+    width: Value<f32>,
+    height: Value<f32>,
 }

@@ -1,4 +1,4 @@
-use macroquad::window;
+use macroquad::{shapes, window};
 use std::error::Error;
 use std::rc::Rc;
 
@@ -8,8 +8,8 @@ mod theme;
 use theme::Theme;
 
 mod component;
-use component::Component;
 use component::TextBox;
+use component::{Component, Value};
 
 pub enum Mode {
     WordCount(usize),
@@ -49,10 +49,10 @@ impl Screen {
         initial.components.push(Box::new(TextBox::new(
             "this is a very long string that I want to wrap and test that it work hopefully so that I don't have to do random shit again".to_string(),
             initial.font_size,
-            (window::screen_width() - 200.0) / 2.0,
-            (window::screen_height() - 100.0) / 2.0,
-            400.0,
-            100.0,
+            Value::Relative(Box::new(|| (window::screen_width() - 600.0) / 2.0)),
+            Value::Relative(Box::new(|| (window::screen_height() - 100.0) / 2.0)),
+            Value::Absolute(600.0),
+            Value::Absolute(100.0),
             Rc::clone(&initial.theme),
         )));
 
@@ -66,6 +66,14 @@ impl Screen {
             for comp in &self.components {
                 comp.update();
             }
+
+            shapes::draw_rectangle(
+                (window::screen_width() - 600.0) / 2.0,
+                (window::screen_height() - 100.0) / 2.0 + 100.0,
+                600.0,
+                100.0,
+                self.theme.text,
+            );
 
             window::next_frame().await;
         }
