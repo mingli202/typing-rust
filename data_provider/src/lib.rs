@@ -1,10 +1,11 @@
+use rand::prelude::*;
 use std::error::Error;
 use std::fs;
 
 #[derive(Debug)]
 pub struct Quote {
-    source: String,
-    quote: String,
+    pub source: String,
+    pub quote: String,
 }
 
 #[derive(Debug)]
@@ -22,44 +23,96 @@ impl Data {
         &self.quotes
     }
 
-    pub fn new_offline() -> Result<Self, Box<dyn Error>> {
-        let cwd = std::env::current_dir()?
-            .to_str()
-            .unwrap()
-            .split("typing_test")
-            .collect::<Vec<&str>>()[0]
-            .to_string();
-
-        let words = fs::read_to_string(cwd.clone() + "/typing_test/data_provider/data/words.txt")?
+    pub fn new_offline(words_path: String, quotes_path: String) -> Result<Self, Box<dyn Error>> {
+        let words = fs::read_to_string(words_path)?
             .split('\n')
             .map(|w| w.to_string())
             .collect();
 
-        let quotes =
-            fs::read_to_string(cwd.clone() + "/typing_test/data_provider/data/quotes.txt")?
-                .split("\n\n")
-                .flat_map(|entry| {
-                    let mut entry: Vec<String> = entry.split('\n').map(|s| s.to_string()).collect();
-                    let source = entry[0].clone();
-                    let mut v = vec![];
+        let quotes = fs::read_to_string(quotes_path)?
+            .split("\n\n")
+            .flat_map(|entry| {
+                let mut entry: Vec<String> = entry.split('\n').map(|s| s.to_string()).collect();
+                let source = entry[0].clone();
+                let mut v = vec![];
 
-                    while let Some(quote) = entry.pop() {
-                        if quote != source {
-                            v.push(Quote {
-                                source: source.clone(),
-                                quote,
-                            });
-                        }
+                while let Some(quote) = entry.pop() {
+                    if quote != source {
+                        v.push(Quote {
+                            source: source.clone(),
+                            quote,
+                        });
                     }
-                    v
-                })
-                .collect();
+                }
+                v
+            })
+            .collect();
 
         Ok(Data { words, quotes })
     }
 
-    pub fn new_online() -> Self {
-        todo!();
+    pub fn new_online(words_file: String) -> Result<Self, Box<dyn Error>> {
+        let words = fs::read_to_string(words_file)?
+            .split('\n')
+            .map(|w| w.to_string())
+            .collect();
+
+        Ok(Data {
+            words,
+            quotes: vec![],
+        })
+    }
+
+    pub fn get_random_word(&self) -> &str {
+        let mut rng = rand::thread_rng();
+        self.words.choose(&mut rng).unwrap()
+    }
+
+    pub fn get_random_quote(&self) -> &Quote {
+        let mut rng = rand::thread_rng();
+        self.quotes.choose(&mut rng).unwrap()
+    }
+
+    pub fn get_n_random_words(&self, n: usize) -> Vec<&String> {
+        let mut rng = rand::thread_rng();
+
+        let mut v = Vec::with_capacity(n);
+
+        let mut last = -1;
+        let mut ind = -1;
+
+        for _ in 0..n {
+            while ind == last {
+                ind = rng.gen_range(0..self.words.len()) as i32;
+            }
+
+            v.push(&self.words[ind as usize]);
+
+            last = ind;
+        }
+
+        v
+    }
+
+    pub fn get_n_random_quotes(&self, n: usize) -> Vec<&Quote> {
+        let mut rng = rand::thread_rng();
+
+        let mut v = Vec::with_capacity(n);
+
+        let mut last = -1;
+        let mut ind = -1;
+
+        for _ in 0..n {
+            while ind == last {
+                ind = rng.gen_range(0..self.quotes.len()) as i32;
+            }
+
+            v.push(&self.quotes[ind as usize]);
+
+            last = ind;
+        }
+
+        v
     }
 }
 
@@ -71,7 +124,8 @@ mod tests {
 
     #[test]
     fn number_of_source() {
-        let data = Data::new_offline().unwrap();
+        let data =
+            Data::new_offline("data/words.txt".to_string(), "data/quotes.txt".to_string()).unwrap();
         assert_eq!(3001, data.words.len());
         assert_eq!(
             28,
@@ -81,5 +135,32 @@ mod tests {
                 .collect::<HashSet<String>>()
                 .len()
         )
+    }
+
+    #[test]
+    fn random_words_and_quotes() {
+        let data =
+            Data::new_offline("data/words.txt".to_string(), "data/quotes.txt".to_string()).unwrap();
+        let random_words = data.get_n_random_words(10);
+        let random_quotes = data.get_n_random_quotes(10);
+
+        assert_eq!(10, random_words.len());
+        assert_eq!(10, random_quotes.len());
+
+        let mut last = String::new();
+
+        for word in random_words {
+            if last == *word {
+                panic!("Repeating word");
+            }
+            last = (*word).clone();
+        }
+
+        for quote in random_quotes {
+            if last == *quote.quote {
+                panic!("Repeating quote");
+            }
+            last = quote.quote.clone();
+        }
     }
 }
