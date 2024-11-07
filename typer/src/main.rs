@@ -1,23 +1,25 @@
-use data_provider::Data;
-use std::env::Args;
+use macroquad::window::Conf;
+use screen::Screen;
 use std::error::Error;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let data = Data::new_offline()?;
-    println!("{:#?}", data);
+#[macroquad::main(window_conf)]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let data = typer::parse_args(std::env::args())?;
+    let screen = Screen::new(data, None, None, None);
+    screen.main_loop().await?;
 
     Ok(())
 }
 
-fn parse_args(mut args: Args) {
-    args.next();
+fn window_conf() -> Conf {
+    let default = Conf::default();
 
-    while let Some(arg) = args.next() {
-        match arg.as_str() {
-            // to add or delete quotes and words
-            "word" => (),
-            "quote" => (),
-            _ => (),
-        }
+    Conf {
+        window_title: "Typing Test".to_string(),
+        fullscreen: false,
+        window_width: 1000,
+        window_height: 600,
+        high_dpi: true,
+        ..default
     }
 }
