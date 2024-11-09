@@ -1,4 +1,5 @@
-use macroquad::{shapes, window};
+use macroquad::{input, window};
+use std::cell::RefCell;
 use std::error::Error;
 use std::rc::Rc;
 
@@ -9,7 +10,7 @@ use theme::Theme;
 
 mod component;
 use component::TextBox;
-use component::{Component, Value};
+use component::{Component, Style, Value};
 
 pub enum Mode {
     WordCount(usize),
@@ -23,10 +24,15 @@ impl Default for Mode {
     }
 }
 
+enum State {
+    Typing(Mode),
+    EndScreen,
+}
+
 pub struct Screen {
     font_size: f32,
-    theme: Rc<Theme>,
-    mode: Mode,
+    theme: Rc<RefCell<Theme>>,
+    mode: State,
     data: Data,
     components: Vec<Box<dyn Component>>,
 }
@@ -40,28 +46,44 @@ impl Screen {
     ) -> Self {
         let mut initial = Screen {
             data,
-            theme: Rc::new(theme.unwrap_or_default()),
-            mode: mode.unwrap_or_default(),
+            theme: Rc::new(RefCell::new(theme.unwrap_or_default())),
+            mode: State::Typing(mode.unwrap_or_default()),
             font_size: font_size.unwrap_or(20.0),
             components: vec![],
         };
 
         initial.components.push(Box::new(TextBox::new(
-            "this is a very long string that I want to wrap and test that its work hopefully so that I don't have to do random shit again".to_string(),
-            initial.font_size,
-            Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
-            Value::Relative(Box::new(|| (window::screen_height() - 100.0) / 2.0)),
-            Value::Relative(Box::new(|| window::screen_width() / 2.0)),
-            Value::Absolute(100.0),
-            Rc::clone(&initial.theme),
+            "This is a very long text that I wish to wrap and test that it works. In other words, this is but a humble placeholder for what is yet to be implemented the greatest typing speed test written in rust!".to_string(),
+            Style {
+                font_size:initial.font_size,
+                border_size: Some(2.0),
+                x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
+                y: Value::Relative(Box::new(|| (window::screen_height() - 100.0) / 2.0)),
+                width: Value::Relative(Box::new(|| window::screen_width() / 2.0)),
+                height: Value::Absolute(100.0),
+                theme: Rc::clone(&initial.theme),
+                clip: true,
+                offset_y: None,
+                offset_x: None,
+                padding_x: Some(Value::Absolute(10.0)),
+                padding_y: Some(Value::Absolute(10.0)),
+            }
         )));
 
         initial
     }
 
-    pub async fn main_loop(&self) -> Result<(), Box<dyn Error>> {
+    pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
         loop {
-            window::clear_background(self.theme.bg);
+            if let Some(c) = input::get_char_pressed() {
+                match c {
+                    'a' => self.theme.borrow_mut().set_atom(),
+                    'c' => self.theme.borrow_mut().set_catppuccin(),
+                    _ => (),
+                }
+            }
+
+            window::clear_background(self.theme.borrow().bg);
 
             for comp in &self.components {
                 comp.update();
