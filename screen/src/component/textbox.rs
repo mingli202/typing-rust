@@ -1,39 +1,15 @@
-use std::rc::Rc;
-
 use macroquad::text::{self, TextDimensions};
 
-use crate::theme::Theme;
-
-use super::{Component, Shape, Value};
+use super::{Component, Style};
 
 pub struct TextBox {
     text: String,
-    font_size: f32,
-    color: Rc<Theme>,
-    shape: Shape,
+    style: Style,
 }
 
 impl TextBox {
-    pub fn new(
-        text: String,
-        font_size: f32,
-        x: Value<f32>,
-        y: Value<f32>,
-        width: Value<f32>,
-        height: Value<f32>,
-        color: Rc<Theme>,
-    ) -> TextBox {
-        TextBox {
-            text,
-            font_size,
-            shape: Shape {
-                x,
-                y,
-                width,
-                height,
-            },
-            color,
-        }
+    pub fn new(text: String, style: Style) -> TextBox {
+        TextBox { text, style }
     }
 
     fn print_text_wrap(&self) {
@@ -48,22 +24,22 @@ impl TextBox {
             let TextDimensions { width, .. } = text::measure_text(
                 &self.text[k as usize..i as usize],
                 None,
-                self.font_size as u16,
+                self.style.font_size as u16,
                 1.0,
             );
 
-            let y = self.shape.y.get() + lines as f32 * self.font_size;
-            if y > self.shape.y.get() + self.shape.height.get() {
+            let y = self.style.y.get() + lines as f32 * self.style.font_size;
+            if y > self.style.y.get() + self.style.height.get() {
                 return;
             }
 
-            if width > self.shape.width.get() {
+            if width > self.style.width.get() {
                 text::draw_text(
                     &self.text[k as usize..last as usize],
-                    self.shape.x.get(),
+                    self.style.x.get(),
                     y,
-                    self.font_size,
-                    self.color.text,
+                    self.style.font_size,
+                    self.style.theme.text,
                 );
 
                 lines += 1;
@@ -75,10 +51,10 @@ impl TextBox {
 
         text::draw_text(
             &self.text[k as usize..last as usize],
-            self.shape.x.get(),
-            self.shape.y.get() + lines as f32 * self.font_size,
-            self.font_size,
-            self.color.text,
+            self.style.x.get(),
+            self.style.y.get() + lines as f32 * self.style.font_size,
+            self.style.font_size,
+            self.style.theme.text,
         );
     }
 }

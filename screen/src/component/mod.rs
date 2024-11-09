@@ -1,6 +1,10 @@
-mod textbox;
+use std::rc::Rc;
 
+mod textbox;
+use macroquad::text::Font;
 pub use textbox::TextBox;
+
+use crate::theme::Theme;
 
 pub trait Component {
     /// Function that will be called on each frame
@@ -21,9 +25,12 @@ impl<T: Clone> Value<T> {
     }
 }
 
-struct Shape {
-    x: Value<f32>,
-    y: Value<f32>,
-    width: Value<f32>,
-    height: Value<f32>,
+pub struct Style {
+    pub x: Value<f32>,
+    pub y: Value<f32>,
+    pub width: Value<f32>,
+    pub height: Value<f32>,
+    pub font_size: f32,
+    pub theme: Rc<Theme>,
+    pub border_size: Option<f32>,
 }
