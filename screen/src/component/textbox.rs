@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use macroquad::text::{self, TextDimensions};
 
 use super::{Component, Style};
@@ -5,11 +8,18 @@ use super::{Component, Style};
 pub struct TextBox {
     text: String,
     style: Style,
+    current: Rc<RefCell<i32>>,
+    id: i32,
 }
 
 impl TextBox {
-    pub fn new(text: String, style: Style) -> TextBox {
-        TextBox { text, style }
+    pub fn new(text: String, style: Style, id: i32, current: Rc<RefCell<i32>>) -> TextBox {
+        TextBox {
+            text,
+            style,
+            id,
+            current,
+        }
     }
 
     pub fn print_text(&self, text: &str, x: f32, y: f32) {
@@ -97,6 +107,9 @@ impl Component for TextBox {
         self.style.draw_bg();
         self.print_text_wrap();
         self.style.draw_mask();
-        self.style.draw_border();
+
+        if *self.current.borrow() == self.id {
+            self.style.draw_border();
+        }
     }
 }

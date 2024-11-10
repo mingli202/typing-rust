@@ -1,4 +1,6 @@
-use macroquad::{shapes, window};
+use macroquad::{color::Color, shapes, window};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 mod textbox;
 pub use textbox::TextBox;
@@ -32,6 +34,7 @@ pub struct Style {
     pub font_size: f32,
     pub theme: Theme,
     pub border_size: Option<f32>,
+    pub border_color: Rc<RefCell<Color>>,
     pub clip: bool,
     pub offset_x: Option<Value<f32>>,
     pub offset_y: Option<Value<f32>>,
@@ -48,7 +51,7 @@ impl Style {
                 self.width.get(),
                 self.height.get(),
                 size,
-                *self.theme.text.borrow(),
+                *self.border_color.borrow(),
             );
         }
     }
