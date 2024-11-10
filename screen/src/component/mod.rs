@@ -1,6 +1,4 @@
 use macroquad::{shapes, window};
-use std::cell::RefCell;
-use std::rc::Rc;
 
 mod textbox;
 pub use textbox::TextBox;
@@ -32,7 +30,7 @@ pub struct Style {
     pub width: Value<f32>,
     pub height: Value<f32>,
     pub font_size: f32,
-    pub theme: Rc<RefCell<Theme>>,
+    pub theme: Theme,
     pub border_size: Option<f32>,
     pub clip: bool,
     pub offset_x: Option<Value<f32>>,
@@ -50,7 +48,7 @@ impl Style {
                 self.width.get(),
                 self.height.get(),
                 size,
-                self.theme.borrow().text,
+                *self.theme.text.borrow(),
             );
         }
     }
@@ -61,7 +59,7 @@ impl Style {
             self.y.get(),
             self.width.get(),
             self.height.get(),
-            self.theme.borrow().bg,
+            *self.theme.bg.borrow(),
         );
     }
 
@@ -88,14 +86,10 @@ impl Style {
                 _ => 0.0,
             };
 
+            let color = *theme.bg.borrow();
+
             // left mask
-            shapes::draw_rectangle(
-                0.0,
-                0.0,
-                x.get() + p_x,
-                window::screen_height(),
-                theme.borrow().bg,
-            );
+            shapes::draw_rectangle(0.0, 0.0, x.get() + p_x, window::screen_height(), color);
 
             // right mask
             shapes::draw_rectangle(
@@ -103,11 +97,11 @@ impl Style {
                 0.0,
                 window::screen_width() - (width.get() + x.get() - p_x),
                 window::screen_height(),
-                theme.borrow().bg,
+                color,
             );
 
             // top
-            shapes::draw_rectangle(x.get(), 0.0, width.get(), y.get() + p_y, theme.borrow().bg);
+            shapes::draw_rectangle(x.get(), 0.0, width.get(), y.get() + p_y, color);
 
             // bottom
             shapes::draw_rectangle(
@@ -115,7 +109,7 @@ impl Style {
                 y.get() + height.get() - p_y,
                 width.get(),
                 window::screen_height() - (y.get() + height.get() - p_y),
-                theme.borrow().bg,
+                color,
             );
         }
     }

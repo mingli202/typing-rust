@@ -1,27 +1,29 @@
 use macroquad::color::Color;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct Theme {
-    pub bg: Color,
-    pub text: Color,
-    pub error: Color,
-    pub ghost: Color,
+    pub bg: Rc<RefCell<Color>>,
+    pub text: Rc<RefCell<Color>>,
+    pub error: Rc<RefCell<Color>>,
+    pub ghost: Rc<RefCell<Color>>,
 }
 
 impl Theme {
     fn new() -> Self {
         Theme {
-            bg: Color::new(0.0, 0.0, 0.0, 1.0),
-            text: Color::new(1.0, 1.0, 1.0, 1.0),
-            error: Color::new(1.0, 0.0, 0.0, 1.0),
-            ghost: Color::new(1.0, 1.0, 1.0, 0.5),
+            bg: Rc::new(RefCell::new(Color::new(0.0, 0.0, 0.0, 1.0))),
+            text: Rc::new(RefCell::new(Color::new(1.0, 1.0, 1.0, 1.0))),
+            error: Rc::new(RefCell::new(Color::new(1.0, 0.0, 0.0, 1.0))),
+            ghost: Rc::new(RefCell::new(Color::new(1.0, 1.0, 1.0, 0.5))),
         }
     }
 
     fn set(&mut self, bg: u32, text: u32, error: u32, ghost: Option<u32>) {
-        self.bg = Color::from_hex(bg);
-        self.text = Color::from_hex(text);
-        self.error = Color::from_hex(error);
-        self.ghost = if let Some(color) = ghost {
+        *self.bg.borrow_mut() = Color::from_hex(bg);
+        *self.text.borrow_mut() = Color::from_hex(text);
+        *self.error.borrow_mut() = Color::from_hex(error);
+        *self.ghost.borrow_mut() = if let Some(color) = ghost {
             Color::from_hex(color)
         } else {
             Color {

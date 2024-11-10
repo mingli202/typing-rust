@@ -41,7 +41,7 @@ impl TextBox {
             x + p_x + o_x,
             y + p_y + o_y + offset_y,
             self.style.font_size,
-            self.style.theme.borrow().text,
+            *self.style.theme.text.borrow(),
         );
     }
 
