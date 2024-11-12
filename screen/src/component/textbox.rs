@@ -3,26 +3,50 @@ use std::rc::Rc;
 
 use macroquad::text::{self, TextDimensions};
 
-use super::{Component, Style};
+use crate::C;
+
+use super::{Button, Component, Style, Text};
 
 pub struct TextBox {
     text: String,
     style: Style,
-    current: Rc<RefCell<i32>>,
     id: i32,
+    current: Rc<RefCell<i32>>,
+    click: Box<dyn Fn()>,
 }
 
 impl TextBox {
-    pub fn new(text: String, style: Style, id: i32, current: Rc<RefCell<i32>>) -> TextBox {
+    pub fn new(
+        text: String,
+        style: Style,
+        id: i32,
+        current: Rc<RefCell<i32>>,
+        click: Box<dyn Fn()>,
+    ) -> TextBox {
         TextBox {
             text,
             style,
             id,
             current,
+            click,
         }
     }
+}
 
-    pub fn print_text(&self, text: &str, x: f32, y: f32) {
+impl Component for TextBox {
+    fn update(&self) {
+        self.style.draw_bg();
+        self.print_text_wrap();
+        self.style.draw_mask();
+
+        if *self.current.borrow() == self.id {
+            self.style.draw_border();
+        }
+    }
+}
+
+impl Text for TextBox {
+    fn print_text(&self, text: &str, x: f32, y: f32) {
         let TextDimensions { offset_y, .. } =
             text::measure_text(text, None, self.style.font_size as u16, 1.0);
 
@@ -102,14 +126,10 @@ impl TextBox {
     }
 }
 
-impl Component for TextBox {
-    fn update(&self) {
-        self.style.draw_bg();
-        self.print_text_wrap();
-        self.style.draw_mask();
-
-        if *self.current.borrow() == self.id {
-            self.style.draw_border();
-        }
+impl Button for TextBox {
+    fn onclick(&self) {
+        (*self.click)();
     }
 }
+
+impl C for TextBox {}

@@ -12,6 +12,15 @@ pub trait Component {
     fn update(&self);
 }
 
+pub trait Text {
+    fn print_text(&self, text: &str, x: f32, y: f32);
+    fn print_text_wrap(&self);
+}
+
+pub trait Button {
+    fn onclick(&self);
+}
+
 pub enum Value<T> {
     Relative(Box<dyn Fn() -> T>),
     Absolute(T),
@@ -26,6 +35,11 @@ impl<T: Clone> Value<T> {
     }
 }
 
+pub struct BorderParams {
+    pub size: f32,
+    pub color: Rc<RefCell<Color>>,
+}
+
 pub struct Style {
     pub x: Value<f32>,
     pub y: Value<f32>,
@@ -33,8 +47,7 @@ pub struct Style {
     pub height: Value<f32>,
     pub font_size: f32,
     pub theme: Theme,
-    pub border_size: Option<f32>,
-    pub border_color: Rc<RefCell<Color>>,
+    pub border: Option<BorderParams>,
     pub clip: bool,
     pub offset_x: Option<Value<f32>>,
     pub offset_y: Option<Value<f32>>,
@@ -42,16 +55,35 @@ pub struct Style {
     pub padding_y: Option<Value<f32>>,
 }
 
+impl Default for Style {
+    fn default() -> Self {
+        Style {
+            x: Value::Absolute(0.0),
+            y: Value::Absolute(0.0),
+            width: Value::Absolute(0.0),
+            height: Value::Absolute(0.0),
+            font_size: 0.0,
+            theme: Theme::default(),
+            border: None,
+            clip: false,
+            offset_x: None,
+            offset_y: None,
+            padding_x: None,
+            padding_y: None,
+        }
+    }
+}
+
 impl Style {
     pub fn draw_border(&self) {
-        if let Some(size) = self.border_size {
+        if let Some(border) = &self.border {
             shapes::draw_rectangle_lines(
                 self.x.get(),
                 self.y.get(),
                 self.width.get(),
                 self.height.get(),
-                size,
-                *self.border_color.borrow(),
+                border.size,
+                *border.color.borrow(),
             );
         }
     }

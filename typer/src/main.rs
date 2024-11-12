@@ -5,7 +5,7 @@ use std::error::Error;
 #[macroquad::main(window_conf)]
 async fn main() -> Result<(), Box<dyn Error>> {
     let data = typer::parse_args(std::env::args())?;
-    let mut screen = Screen::new(data, None, None, None);
+    let mut screen = Screen::new(data);
     screen.main_loop().await?;
 
     Ok(())
