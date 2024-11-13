@@ -12,8 +12,7 @@ mod theme;
 mod component;
 use component::{Component, Style};
 
-use self::component::{BorderParams, Button, TextBox, Value};
-use self::theme::Theme;
+use self::component::Button;
 
 mod typing_box;
 
@@ -62,33 +61,10 @@ impl Screen {
         initial
             .components
             .entry(initial.mode.clone())
-            .or_insert(vec![
-                typing_box::typing_box(&initial.style, Rc::clone(&initial.current)),
-                Box::new(TextBox::new(
-                    "Hello world".to_string(),
-                    Style {
-                        width: Value::Absolute(100.0),
-                        height: Value::Absolute(100.0),
-                        font_size: 20.0,
-                        padding_x: Some(Value::Absolute(10.0)),
-                        padding_y: Some(Value::Absolute(10.0)),
-                        theme: Theme {
-                            bg: Rc::clone(&initial.style.theme.bg),
-                            ghost: Rc::clone(&initial.style.theme.ghost),
-                            text: Rc::clone(&initial.style.theme.text),
-                            error: Rc::clone(&initial.style.theme.error),
-                        },
-                        border: Some(BorderParams {
-                            size: 2.0,
-                            color: Rc::clone(&initial.style.theme.text),
-                        }),
-                        ..Style::default()
-                    },
-                    1,
-                    Rc::clone(&initial.current),
-                    Box::new(|| std::process::exit(0)),
-                )),
-            ]);
+            .or_insert(vec![typing_box::typing_box(
+                &initial.style,
+                Rc::clone(&initial.current),
+            )]);
 
         // TODO: feedback keep track of the first line and overwrite the ghost text
         // animation library use threads to mutate value over time (maybe)
@@ -109,13 +85,10 @@ impl Screen {
                             % self.components.get(&self.mode).unwrap().len() as i32;
                         *self.current.borrow_mut() = next;
                     }
-                    _ => (),
+                    // this passes the keytrokes to type
+                    _ => if let Some(c) = input::get_char_pressed() {},
                 }
             }
-
-            //if let Some(c) = input::get_char_pressed() {
-            //    todo!("pass in the characters");
-            //}
 
             window::clear_background(*self.style.theme.bg.borrow());
 
