@@ -33,6 +33,6 @@ pub fn typing_box(initial: &Style, current: Rc<RefCell<i32>>) -> Box<TextBox> {
         },
         0,
         Rc::clone(&current),
-        Box::new(|| {})
+        None
     ))
 }

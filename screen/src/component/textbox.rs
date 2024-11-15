@@ -12,7 +12,7 @@ pub struct TextBox {
     style: Style,
     id: i32,
     current: Rc<RefCell<i32>>,
-    click: Box<dyn Fn()>,
+    click: Option<Box<dyn Fn()>>,
 }
 
 impl TextBox {
@@ -21,7 +21,7 @@ impl TextBox {
         style: Style,
         id: i32,
         current: Rc<RefCell<i32>>,
-        click: Box<dyn Fn()>,
+        click: Option<Box<dyn Fn()>>,
     ) -> TextBox {
         TextBox {
             text,
@@ -128,7 +128,9 @@ impl Text for TextBox {
 
 impl Button for TextBox {
     fn onclick(&self) {
-        (*self.click)();
+        if let Some(f) = &self.click {
+            f();
+        }
     }
 }
 
