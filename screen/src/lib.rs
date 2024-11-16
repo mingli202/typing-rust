@@ -1,19 +1,15 @@
+use data_provider::Data;
 use macroquad::input::KeyCode;
 use macroquad::{input, window};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::error::Error;
 use std::rc::Rc;
-
-use data_provider::Data;
-
-mod theme;
-
 mod component;
+mod theme;
 use component::{Component, Style};
-
-use self::component::Button;
-
+mod feedback;
+mod text;
 mod typing_box;
 
 #[derive(PartialEq, Hash, Eq, Clone)]
@@ -35,55 +31,58 @@ enum State {
     EndScreen,
 }
 
-trait C: Component + Button {}
-
 pub struct Screen {
     style: Style,
-    mode: State,
+    state: State,
     data: Data,
-    components: HashMap<State, Vec<Box<dyn C>>>,
-    current: Rc<RefCell<i32>>,
+    components: HashMap<State, Vec<Box<dyn Component>>>,
+    focus: Rc<RefCell<i32>>,
 }
 
 impl Screen {
     pub fn new(data: Data) -> Self {
         let mut initial = Screen {
             data,
-            mode: State::Typing(Mode::default()),
-            components: HashMap::new(),
-            current: Rc::new(RefCell::new(0)),
+            state: State::Typing(Mode::default()),
+            components: HashMap::from([
+                (State::Typing(Mode::default()), vec![]),
+                (State::Typing(Mode::Quote), vec![]),
+                (State::Typing(Mode::WordCount(30)), vec![]),
+            ]),
+            focus: Rc::new(RefCell::new(0)),
             style: Style {
                 font_size: 20.0,
                 ..Style::default()
             },
         };
 
-        initial
-            .components
-            .entry(initial.mode.clone())
-            .or_insert(vec![typing_box::typing_box(
+        initial.components.entry(initial.state.clone()).and_modify(|v| v.append(&mut vec![
+            typing_box::typing_box(
+                "This is a very long text that I wish to wrap and test that it works. In other words, this is but a humble placeholder for what is yet to be implemented the greatest typing speed test written in rust!".to_string(),
                 &initial.style,
-                Rc::clone(&initial.current),
-            )]);
+                Rc::clone(&initial.focus),
+            ),
+        ]));
 
         // TODO: feedback keep track of the first line and overwrite the ghost text
         // animation library use threads to mutate value over time (maybe)
-
         initial
     }
 
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
+        let current_text = Rc::new(RefCell::new(self.data.get_n_random_words(100)));
+
         loop {
             if let Some(k) = input::get_last_key_pressed() {
                 match k {
                     KeyCode::Enter => {
-                        let current = *self.current.borrow() as usize;
-                        self.components.get(&self.mode).unwrap()[current].onclick();
+                        let current = *self.focus.borrow() as usize;
+                        self.components.get(&self.state).unwrap()[current].onclick();
                     }
                     KeyCode::Tab => {
-                        let next = (*self.current.borrow() + 1)
-                            % self.components.get(&self.mode).unwrap().len() as i32;
-                        *self.current.borrow_mut() = next;
+                        let next = (*self.focus.borrow() + 1)
+                            % self.components.get(&self.state).unwrap().len() as i32;
+                        *self.focus.borrow_mut() = next;
                     }
                     // this passes the keytrokes to type
                     _ => if let Some(c) = input::get_char_pressed() {},
@@ -92,7 +91,7 @@ impl Screen {
 
             window::clear_background(*self.style.theme.bg.borrow());
 
-            for comp in self.components.get(&self.mode).unwrap() {
+            for comp in self.components.get(&self.state).unwrap() {
                 comp.update();
             }
 

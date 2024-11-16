@@ -2,22 +2,13 @@ use macroquad::{color::Color, shapes, window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-mod textbox;
-pub use textbox::TextBox;
+pub mod textbox;
 
 use crate::theme::Theme;
 
 pub trait Component {
     /// Function that will be called on each frame
     fn update(&self);
-}
-
-pub trait Text {
-    fn print_text(&self, text: &str, x: f32, y: f32);
-    fn print_text_wrap(&self);
-}
-
-pub trait Button {
     fn onclick(&self);
 }
 
@@ -27,7 +18,7 @@ pub enum Value<T> {
 }
 
 impl<T: Clone> Value<T> {
-    fn get(&self) -> T {
+    pub fn get(&self) -> T {
         match self {
             Self::Absolute(v) => v.clone(),
             Self::Relative(v) => v(),
