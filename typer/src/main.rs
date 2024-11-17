@@ -17,7 +17,7 @@ fn window_conf() -> Conf {
     Conf {
         window_title: "Typing Test".to_string(),
         fullscreen: false,
-        window_width: 1000,
+        window_width: (600.0 * 1.61) as i32,
         window_height: 600,
         window_resizable: false,
         high_dpi: true,
