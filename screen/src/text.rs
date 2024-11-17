@@ -1,3 +1,4 @@
+use macroquad::shapes;
 use macroquad::text::{self, TextDimensions};
 
 use crate::component::Style;
@@ -36,15 +37,26 @@ pub fn print_letter(style: &Style, letter: &Letter, x: f32, y: f32) -> TextDimen
         x + p_x + o_x,
         y + p_y + o_y,
         style.font_size,
-        *style.theme.text.borrow(),
+        *letter.color.borrow(),
     );
+
+    if *letter.color.borrow() == *style.theme.error.borrow() {
+        shapes::draw_line(
+            x + p_x + o_x,
+            y + p_y + o_y + 0.2 * style.font_size,
+            x + p_x + o_x + dimensions.width,
+            y + p_y + o_y + 0.2 * style.font_size,
+            1.5,
+            *letter.color.borrow(),
+        );
+    }
 
     dimensions
 }
 
 pub fn print_text(style: &Style, letters: &[&Letter], x: f32, y: f32) {
     let mut offset_x = 0.0;
-    let mut offset_y = text::measure_text(
+    let offset_y = text::measure_text(
         &letters
             .iter()
             .fold(String::new(), |acc, l| acc + &l.letter.to_string()),

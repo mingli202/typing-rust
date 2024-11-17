@@ -8,8 +8,8 @@ use super::{Component, Style};
 pub struct TextBoxState {
     pub focus: Rc<RefCell<i32>>,
     pub id: i32,
-    pub text: String,
     pub letters: Vec<Letter>,
+    pub index: usize,
 }
 
 pub struct TextBox {
@@ -18,8 +18,38 @@ pub struct TextBox {
     pub onclick: Option<Box<dyn Fn()>>,
 }
 
+// TODO:pass in character, and update real time colors
 impl TextBox {
-    pub fn ontype(&self, c: char) {}
+    pub fn ontype(&mut self, c: char) -> bool {
+        if self.state.index == self.state.letters.len() {
+            return true;
+        }
+
+        if c == self.state.letters[self.state.index].letter {
+            self.state.letters[self.state.index] = Letter {
+                color: Rc::clone(&self.style.theme.text),
+                ..self.state.letters[self.state.index]
+            };
+        } else {
+            self.state.letters[self.state.index] = Letter {
+                color: Rc::clone(&self.style.theme.error),
+                ..self.state.letters[self.state.index]
+            };
+        }
+
+        self.state.index += 1;
+        false
+    }
+    pub fn delete_char(&mut self) {
+        if self.state.index == 0 {
+            return;
+        }
+        self.state.index -= 1;
+        self.state.letters[self.state.index] = Letter {
+            color: Rc::clone(&self.style.theme.ghost),
+            ..self.state.letters[self.state.index]
+        };
+    }
 }
 
 impl Component for TextBox {

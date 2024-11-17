@@ -8,7 +8,7 @@ use crate::component::{BorderParams, Style, Value};
 use crate::theme::Theme;
 use crate::Letter;
 
-pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> Box<TextBox> {
+pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextBox {
     let letters: Vec<Letter> = text
         .chars()
         .map(|c| Letter {
@@ -17,7 +17,7 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> Box<T
         })
         .collect();
 
-    Box::new(TextBox {
+    TextBox {
         style: Style {
             font_size: style.font_size,
             border: Some(BorderParams {
@@ -27,7 +27,7 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> Box<T
             theme: Theme {
                 bg: Rc::clone(&style.theme.bg),
                 ghost: Rc::clone(&style.theme.ghost),
-                text: Rc::clone(&style.theme.ghost),
+                text: Rc::clone(&style.theme.text),
                 error: Rc::clone(&style.theme.error),
             },
             x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
@@ -45,9 +45,9 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> Box<T
         state: TextBoxState {
             focus: Rc::clone(&focus),
             id: 0,
-            text,
             letters,
+            index: 0,
         },
         onclick: None,
-    })
+    }
 }
