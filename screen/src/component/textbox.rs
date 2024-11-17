@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use macroquad::color::Color;
+use crate::Letter;
 
 use super::{Component, Style};
 
@@ -37,9 +37,4 @@ impl Component for TextBox {
             f();
         }
     }
-}
-
-pub struct Letter {
-    pub letter: char,
-    pub color: Rc<RefCell<Color>>,
 }

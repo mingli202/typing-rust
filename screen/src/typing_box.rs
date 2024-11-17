@@ -6,6 +6,7 @@ use macroquad::window;
 use crate::component::textbox::*;
 use crate::component::{BorderParams, Style, Value};
 use crate::theme::Theme;
+use crate::Letter;
 
 pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> Box<TextBox> {
     let letters: Vec<Letter> = text

@@ -1,7 +1,7 @@
 use macroquad::text::{self, TextDimensions};
 
-use crate::component::textbox::Letter;
 use crate::component::Style;
+use crate::Letter;
 
 pub fn print_letter(style: &Style, letter: &Letter, x: f32, y: f32) -> TextDimensions {
     let dimensions = text::measure_text(

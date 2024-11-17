@@ -1,4 +1,5 @@
 use data_provider::Data;
+use macroquad::color::Color;
 use macroquad::input::KeyCode;
 use macroquad::{input, window};
 use std::cell::RefCell;
@@ -106,4 +107,9 @@ impl Screen {
             window::next_frame().await;
         }
     }
+}
+
+pub struct Letter {
+    pub letter: char,
+    pub color: Rc<RefCell<Color>>,
 }
