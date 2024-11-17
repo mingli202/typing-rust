@@ -51,10 +51,9 @@ impl Theme {
 }
 
 impl Default for Theme {
-    /// The default theme is catppuccin
     fn default() -> Self {
         let mut theme = Self::new();
-        theme.set_catppuccin();
+        theme.set_gruvbox();
         theme
     }
 }
