@@ -1,10 +1,15 @@
 use macroquad::text::{self, TextDimensions};
 
+use crate::component::textbox::Letter;
 use crate::component::Style;
 
-pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
-    let TextDimensions { offset_y, .. } =
-        text::measure_text(text, None, style.font_size as u16, 1.0);
+pub fn print_letter(style: &Style, letter: &Letter, x: f32, y: f32) -> TextDimensions {
+    let dimensions = text::measure_text(
+        &letter.letter.to_string(),
+        None,
+        style.font_size as u16,
+        1.0,
+    );
 
     let p_x = match &style.padding_x {
         Some(p) => p.get(),
@@ -27,19 +32,35 @@ pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
     };
 
     text::draw_text(
-        text,
+        &letter.letter.to_string(),
         x + p_x + o_x,
-        y + p_y + o_y + offset_y,
+        y + p_y + o_y,
         style.font_size,
         *style.theme.text.borrow(),
     );
+
+    dimensions
 }
 
-pub fn print_text_wrap(style: &Style, text: &str) {
-    let mut i = -1;
-    let mut k: i32 = 0;
-    let mut last = i;
-    let mut lines = 0;
+pub fn print_text(style: &Style, letters: &[&Letter], x: f32, y: f32) {
+    let mut offset_x = 0.0;
+    let mut offset_y = text::measure_text(
+        &letters
+            .iter()
+            .fold(String::new(), |acc, l| acc + &l.letter.to_string()),
+        None,
+        style.font_size as u16,
+        1.0,
+    )
+    .offset_y;
+
+    for letter in letters {
+        offset_x += print_letter(style, letter, x + offset_x, y + offset_y).width;
+    }
+}
+
+pub fn print_text_wrap(style: &Style, letters: &[Letter]) {
+    let mut lines = 0.0;
 
     let p_x = match &style.padding_x {
         Some(p) => p.get(),
@@ -51,32 +72,60 @@ pub fn print_text_wrap(style: &Style, text: &str) {
         _ => 0.0,
     };
 
-    for word in text.split(' ') {
-        i += word.len() as i32 + 1;
+    let mut line: Vec<&Letter> = vec![];
+    let mut word: Vec<&Letter> = vec![];
 
-        let y = style.y.get() + lines as f32 * style.font_size;
-        if y > style.y.get() + style.height.get() - p_y {
-            return;
+    for (i, letter) in letters.iter().enumerate() {
+        if letter.letter != ' ' {
+            word.push(letter);
+            if i != letters.len() - 1 {
+                continue;
+            }
         }
 
-        let TextDimensions { width, .. } = text::measure_text(
-            &text[k as usize..i as usize],
+        let line_merged: String = line
+            .iter()
+            .fold(String::new(), |acc, l| acc + &l.letter.to_string());
+
+        let word_merged: String = word
+            .iter()
+            .fold(String::new(), |acc, l| acc + &l.letter.to_string());
+
+        if text::measure_text(
+            &(line_merged + &word_merged),
             None,
             style.font_size as u16,
             1.0,
-        );
-
-        if width > style.width.get() - 2.0 * p_x {
-            print_text(style, &text[k as usize..last as usize], style.x.get(), y);
-
-            lines += 1;
-            k = last + 1;
+        )
+        .width
+            > style.width.get() - 2.0 * p_x
+        {
+            print_text(
+                style,
+                &line,
+                style.x.get(),
+                style.y.get() + lines * style.font_size,
+            );
+            lines += 1.0;
+            line.drain(..);
         }
 
-        last = i;
+        line.append(&mut word);
+        line.push(letter);
+        word.drain(..);
+
+        if lines * style.font_size > style.y.get() + style.height.get() - p_y {
+            return;
+        }
     }
 
-    let y = style.y.get() + lines as f32 * style.font_size;
+    line.append(&mut word);
+    line.pop();
 
-    print_text(style, &text[k as usize..last as usize], style.x.get(), y);
+    print_text(
+        style,
+        &line,
+        style.x.get(),
+        style.y.get() + lines * style.font_size,
+    );
 }
