@@ -1,9 +1,10 @@
 use std::cell::RefCell;
+use std::cmp::Ordering;
 use std::rc::Rc;
 
 use crate::Letter;
 
-use super::{Component, Style};
+use super::{Component, Style, Value};
 
 pub struct TextBoxState {
     pub focus: Rc<RefCell<i32>>,
@@ -40,6 +41,7 @@ impl TextBox {
         self.state.index += 1;
         false
     }
+
     pub fn delete_char(&mut self) {
         if self.state.index == 0 {
             return;
@@ -50,14 +52,38 @@ impl TextBox {
             ..self.state.letters[self.state.index]
         };
     }
+
+    fn update_position(&mut self, line_breaks: &[usize]) {
+        let mut left: i32 = 0;
+        let mut right: i32 = line_breaks.len() as i32 - 1;
+
+        while left < right {
+            let mid = (left + right) / 2;
+
+            match self.state.index.cmp(&line_breaks[mid as usize]) {
+                Ordering::Less => right = mid - 1,
+                Ordering::Greater => left = mid + 1,
+                Ordering::Equal => {
+                    left = mid;
+                    break;
+                }
+            }
+        }
+        if self.state.index < line_breaks[left as usize] && left > 0 {
+            left -= 1;
+        }
+        self.style.offset_y = Some(Value::Absolute(-(left as f32 * self.style.font_size)));
+    }
 }
 
 impl Component for TextBox {
-    fn update(&self) {
+    fn update(&mut self) {
         self.style.draw_bg();
-        crate::text::print_text_wrap(&self.style, &self.state.letters);
-        self.style.draw_mask();
 
+        let line_breaks = crate::text::print_text_wrap(&self.style, &self.state.letters);
+        self.update_position(&line_breaks);
+
+        self.style.draw_mask();
         if *self.state.focus.borrow() == self.state.id {
             self.style.draw_border();
         }

@@ -8,7 +8,7 @@ use crate::theme::Theme;
 
 pub trait Component {
     /// Function that will be called on each frame
-    fn update(&self);
+    fn update(&mut self);
     fn click(&self);
 }
 

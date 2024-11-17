@@ -17,6 +17,8 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextB
         })
         .collect();
 
+    let font_size = style.font_size.to_owned();
+
     TextBox {
         style: Style {
             font_size: style.font_size,
@@ -31,11 +33,11 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextB
                 error: Rc::clone(&style.theme.error),
             },
             x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
-            y: Value::Relative(Box::new(|| {
-                window::screen_height() * (1.0 - 1.0 / (2.0 * 1.61)) / 2.0
+            y: Value::Relative(Box::new(move || {
+                (window::screen_height() - font_size * 3.0) / 2.0
             })),
             width: Value::Relative(Box::new(|| window::screen_width() / 2.0)),
-            height: Value::Relative(Box::new(|| window::screen_height() / (2.0 * 1.61))),
+            height: Value::Absolute(style.font_size * 3.0 + 10.0),
             clip: true,
             offset_y: None,
             offset_x: None,
@@ -44,7 +46,7 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextB
         },
         state: TextBoxState {
             focus: Rc::clone(&focus),
-            id: 0,
+            id: -1,
             letters,
             index: 0,
         },

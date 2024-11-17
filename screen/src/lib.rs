@@ -14,7 +14,6 @@ use self::component::textbox::TextBox;
 mod text;
 mod typing_box;
 
-#[derive(PartialEq, Hash, Eq, Clone)]
 pub enum Mode {
     WordCount(usize),
     TimeSec(usize),
@@ -27,7 +26,6 @@ impl Default for Mode {
     }
 }
 
-#[derive(Eq, Hash, PartialEq, Clone)]
 enum State {
     Typing(Mode),
     EndScreen,
@@ -47,9 +45,9 @@ impl Screen {
             data,
             state: State::Typing(Mode::default()),
             components: HashMap::from([("typing", vec![]), ("endscreen", vec![])]),
-            focus: Rc::new(RefCell::new(0)),
+            focus: Rc::new(RefCell::new(-1)),
             style: Style {
-                font_size: 20.0,
+                font_size: 30.0,
                 ..Style::default()
             },
         }
@@ -58,42 +56,57 @@ impl Screen {
         // animation library use threads to mutate value over time (maybe)
     }
 
+    fn get_state(&self) -> &str {
+        match self.state {
+            State::Typing(_) => "typing",
+            State::EndScreen => "endscreen",
+        }
+    }
+
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        // let current_text = Rc::new(RefCell::new(self.data.get_n_random_words(100)));
+        let mut current_text = self
+            .data
+            .get_n_random_words(100)
+            .iter()
+            .fold(String::new(), |acc, el| acc + el + " ");
+        current_text.pop();
 
-        let mut typingbox: TextBox = typing_box::typing_box(
-                "This is a very long text that I wish to wrap and test that it works. In other words, this is but a humble placeholder for what is yet to be implemented the greatest typing speed test written in rust!".to_string(),
-                &self.style,
-                Rc::clone(&self.focus));
-
-        let mut state = "typing";
+        let mut typingbox: TextBox =
+            typing_box::typing_box(current_text, &self.style, Rc::clone(&self.focus));
 
         loop {
             if let Some(k) = input::get_last_key_pressed() {
                 match k {
                     KeyCode::Enter => {
                         input::clear_input_queue();
-                        let current = *self.focus.borrow() as usize;
-                        self.components.get(state).unwrap()[current].click();
+                        let current = *self.focus.borrow();
+                        if current >= 0 {
+                            self.components.get(self.get_state()).unwrap()[current as usize]
+                                .click();
+                        }
                     }
                     KeyCode::Tab => {
                         input::clear_input_queue();
-                        let next = (*self.focus.borrow() + 1)
-                            % self.components.get(state).unwrap().len() as i32;
-                        *self.focus.borrow_mut() = next;
+                        let len = self.components.get(self.get_state()).unwrap().len() as i32;
+                        if len > 0 {
+                            let next = (*self.focus.borrow() + 1) % len;
+                            *self.focus.borrow_mut() = next;
+                        }
                     }
                     KeyCode::Backspace => {
                         input::clear_input_queue();
-                        if state == "typing" {
+                        if let State::Typing(_) = self.state {
                             typingbox.delete_char();
                         }
                     }
                     // this passes the keytrokes to type
                     _ => {
-                        *self.focus.borrow_mut() = 0;
+                        *self.focus.borrow_mut() = -1;
                         if let Some(c) = input::get_char_pressed() {
-                            if state == "typing" && typingbox.ontype(c) {
-                                state = "endscreen"
+                            if let State::Typing(_) = self.state {
+                                if typingbox.ontype(c) {
+                                    self.state = State::EndScreen;
+                                }
                             }
                         }
                     }
@@ -102,12 +115,11 @@ impl Screen {
 
             window::clear_background(*self.style.theme.bg.borrow());
 
-            match state {
-                "typing" => {
+            match self.state {
+                State::Typing(_) => {
                     typingbox.update();
                 }
-                "endscreen" => {}
-                _ => (),
+                State::EndScreen => {}
             }
 
             window::next_frame().await;

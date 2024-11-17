@@ -71,15 +71,12 @@ pub fn print_text(style: &Style, letters: &[&Letter], x: f32, y: f32) {
     }
 }
 
-pub fn print_text_wrap(style: &Style, letters: &[Letter]) {
+pub fn print_text_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
+    let mut line_breaks = vec![];
+
     let mut lines = 0.0;
 
     let p_x = match &style.padding_x {
-        Some(p) => p.get(),
-        _ => 0.0,
-    };
-
-    let p_y = match &style.padding_y {
         Some(p) => p.get(),
         _ => 0.0,
     };
@@ -120,15 +117,12 @@ pub fn print_text_wrap(style: &Style, letters: &[Letter]) {
             );
             lines += 1.0;
             line.drain(..);
+            line_breaks.push(i - word.len())
         }
 
         line.append(&mut word);
         line.push(letter);
         word.drain(..);
-
-        if lines * style.font_size > style.y.get() + style.height.get() - p_y {
-            return;
-        }
     }
 
     line.append(&mut word);
@@ -140,4 +134,6 @@ pub fn print_text_wrap(style: &Style, letters: &[Letter]) {
         style.x.get(),
         style.y.get() + lines * style.font_size,
     );
+
+    line_breaks
 }
