@@ -22,7 +22,7 @@ pub struct TextBox {
 // TODO:pass in character, and update real time colors
 impl TextBox {
     pub fn ontype(&mut self, c: char) -> bool {
-        if self.state.index == self.state.letters.len() {
+        if self.state.index == self.state.letters.len() - 1 {
             return true;
         }
 
@@ -69,7 +69,7 @@ impl TextBox {
                 }
             }
         }
-        if self.state.index < line_breaks[left as usize] && left > 0 {
+        if left > 0 && self.state.index < line_breaks[left as usize] {
             left -= 1;
         }
         self.style.offset_y = Some(Value::Absolute(-(left as f32 * self.style.font_size)));
