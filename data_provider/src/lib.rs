@@ -46,6 +46,7 @@ impl Data {
                 }
                 v
             })
+            .filter(|q| !q.quote.is_empty())
             .collect();
 
         Ok(Data { words, quotes })
