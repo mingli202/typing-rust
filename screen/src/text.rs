@@ -54,7 +54,7 @@ pub fn print_letter(style: &Style, letter: &Letter, x: f32, y: f32) -> TextDimen
     dimensions
 }
 
-pub fn print_text(style: &Style, letters: &[&Letter], x: f32, y: f32) {
+pub fn print_letters(style: &Style, letters: &[&Letter], x: f32, y: f32) {
     let mut offset_x = 0.0;
     let offset_y = text::measure_text(
         &letters
@@ -71,7 +71,7 @@ pub fn print_text(style: &Style, letters: &[&Letter], x: f32, y: f32) {
     }
 }
 
-pub fn print_text_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
+pub fn print_letters_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
     let mut line_breaks = vec![];
 
     let mut lines = 0.0;
@@ -109,7 +109,7 @@ pub fn print_text_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
         .width
             > style.width.get() - 2.0 * p_x
         {
-            print_text(
+            print_letters(
                 style,
                 &line,
                 style.x.get(),
@@ -128,7 +128,7 @@ pub fn print_text_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
     line.append(&mut word);
     line.pop();
 
-    print_text(
+    print_letters(
         style,
         &line,
         style.x.get(),
@@ -136,4 +136,34 @@ pub fn print_text_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
     );
 
     line_breaks
+}
+
+pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
+    let p_x = match &style.padding_x {
+        Some(p) => p.get(),
+        _ => 0.0,
+    };
+
+    let o_x = match &style.offset_x {
+        Some(p) => p.get(),
+        _ => 0.0,
+    };
+
+    let p_y = match &style.padding_y {
+        Some(p) => p.get(),
+        _ => 0.0,
+    };
+
+    let o_y = match &style.offset_y {
+        Some(p) => p.get(),
+        _ => 0.0,
+    };
+
+    text::draw_text(
+        text,
+        x + p_x + o_x,
+        y + p_y + o_y,
+        style.font_size,
+        *style.theme.text.borrow(),
+    );
 }
