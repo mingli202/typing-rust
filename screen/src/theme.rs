@@ -19,7 +19,7 @@ impl Theme {
         }
     }
 
-    fn set(&mut self, bg: u32, text: u32, error: u32, ghost: Option<u32>) {
+    fn set(&self, bg: u32, text: u32, error: u32, ghost: Option<u32>) {
         *self.bg.borrow_mut() = Color::from_hex(bg);
         *self.text.borrow_mut() = Color::from_hex(text);
         *self.error.borrow_mut() = Color::from_hex(error);
@@ -33,26 +33,26 @@ impl Theme {
         }
     }
 
-    pub fn set_atom(&mut self) {
+    pub fn set_atom(&self) {
         self.set(0x161719, 0xc5c8c6, 0xfd5ff1, Some(0x444444))
     }
 
-    pub fn set_gruvbox(&mut self) {
+    pub fn set_gruvbox(&self) {
         self.set(0x1b1b1b, 0xebdbb2, 0xcc241d, Some(0x665c54))
     }
 
-    pub fn set_catppuccin(&mut self) {
+    pub fn set_catppuccin(&self) {
         self.set(0x1e1e2e, 0xcdd6f4, 0xf38ba8, Some(0x585b70))
     }
 
-    pub fn set_tokyonight(&mut self) {
+    pub fn set_tokyonight(&self) {
         self.set(0x1a1b26, 0xc0caf5, 0xf7768e, Some(0x33467c))
     }
 }
 
 impl Default for Theme {
     fn default() -> Self {
-        let mut theme = Self::new();
+        let theme = Self::new();
         theme.set_gruvbox();
         theme
     }
