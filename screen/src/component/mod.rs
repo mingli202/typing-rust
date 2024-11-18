@@ -2,14 +2,16 @@ use macroquad::{color::Color, shapes, window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+pub mod button;
 pub mod textbox;
 
 use crate::theme::Theme;
+use crate::Screen;
 
 pub trait Component {
     /// Function that will be called on each frame
     fn update(&mut self);
-    fn click(&self);
+    fn click(&self, screen: &Screen);
 }
 
 pub enum Value<T> {

@@ -1,4 +1,4 @@
-use data_provider::Data;
+use data_provider::{Data, Quote};
 use macroquad::color::Color;
 use macroquad::input::KeyCode;
 use macroquad::{input, window};
@@ -10,6 +10,7 @@ mod component;
 mod theme;
 use component::{Component, Style};
 
+use self::component::button;
 use self::component::textbox::TextBox;
 mod text;
 mod typing_box;
@@ -52,8 +53,7 @@ impl Screen {
             },
         }
 
-        // TODO: feedback keep track of the first line and overwrite the ghost text
-        // animation library use threads to mutate value over time (maybe)
+        // TODO: animation library use threads to mutate value over time (maybe)
     }
 
     fn get_state(&self) -> &str {
@@ -64,15 +64,27 @@ impl Screen {
     }
 
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        let mut current_text = self
-            .data
-            .get_n_random_words(100)
-            .iter()
-            .fold(String::new(), |acc, el| acc + el + " ");
-        current_text.pop();
+        //let mut current_text = self
+        //    .data
+        //    .get_n_random_words(100)
+        //    .iter()
+        //    .fold(String::new(), |acc, el| acc + el + " ");
+        //current_text.pop();
 
-        let mut typingbox: TextBox =
-            typing_box::typing_box(current_text, &self.style, Rc::clone(&self.focus));
+        let current_text = self.data.get_random_quote().quote.clone();
+
+        let typingbox: Rc<RefCell<TextBox>> = Rc::new(RefCell::new(typing_box::typing_box(
+            current_text,
+            &self.style,
+            Rc::clone(&self.focus),
+        )));
+
+        let restart_button =
+            button::restart_button(&self.style, Rc::clone(&self.focus), Rc::clone(&typingbox));
+
+        self.components
+            .entry("typing")
+            .and_modify(|v| v.push(Box::new(restart_button)));
 
         loop {
             if let Some(k) = input::get_last_key_pressed() {
@@ -82,7 +94,7 @@ impl Screen {
                         let current = *self.focus.borrow();
                         if current >= 0 {
                             self.components.get(self.get_state()).unwrap()[current as usize]
-                                .click();
+                                .click(self);
                         }
                     }
                     KeyCode::Tab => {
@@ -96,7 +108,7 @@ impl Screen {
                     KeyCode::Backspace => {
                         input::clear_input_queue();
                         if let State::Typing(_) = self.state {
-                            typingbox.delete_char();
+                            typingbox.borrow_mut().delete_char();
                         }
                     }
                     // this passes the keytrokes to type
@@ -104,8 +116,21 @@ impl Screen {
                         *self.focus.borrow_mut() = -1;
                         if let Some(c) = input::get_char_pressed() {
                             if let State::Typing(_) = self.state {
-                                if typingbox.ontype(c) {
+                                if typingbox.borrow_mut().ontype(c) {
                                     self.state = State::EndScreen;
+                                }
+                            } else {
+                                match c {
+                                    'q' => break,
+                                    'n' => {
+                                        *typingbox.borrow_mut() = typing_box::typing_box(
+                                            self.data.get_random_quote().quote.clone(),
+                                            &self.style,
+                                            Rc::clone(&self.focus),
+                                        );
+                                        self.state = State::Typing(Mode::Quote);
+                                    }
+                                    _ => (),
                                 }
                             }
                         }
@@ -117,13 +142,20 @@ impl Screen {
 
             match self.state {
                 State::Typing(_) => {
-                    typingbox.update();
+                    typingbox.borrow_mut().update();
+
+                    self.components.entry("typing").and_modify(|comps| {
+                        for comp in comps {
+                            comp.update();
+                        }
+                    });
                 }
                 State::EndScreen => {}
             }
 
             window::next_frame().await;
         }
+        Ok(())
     }
 }
 

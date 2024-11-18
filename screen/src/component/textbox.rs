@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-use crate::Letter;
+use crate::{Letter, Screen};
 
 use super::{Component, Style, Value};
 
@@ -16,7 +16,6 @@ pub struct TextBoxState {
 pub struct TextBox {
     pub style: Style,
     pub state: TextBoxState,
-    pub onclick: Option<Box<dyn Fn()>>,
 }
 
 // TODO:pass in character, and update real time colors
@@ -80,7 +79,7 @@ impl Component for TextBox {
     fn update(&mut self) {
         self.style.draw_bg();
 
-        let line_breaks = crate::text::print_text_wrap(&self.style, &self.state.letters);
+        let line_breaks = crate::text::print_letters_wrap(&self.style, &self.state.letters);
         self.update_position(&line_breaks);
 
         self.style.draw_mask();
@@ -88,9 +87,7 @@ impl Component for TextBox {
             self.style.draw_border();
         }
     }
-    fn click(&self) {
-        if let Some(f) = &self.onclick {
-            f();
-        }
+    fn click(&self, _screen: &Screen) {
+        *self.state.focus.borrow_mut() = -1;
     }
 }

@@ -50,6 +50,5 @@ pub fn typing_box(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextB
             letters,
             index: 0,
         },
-        onclick: None,
     }
 }
