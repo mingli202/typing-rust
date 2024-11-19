@@ -15,6 +15,7 @@ pub struct TextBoxState {
     pub letters: Vec<Letter>,
     pub index: usize,
     pub accuracy: f64,
+    pub speed: Vec<i32>,
 }
 
 pub struct TextBox {
@@ -26,9 +27,11 @@ impl TextBox {
     pub fn new(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextBox {
         let letters: Vec<Letter> = text
             .chars()
-            .map(|c| Letter {
+            .enumerate()
+            .map(|(id, c)| Letter {
                 letter: c,
                 color: Rc::clone(&style.theme.ghost),
+                id,
             })
             .collect();
 
@@ -65,6 +68,7 @@ impl TextBox {
                 letters,
                 index: 0,
                 accuracy: 0.0,
+                speed: vec![],
             },
         }
     }
@@ -128,7 +132,8 @@ impl Component for TextBox {
     fn update(&mut self) {
         self.style.draw_bg();
 
-        let line_breaks = crate::text::print_letters_wrap(&self.style, &self.state.letters);
+        let line_breaks =
+            crate::text::print_letters_wrap(&self.style, &self.state.letters, self.state.index);
         self.update_position(&line_breaks);
 
         self.style.draw_mask();

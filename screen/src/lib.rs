@@ -63,13 +63,6 @@ impl Screen {
     }
 
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        //let mut current_text = self
-        //    .data
-        //    .get_n_random_words(10)
-        //    .iter()
-        //    .fold(String::new(), |acc, el| acc + el + " ");
-        //current_text.pop();
-
         let current_text = self.data.get_random_quote().quote.clone();
 
         let typingbox: Rc<RefCell<TextBox>> = Rc::new(RefCell::new(TextBox::new(
@@ -80,12 +73,13 @@ impl Screen {
 
         let mut tracker = Tracker::new(&self.style, Rc::clone(&typingbox));
 
-        let restart_button =
-            RestartButton::new(&self.style, Rc::clone(&self.focus), Rc::clone(&typingbox));
-
-        self.components
-            .entry("typing")
-            .and_modify(|v| v.push(Box::new(restart_button)));
+        self.components.entry("typing").and_modify(|v| {
+            v.push(Box::new(RestartButton::new(
+                &self.style,
+                Rc::clone(&self.focus),
+                Rc::clone(&typingbox),
+            )))
+        });
 
         loop {
             if let Some(k) = input::get_last_key_pressed() {
@@ -152,7 +146,9 @@ impl Screen {
                         }
                     });
                 }
-                State::EndScreen => {}
+                State::EndScreen => {
+                    // TODO: speed graph like in monkeytype.
+                }
             }
 
             window::next_frame().await;
@@ -165,4 +161,5 @@ impl Screen {
 pub struct Letter {
     pub letter: char,
     pub color: Rc<RefCell<Color>>,
+    pub id: usize,
 }

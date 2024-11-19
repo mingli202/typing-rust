@@ -1,10 +1,18 @@
+use std::rc::Rc;
+
 use macroquad::shapes;
 use macroquad::text::{self, TextDimensions};
 
 use crate::component::Style;
 use crate::Letter;
 
-pub fn print_letter(style: &Style, letter: &Letter, x: f32, y: f32) -> TextDimensions {
+pub fn print_letter(
+    style: &Style,
+    letter: &Letter,
+    x: f32,
+    y: f32,
+    cursor_index: usize,
+) -> TextDimensions {
     let dimensions = text::measure_text(
         &letter.letter.to_string(),
         None,
@@ -32,29 +40,42 @@ pub fn print_letter(style: &Style, letter: &Letter, x: f32, y: f32) -> TextDimen
         _ => 0.0,
     };
 
+    let x = x + p_x + o_x;
+    let y = y + p_y + o_y;
+
     text::draw_text(
         &letter.letter.to_string(),
-        x + p_x + o_x,
-        y + p_y + o_y,
+        x,
+        y,
         style.font_size,
         *letter.color.borrow(),
     );
 
     if *letter.color.borrow() == *style.theme.error.borrow() {
         shapes::draw_line(
-            x + p_x + o_x,
-            y + p_y + o_y + 0.2 * style.font_size,
-            x + p_x + o_x + dimensions.width,
-            y + p_y + o_y + 0.2 * style.font_size,
+            x,
+            y + 0.2 * style.font_size,
+            x + dimensions.width,
+            y + 0.2 * style.font_size,
             1.5,
             *letter.color.borrow(),
+        );
+    }
+
+    if letter.id == cursor_index {
+        text::draw_text(
+            "|",
+            x - dimensions.width / 2.0,
+            y,
+            style.font_size,
+            *style.theme.text.borrow(),
         );
     }
 
     dimensions
 }
 
-pub fn print_letters(style: &Style, letters: &[&Letter], x: f32, y: f32) {
+pub fn print_letters(style: &Style, letters: &[&Letter], x: f32, y: f32, cursor_index: usize) {
     let mut offset_x = 0.0;
     let offset_y = text::measure_text(
         &letters
@@ -67,11 +88,11 @@ pub fn print_letters(style: &Style, letters: &[&Letter], x: f32, y: f32) {
     .offset_y;
 
     for letter in letters {
-        offset_x += print_letter(style, letter, x + offset_x, y + offset_y).width;
+        offset_x += print_letter(style, letter, x + offset_x, y + offset_y, cursor_index).width;
     }
 }
 
-pub fn print_letters_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
+pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize) -> Vec<usize> {
     let mut line_breaks = vec![];
 
     let mut lines = 0.0;
@@ -114,6 +135,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
                 &line,
                 style.x.get(),
                 style.y.get() + lines * style.font_size,
+                cursor_index,
             );
             lines += 1.0;
             line.drain(..);
@@ -133,6 +155,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter]) -> Vec<usize> {
         &line,
         style.x.get(),
         style.y.get() + lines * style.font_size,
+        cursor_index,
     );
 
     line_breaks
