@@ -1,4 +1,4 @@
-use data_provider::{Data, Quote};
+use data_provider::Data;
 use macroquad::color::Color;
 use macroquad::input::KeyCode;
 use macroquad::{input, window};
@@ -10,10 +10,9 @@ mod component;
 mod theme;
 use component::{Component, Style};
 
-use self::component::button;
-use self::component::textbox::TextBox;
+use self::component::tracker::Tracker;
+use self::component::{restart_button::RestartButton, textbox::TextBox};
 mod text;
-mod typing_box;
 
 pub enum Mode {
     WordCount(usize),
@@ -66,21 +65,23 @@ impl Screen {
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
         //let mut current_text = self
         //    .data
-        //    .get_n_random_words(100)
+        //    .get_n_random_words(10)
         //    .iter()
         //    .fold(String::new(), |acc, el| acc + el + " ");
         //current_text.pop();
 
         let current_text = self.data.get_random_quote().quote.clone();
 
-        let typingbox: Rc<RefCell<TextBox>> = Rc::new(RefCell::new(typing_box::typing_box(
+        let typingbox: Rc<RefCell<TextBox>> = Rc::new(RefCell::new(TextBox::new(
             current_text,
             &self.style,
             Rc::clone(&self.focus),
         )));
 
+        let mut tracker = Tracker::new(&self.style, Rc::clone(&typingbox));
+
         let restart_button =
-            button::restart_button(&self.style, Rc::clone(&self.focus), Rc::clone(&typingbox));
+            RestartButton::new(&self.style, Rc::clone(&self.focus), Rc::clone(&typingbox));
 
         self.components
             .entry("typing")
@@ -123,7 +124,7 @@ impl Screen {
                                 match c {
                                     'q' => break,
                                     'n' => {
-                                        *typingbox.borrow_mut() = typing_box::typing_box(
+                                        *typingbox.borrow_mut() = TextBox::new(
                                             self.data.get_random_quote().quote.clone(),
                                             &self.style,
                                             Rc::clone(&self.focus),
@@ -143,6 +144,7 @@ impl Screen {
             match self.state {
                 State::Typing(_) => {
                     typingbox.borrow_mut().update();
+                    tracker.update();
 
                     self.components.entry("typing").and_modify(|comps| {
                         for comp in comps {
