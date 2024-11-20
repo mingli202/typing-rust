@@ -2,6 +2,8 @@ use macroquad::{color::Color, shapes, window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+pub mod next_button;
+pub mod quit_button;
 pub mod restart_button;
 pub mod textbox;
 pub mod tracker;

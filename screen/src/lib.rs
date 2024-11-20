@@ -8,11 +8,13 @@ use std::error::Error;
 use std::rc::Rc;
 mod component;
 mod theme;
-use component::{Component, Style};
-
 use self::component::tracker::Tracker;
+use self::component::{next_button, quit_button};
 use self::component::{restart_button::RestartButton, textbox::TextBox};
+use self::wpm::Wmp;
+use component::{Component, Style};
 mod text;
+mod wpm;
 
 pub enum Mode {
     WordCount(usize),
@@ -33,9 +35,9 @@ enum State {
 
 pub struct Screen {
     style: Style,
-    state: State,
+    state: Rc<RefCell<State>>,
     data: Data,
-    components: HashMap<&'static str, Vec<Box<dyn Component>>>,
+    buttons: HashMap<&'static str, Vec<Box<dyn Component>>>,
     focus: Rc<RefCell<i32>>,
 }
 
@@ -43,8 +45,8 @@ impl Screen {
     pub fn new(data: Data) -> Self {
         Screen {
             data,
-            state: State::Typing(Mode::default()),
-            components: HashMap::from([("typing", vec![]), ("endscreen", vec![])]),
+            state: Rc::new(RefCell::new(State::Typing(Mode::default()))),
+            buttons: HashMap::from([("typing", vec![]), ("endscreen", vec![])]),
             focus: Rc::new(RefCell::new(-1)),
             style: Style {
                 font_size: 30.0,
@@ -56,7 +58,7 @@ impl Screen {
     }
 
     fn get_state(&self) -> &str {
-        match self.state {
+        match *self.state.borrow() {
             State::Typing(_) => "typing",
             State::EndScreen => "endscreen",
         }
@@ -73,13 +75,29 @@ impl Screen {
 
         let mut tracker = Tracker::new(&self.style, Rc::clone(&typingbox));
 
-        self.components.entry("typing").and_modify(|v| {
+        self.buttons.entry("typing").and_modify(|v| {
             v.push(Box::new(RestartButton::new(
                 &self.style,
                 Rc::clone(&self.focus),
                 Rc::clone(&typingbox),
             )))
         });
+
+        self.buttons.entry("endscreen").and_modify(|v| {
+            v.append(&mut vec![
+                Box::new(next_button::NextButton::new(
+                    &self.style,
+                    Rc::clone(&self.focus),
+                    Rc::clone(&typingbox),
+                )),
+                Box::new(quit_button::QuitButton::new(
+                    &self.style,
+                    Rc::clone(&self.focus),
+                )),
+            ])
+        });
+
+        let mut wmp = Wmp::new(&self.style, 0);
 
         loop {
             if let Some(k) = input::get_last_key_pressed() {
@@ -88,13 +106,13 @@ impl Screen {
                         input::clear_input_queue();
                         let current = *self.focus.borrow();
                         if current >= 0 {
-                            self.components.get(self.get_state()).unwrap()[current as usize]
+                            self.buttons.get(self.get_state()).unwrap()[current as usize]
                                 .click(self);
                         }
                     }
                     KeyCode::Tab => {
                         input::clear_input_queue();
-                        let len = self.components.get(self.get_state()).unwrap().len() as i32;
+                        let len = self.buttons.get(self.get_state()).unwrap().len() as i32;
                         if len > 0 {
                             let next = (*self.focus.borrow() + 1) % len;
                             *self.focus.borrow_mut() = next;
@@ -102,17 +120,19 @@ impl Screen {
                     }
                     KeyCode::Backspace => {
                         input::clear_input_queue();
-                        if let State::Typing(_) = self.state {
+                        if let State::Typing(_) = *self.state.borrow() {
                             typingbox.borrow_mut().delete_char();
                         }
                     }
                     // this passes the keytrokes to type
                     _ => {
-                        *self.focus.borrow_mut() = -1;
                         if let Some(c) = input::get_char_pressed() {
-                            if let State::Typing(_) = self.state {
+                            if self.get_state() == "typing" {
+                                *self.focus.borrow_mut() = -1;
                                 if typingbox.borrow_mut().ontype(c) {
-                                    self.state = State::EndScreen;
+                                    typingbox.borrow_mut().state.started = false;
+                                    wmp = Wmp::new(&self.style, typingbox.borrow().get_wpm());
+                                    *self.state.borrow_mut() = State::EndScreen;
                                 }
                             } else {
                                 match c {
@@ -123,7 +143,7 @@ impl Screen {
                                             &self.style,
                                             Rc::clone(&self.focus),
                                         );
-                                        self.state = State::Typing(Mode::Quote);
+                                        *self.state.borrow_mut() = State::Typing(Mode::Quote);
                                     }
                                     _ => (),
                                 }
@@ -135,12 +155,12 @@ impl Screen {
 
             window::clear_background(*self.style.theme.bg.borrow());
 
-            match self.state {
+            match *self.state.borrow() {
                 State::Typing(_) => {
                     typingbox.borrow_mut().update();
                     tracker.update();
 
-                    self.components.entry("typing").and_modify(|comps| {
+                    self.buttons.entry("typing").and_modify(|comps| {
                         for comp in comps {
                             comp.update();
                         }
@@ -148,6 +168,13 @@ impl Screen {
                 }
                 State::EndScreen => {
                     // TODO: speed graph like in monkeytype.
+                    wmp.update();
+
+                    self.buttons.entry("endscreen").and_modify(|comps| {
+                        for comp in comps {
+                            comp.update();
+                        }
+                    });
                 }
             }
 
