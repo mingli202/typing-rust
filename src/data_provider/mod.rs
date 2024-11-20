@@ -23,31 +23,42 @@ impl Data {
         &self.quotes
     }
 
-    pub fn new_offline(words_path: String, quotes_path: String) -> Result<Self, Box<dyn Error>> {
-        let words = fs::read_to_string(words_path)?
-            .split('\n')
-            .map(|w| w.to_string())
-            .collect();
+    pub fn new_offline(
+        words_path: Option<String>,
+        quotes_path: Option<String>,
+    ) -> Result<Self, Box<dyn Error>> {
+        let words = if let Some(p) = words_path {
+            fs::read_to_string(p)?
+        } else {
+            include_str!("../data/words.txt").to_string()
+        }
+        .split('\n')
+        .map(|w| w.to_string())
+        .collect();
 
-        let quotes = fs::read_to_string(quotes_path)?
-            .split("\n\n")
-            .flat_map(|entry| {
-                let mut entry: Vec<String> = entry.split('\n').map(|s| s.to_string()).collect();
-                let source = entry[0].clone();
-                let mut v = vec![];
+        let quotes = if let Some(p) = quotes_path {
+            fs::read_to_string(p)?
+        } else {
+            include_str!("../data/quotes.txt").to_string()
+        }
+        .split("\n\n")
+        .flat_map(|entry| {
+            let mut entry: Vec<String> = entry.split('\n').map(|s| s.to_string()).collect();
+            let source = entry[0].clone();
+            let mut v = vec![];
 
-                while let Some(quote) = entry.pop() {
-                    if quote != source {
-                        v.push(Quote {
-                            source: source.clone(),
-                            quote,
-                        });
-                    }
+            while let Some(quote) = entry.pop() {
+                if quote != source {
+                    v.push(Quote {
+                        source: source.clone(),
+                        quote,
+                    });
                 }
-                v
-            })
-            .filter(|q| !q.quote.is_empty())
-            .collect();
+            }
+            v
+        })
+        .filter(|q| !q.quote.is_empty())
+        .collect();
 
         Ok(Data { words, quotes })
     }
@@ -125,8 +136,7 @@ mod tests {
 
     #[test]
     fn number_of_source() {
-        let data =
-            Data::new_offline("data/words.txt".to_string(), "data/quotes.txt".to_string()).unwrap();
+        let data = Data::new_offline(None, None).unwrap();
         assert_eq!(3001, data.words.len());
         assert_eq!(
             30,
@@ -140,8 +150,7 @@ mod tests {
 
     #[test]
     fn random_words_and_quotes() {
-        let data =
-            Data::new_offline("data/words.txt".to_string(), "data/quotes.txt".to_string()).unwrap();
+        let data = Data::new_offline(None, None).unwrap();
         let random_words = data.get_n_random_words(10);
         let random_quotes = data.get_n_random_quotes(10);
 
