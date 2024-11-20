@@ -2,6 +2,10 @@
 name = "typing_test"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Typing speed test in rust"
+repository = "https://github.com/mingli202/typing-rust"
+authors = ["mingli202"]
 
 [dependencies]
 macroquad = "0.4.13"
