@@ -3,8 +3,7 @@ use std::rc::Rc;
 
 use macroquad::window;
 
-use crate::theme::Theme;
-use crate::{text, Screen};
+use crate::screen::{text, theme::Theme, Screen};
 
 use super::textbox::TextBox;
 use super::{Component, Style, Value};

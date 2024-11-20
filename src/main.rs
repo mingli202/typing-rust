@@ -1,10 +1,10 @@
 use macroquad::window::Conf;
-use screen::Screen;
 use std::error::Error;
+use typing_test::screen::Screen;
 
 #[macroquad::main(window_conf)]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let data = typer::parse_args(std::env::args())?;
+    let data = typing_test::parse_args(std::env::args())?;
     let mut screen = Screen::new(data);
     screen.main_loop().await?;
 

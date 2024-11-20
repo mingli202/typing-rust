@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use macroquad::{text, window};
 
-use crate::theme::Theme;
-use crate::{Mode, Screen, State};
+use crate::screen::theme::Theme;
+use crate::screen::{Mode, Screen, State};
 
 use super::textbox::TextBox;
 use super::{BorderParams, Component, Style, Value};
@@ -23,7 +23,7 @@ pub struct NextButton {
 
 impl Component for NextButton {
     fn update(&mut self) {
-        crate::text::print_text(
+        crate::screen::text::print_text(
             &self.style,
             &self.state.text,
             self.style.x.get(),

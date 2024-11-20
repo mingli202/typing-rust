@@ -1,9 +1,0 @@
-[package]
-name = "typer"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-screen = { path = "../screen" }
-data_provider = { path = "../data_provider" }
-macroquad = "0.4.13"

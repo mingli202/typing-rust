@@ -5,8 +5,7 @@ use std::time::Instant;
 
 use macroquad::window;
 
-use crate::theme::Theme;
-use crate::{Letter, Screen};
+use crate::screen::{self, theme::Theme, Letter, Screen};
 
 use super::{BorderParams, Component, Style, Value};
 
@@ -157,7 +156,7 @@ impl Component for TextBox {
         self.style.draw_bg();
 
         let line_breaks =
-            crate::text::print_letters_wrap(&self.style, &self.state.letters, self.state.index);
+            screen::text::print_letters_wrap(&self.style, &self.state.letters, self.state.index);
         self.update_position(&line_breaks);
 
         self.style.draw_mask();

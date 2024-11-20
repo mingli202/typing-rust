@@ -2,15 +2,15 @@ use macroquad::{color::Color, shapes, window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use super::theme::Theme;
+use super::Screen;
+
 pub mod next_button;
 pub mod quit_button;
 pub mod restart_button;
 pub mod textbox;
 pub mod tracker;
 pub mod wpm;
-
-use crate::theme::Theme;
-use crate::Screen;
 
 pub trait Component {
     /// Function that will be called on each frame
