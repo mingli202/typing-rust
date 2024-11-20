@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::rc::Rc;
+use std::time::Instant;
 
 use macroquad::window;
 
@@ -16,6 +17,8 @@ pub struct TextBoxState {
     pub index: usize,
     pub accuracy: f64,
     pub speed: Vec<i32>,
+    pub time_started: Instant,
+    pub started: bool,
 }
 
 pub struct TextBox {
@@ -69,6 +72,8 @@ impl TextBox {
                 index: 0,
                 accuracy: 0.0,
                 speed: vec![],
+                time_started: Instant::now(),
+                started: false,
             },
         }
     }
@@ -126,6 +131,24 @@ impl TextBox {
         }
         self.style.offset_y = Some(Value::Absolute(-(left as f32 * self.style.font_size)));
     }
+
+    pub fn get_wpm(&self) -> u64 {
+        let mut wrongs = 0;
+        let mut word_count = 1;
+
+        for letter in &self.state.letters {
+            if letter.letter == ' ' {
+                word_count += 1;
+            }
+            if *letter.color.borrow() == *self.style.theme.error.borrow() {
+                wrongs += 1;
+            }
+        }
+
+        let words_typed = word_count - word_count * wrongs / self.state.letters.len();
+
+        60 * words_typed as u64 / self.state.time_started.elapsed().as_secs()
+    }
 }
 
 impl Component for TextBox {
@@ -139,6 +162,11 @@ impl Component for TextBox {
         self.style.draw_mask();
         if *self.state.focus.borrow() == self.state.id {
             self.style.draw_border();
+        }
+
+        if self.state.index > 0 && !self.state.started {
+            self.state.started = true;
+            self.state.time_started = Instant::now();
         }
     }
     fn click(&self, _screen: &Screen) {
