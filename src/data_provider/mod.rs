@@ -129,7 +129,7 @@ mod tests {
             Data::new_offline("data/words.txt".to_string(), "data/quotes.txt".to_string()).unwrap();
         assert_eq!(3001, data.words.len());
         assert_eq!(
-            28,
+            30,
             data.quotes
                 .iter()
                 .map(|q| q.source.clone())

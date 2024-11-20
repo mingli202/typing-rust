@@ -7,8 +7,8 @@ use std::error::Error;
 pub fn parse_args(mut args: Args) -> Result<Data, Box<dyn Error>> {
     args.next();
 
-    let mut words_file = String::from("data/words.txt");
-    let mut quotes_file = String::from("data/quotes.txt");
+    let mut words_file = String::from("src/data/words.txt");
+    let mut quotes_file = String::from("src/data/quotes.txt");
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -22,7 +22,7 @@ pub fn parse_args(mut args: Args) -> Result<Data, Box<dyn Error>> {
                     quotes_file = f;
                 }
             }
-            "--online" => return Data::new_online(words_file),
+            //"--online" => return Data::new_online(words_file),
             "--help" | "-h" => help(),
             _ => (),
         }
