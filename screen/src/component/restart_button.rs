@@ -9,7 +9,7 @@ use crate::Screen;
 use super::textbox::TextBox;
 use super::{BorderParams, Component, Style, Value};
 
-pub struct ButtonState {
+pub struct NextButtonState {
     pub text: String,
     pub focus: Rc<RefCell<i32>>,
     pub id: i32,
@@ -17,7 +17,7 @@ pub struct ButtonState {
 
 pub struct RestartButton {
     pub style: Style,
-    pub state: ButtonState,
+    pub state: NextButtonState,
     pub typingbox_ref: Rc<RefCell<TextBox>>,
 }
 
@@ -59,7 +59,7 @@ impl RestartButton {
         let font_size = style.font_size;
 
         RestartButton {
-            state: ButtonState {
+            state: NextButtonState {
                 text: "Restart".to_string(),
                 id: 0,
                 focus: Rc::clone(&focus),
