@@ -1,4 +1,4 @@
-use data_provider::Data;
+use crate::data_provider::Data;
 use macroquad::color::Color;
 use macroquad::input::KeyCode;
 use macroquad::{input, window};
@@ -8,6 +8,7 @@ use std::error::Error;
 use std::rc::Rc;
 mod component;
 mod theme;
+
 use self::component::tracker::Tracker;
 use self::component::{next_button, quit_button};
 use self::component::{restart_button::RestartButton, textbox::TextBox, wpm::Wmp};

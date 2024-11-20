@@ -3,26 +3,26 @@ use std::rc::Rc;
 
 use macroquad::{text, window};
 
-use crate::theme::Theme;
-use crate::{Mode, Screen, State};
+use crate::screen::{self, theme::Theme, Screen};
 
 use super::textbox::TextBox;
 use super::{BorderParams, Component, Style, Value};
 
-pub struct QuitButtonState {
+pub struct NextButtonState {
     pub text: String,
     pub focus: Rc<RefCell<i32>>,
     pub id: i32,
 }
 
-pub struct QuitButton {
+pub struct RestartButton {
     pub style: Style,
-    pub state: QuitButtonState,
+    pub state: NextButtonState,
+    pub typingbox_ref: Rc<RefCell<TextBox>>,
 }
 
-impl Component for QuitButton {
+impl Component for RestartButton {
     fn update(&mut self) {
-        crate::text::print_text(
+        screen::text::print_text(
             &self.style,
             &self.state.text,
             self.style.x.get(),
@@ -34,35 +34,47 @@ impl Component for QuitButton {
         }
     }
 
-    fn click(&self, _screen: &Screen) {
-        std::process::exit(1);
+    fn click(&self, screen: &Screen) {
+        *self.typingbox_ref.borrow_mut() = TextBox::new(
+            screen.data.get_random_quote().quote.clone(),
+            &screen.style,
+            Rc::clone(&screen.focus),
+        );
+        *screen.focus.borrow_mut() = -1;
     }
 }
 
-impl QuitButton {
-    pub fn new(style: &Style, focus: Rc<RefCell<i32>>) -> QuitButton {
-        let text = "Quit (q)".to_string();
+impl RestartButton {
+    pub fn new(
+        style: &Style,
+        focus: Rc<RefCell<i32>>,
+        typingbox_ref: Rc<RefCell<TextBox>>,
+    ) -> RestartButton {
+        let text = "Restart".to_string();
 
         let dim = text::measure_text(&text, None, style.font_size as u16, 1.0);
         let width = dim.width;
         let o_y = dim.offset_y;
         let font_size = style.font_size;
 
-        QuitButton {
-            state: QuitButtonState {
-                text: text.to_string(),
-                id: 1,
+        RestartButton {
+            state: NextButtonState {
+                text: "Restart".to_string(),
+                id: 0,
                 focus: Rc::clone(&focus),
             },
+            typingbox_ref,
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move || window::screen_width() / 2.0 + 10.0)),
+                x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + font_size) / 2.0
+                    (window::screen_height() + font_size * 3.0 + 10.0) / 2.0 + 30.0
                 })),
+                width: Value::Absolute(width + 20.0),
+                height: Value::Absolute(font_size + 5.0),
                 font_size: style.font_size,
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
@@ -73,8 +85,6 @@ impl QuitButton {
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
                 offset_y: Some(Value::Absolute(o_y)),
-                width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(font_size + 10.0),
                 ..Style::default()
             },
         }

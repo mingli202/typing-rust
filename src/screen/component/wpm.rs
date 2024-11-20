@@ -3,8 +3,11 @@ use std::rc::Rc;
 use macroquad::text::TextDimensions;
 use macroquad::window;
 
-use crate::component::{Component, Style, Value};
-use crate::theme::Theme;
+use crate::screen::{
+    component::{Component, Style, Value},
+    theme::Theme,
+    Screen,
+};
 
 pub struct Wmp {
     pub wmp: String,
@@ -12,7 +15,7 @@ pub struct Wmp {
 }
 
 impl Component for Wmp {
-    fn click(&self, _screen: &crate::Screen) {}
+    fn click(&self, _screen: &Screen) {}
     fn update(&mut self) {
         macroquad::text::draw_text(
             &self.wmp,

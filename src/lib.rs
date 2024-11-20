@@ -1,12 +1,14 @@
+pub mod data_provider;
 use data_provider::Data;
+pub mod screen;
 use std::env::Args;
 use std::error::Error;
 
 pub fn parse_args(mut args: Args) -> Result<Data, Box<dyn Error>> {
     args.next();
 
-    let mut words_file = String::from("data_provider/data/words.txt");
-    let mut quotes_file = String::from("data_provider/data/quotes.txt");
+    let mut words_file = String::from("data/words.txt");
+    let mut quotes_file = String::from("data/quotes.txt");
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -42,7 +44,7 @@ fn help() {
         "                           Sources are sepparated by 2 new line characters.",
         "                           The first line is the source name, and each quote belonging",
         "                           to that source is separated by a new line character.",
-        "   -o, --online            Get quotes from the web. Must be connected to the internet.",
+        //"   -o, --online            Get quotes from the web. Must be connected to the internet.",
         "   -h, --help              Print this help.",
     ]
     .join("\n");
