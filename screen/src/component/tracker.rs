@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use macroquad::window;
 
-use crate::text;
 use crate::theme::Theme;
+use crate::{text, Screen};
 
 use super::textbox::TextBox;
 use super::{Component, Style, Value};
@@ -25,7 +25,7 @@ impl Component for Tracker {
             self.style.y.get(),
         );
     }
-    fn click(&self, _screen: &crate::Screen) {}
+    fn click(&self, _screen: &Screen) {}
 }
 
 impl Tracker {

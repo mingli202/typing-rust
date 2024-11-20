@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use macroquad::shapes;
 use macroquad::text::{self, TextDimensions};
 
