@@ -132,8 +132,8 @@ impl TextBox {
         self.style.offset_y = Some(Value::Absolute(-(left as f32 * self.style.font_size)));
     }
 
-    pub fn get_wpm(&self) -> u64 {
-        let time_passed = self.state.time_started.elapsed().as_secs();
+    pub fn get_wpm(&self) -> u16 {
+        let time_passed: u128 = self.state.time_started.elapsed().as_millis();
         let mut wrongs = 0;
         let mut word_count = 1;
 
@@ -148,7 +148,7 @@ impl TextBox {
 
         let words_typed = word_count - word_count * wrongs / self.state.letters.len();
 
-        60 * words_typed as u64 / time_passed
+        (1000 * 60 * words_typed as u128 / time_passed) as u16
     }
 }
 
