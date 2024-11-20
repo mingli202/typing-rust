@@ -41,9 +41,10 @@ fn help() {
         "   -w, --words <file>      Provide your own words file.",
         "                           Words are separated by a new line character.",
         "   -q, --quotes <file>     Provide your own quotes file.",
-        "                           Sources are sepparated by 2 new line characters.",
+        "                           Sources are separated by 2 new line characters.",
         "                           The first line is the source name, and each quote belonging",
         "                           to that source is separated by a new line character.",
+        "                           See built-in quotes at the repository.",
         //"   -o, --online            Get quotes from the web. Must be connected to the internet.",
         "   -h, --help              Print this help.",
     ]
