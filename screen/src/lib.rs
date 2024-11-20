@@ -10,11 +10,9 @@ mod component;
 mod theme;
 use self::component::tracker::Tracker;
 use self::component::{next_button, quit_button};
-use self::component::{restart_button::RestartButton, textbox::TextBox};
-use self::wpm::Wmp;
+use self::component::{restart_button::RestartButton, textbox::TextBox, wpm::Wmp};
 use component::{Component, Style};
 mod text;
-mod wpm;
 
 pub enum Mode {
     WordCount(usize),
@@ -138,12 +136,7 @@ impl Screen {
                                 match c {
                                     'q' => break,
                                     'n' => {
-                                        *typingbox.borrow_mut() = TextBox::new(
-                                            self.data.get_random_quote().quote.clone(),
-                                            &self.style,
-                                            Rc::clone(&self.focus),
-                                        );
-                                        *self.state.borrow_mut() = State::Typing(Mode::Quote);
+                                        self.buttons.get(self.get_state()).unwrap()[0].click(self);
                                     }
                                     _ => (),
                                 }

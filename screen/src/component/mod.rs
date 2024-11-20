@@ -7,6 +7,7 @@ pub mod quit_button;
 pub mod restart_button;
 pub mod textbox;
 pub mod tracker;
+pub mod wpm;
 
 use crate::theme::Theme;
 use crate::Screen;

@@ -25,7 +25,7 @@ impl Component for Wmp {
 }
 
 impl Wmp {
-    pub fn new(style: &Style, wmp: u64) -> Wmp {
+    pub fn new(style: &Style, wmp: u16) -> Wmp {
         let wmp = format!("WPM: {}", wmp);
         let TextDimensions {
             width,
