@@ -133,6 +133,7 @@ impl TextBox {
     }
 
     pub fn get_wpm(&self) -> u64 {
+        let time_passed = self.state.time_started.elapsed().as_secs();
         let mut wrongs = 0;
         let mut word_count = 1;
 
@@ -147,7 +148,7 @@ impl TextBox {
 
         let words_typed = word_count - word_count * wrongs / self.state.letters.len();
 
-        60 * words_typed as u64 / self.state.time_started.elapsed().as_secs()
+        60 * words_typed as u64 / time_passed
     }
 }
 
