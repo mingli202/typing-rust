@@ -35,7 +35,7 @@ pub fn parse_args(mut args: Args) -> Result<Data, Box<dyn Error>> {
 
 fn help() {
     let help = [
-        "Usage: typing_test [-w <file>] [(-q <file>)|-o]\n",
+        "Usage: typing_test [-w <file>] [-q <file>]\n",
         "Test your typing speed from built-in words and quotes, or provide your own words and quotes. You can also choose to get quotes from scrapping popular quotes on the Internet.\n",
         "Options:",
         "   -w, --words <file>      Provide your own words file.",
