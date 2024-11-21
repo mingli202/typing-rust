@@ -1,5 +1,7 @@
 # typing-rust (in-progress)
 
+Try it with `cargo install typing_test` and run `typing_test`
+
 Fast and minimal typing test binary crate written in rust
 - graphics library for rendering words and quotes
 - display typing speed
