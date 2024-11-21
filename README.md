@@ -8,7 +8,7 @@ Fast and minimal typing test binary crate written in rust
 - can be timer, by number of words, or quote (akin to monkeytype)
 - offline default words and quotes (done)
 - online web scraping for more quotes and words
-- has themes, default is catppuccin
+- has themes, default is gruvbox
 
 Tech Stack:
 - macroquad for graphics library and keyboard input
