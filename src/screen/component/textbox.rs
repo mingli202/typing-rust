@@ -133,21 +133,15 @@ impl TextBox {
 
     pub fn get_wpm(&self) -> u16 {
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
-        let mut wrongs = 0;
-        let mut word_count = 1;
+        let mut wrongs = 0.0;
 
         for letter in &self.state.letters {
-            if letter.letter == ' ' {
-                word_count += 1;
-            }
             if *letter.color.borrow() == *self.style.theme.error.borrow() {
-                wrongs += 1;
+                wrongs += 1.0;
             }
         }
 
-        let words_typed = word_count - word_count * wrongs / self.state.letters.len();
-
-        (1000 * 60 * words_typed as u128 / time_passed) as u16
+        (1000 * 60 * (self.state.letters.len() as f32 / 5.0 - wrongs) as u128 / time_passed) as u16
     }
 }
 
