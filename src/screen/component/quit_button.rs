@@ -4,6 +4,7 @@ use std::rc::Rc;
 use macroquad::{text, window};
 
 use super::{BorderParams, Component, Style, Value};
+use crate::screen::util;
 use crate::screen::{self, theme::Theme, Screen};
 
 pub struct QuitButtonState {
@@ -29,6 +30,8 @@ impl Component for QuitButton {
         if *self.state.focus.borrow() == self.state.id {
             self.style.draw_border();
         }
+
+        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
     fn click(&self, _screen: &Screen) {
@@ -58,7 +61,7 @@ impl QuitButton {
                 }),
                 x: Value::Relative(Box::new(move || window::screen_width() / 2.0 + 10.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + font_size) / 2.0
+                    (window::screen_height()) / 2.0 + font_size
                 })),
                 font_size: style.font_size,
                 theme: Theme {

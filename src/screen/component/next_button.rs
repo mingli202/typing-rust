@@ -4,7 +4,7 @@ use std::rc::Rc;
 use macroquad::{text, window};
 
 use crate::screen::theme::Theme;
-use crate::screen::{Mode, Screen, State};
+use crate::screen::{util, Mode, Screen, State};
 
 use super::textbox::TextBox;
 use super::{BorderParams, Component, Style, Value};
@@ -33,6 +33,8 @@ impl Component for NextButton {
         if *self.state.focus.borrow() == self.state.id {
             self.style.draw_border();
         }
+
+        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
     fn click(&self, screen: &Screen) {
@@ -75,7 +77,7 @@ impl NextButton {
                     window::screen_width() / 2.0 - width - 10.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + font_size) / 2.0
+                    (window::screen_height()) / 2.0 + font_size
                 })),
                 font_size: style.font_size,
                 theme: Theme {

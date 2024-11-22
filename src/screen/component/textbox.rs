@@ -3,8 +3,9 @@ use std::cmp::Ordering;
 use std::rc::Rc;
 use std::time::Instant;
 
-use macroquad::window;
+use macroquad::{input, window};
 
+use crate::screen::util;
 use crate::screen::{self, theme::Theme, Letter, Screen};
 
 use super::{BorderParams, Component, Style, Value};
@@ -134,10 +135,15 @@ impl TextBox {
     pub fn get_wpm(&self) -> u16 {
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
         let mut wrongs = 0.0;
+        let mut is_word_wrong = false;
 
         for letter in &self.state.letters {
-            if *letter.color.borrow() == *self.style.theme.error.borrow() {
+            if *letter.color.borrow() == *self.style.theme.error.borrow() && !is_word_wrong {
                 wrongs += 1.0;
+                is_word_wrong = true;
+            }
+            if letter.letter == ' ' {
+                is_word_wrong = false;
             }
         }
 
@@ -162,8 +168,10 @@ impl Component for TextBox {
             self.state.started = true;
             self.state.time_started = Instant::now();
         }
+
+        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
     fn click(&self, _screen: &Screen) {
-        *self.state.focus.borrow_mut() = -1;
+        *self.state.focus.borrow_mut() = self.state.id;
     }
 }

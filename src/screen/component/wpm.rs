@@ -43,7 +43,7 @@ impl Wmp {
             style: Style {
                 x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - height + offset_y - font_size) / 2.0
+                    (window::screen_height() - height + offset_y) / 2.0
                 })),
                 font_size: style.font_size,
                 theme: Theme {

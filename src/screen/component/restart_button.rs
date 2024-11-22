@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use macroquad::{text, window};
 
+use crate::screen::util;
 use crate::screen::{self, theme::Theme, Screen};
 
 use super::textbox::TextBox;
@@ -32,6 +33,7 @@ impl Component for RestartButton {
         if *self.state.focus.borrow() == self.state.id {
             self.style.draw_border();
         }
+        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
     fn click(&self, screen: &Screen) {

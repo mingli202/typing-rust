@@ -1,6 +1,6 @@
 use crate::data_provider::Data;
 use macroquad::color::Color;
-use macroquad::input::KeyCode;
+use macroquad::input::{KeyCode, MouseButton};
 use macroquad::{input, window};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -14,6 +14,7 @@ use self::component::{next_button, quit_button};
 use self::component::{restart_button::RestartButton, textbox::TextBox, wpm::Wmp};
 use component::{Component, Style};
 mod text;
+mod util;
 
 pub enum Mode {
     WordCount(usize),
@@ -147,10 +148,17 @@ impl Screen {
                 }
             }
 
+            if input::is_mouse_button_pressed(MouseButton::Left) {
+                let current = *self.focus.borrow();
+                if current >= 0 {
+                    self.buttons.get(self.get_state()).unwrap()[current as usize].click(self);
+                }
+            }
+
             window::clear_background(*self.style.theme.bg.borrow());
 
-            match *self.state.borrow() {
-                State::Typing(_) => {
+            match self.get_state() {
+                "typing" => {
                     typingbox.borrow_mut().update();
                     tracker.update();
 
@@ -160,7 +168,7 @@ impl Screen {
                         }
                     });
                 }
-                State::EndScreen => {
+                "endscreen" => {
                     // TODO: speed graph like in monkeytype.
                     wmp.update();
 
@@ -170,6 +178,7 @@ impl Screen {
                         }
                     });
                 }
+                _ => (),
             }
 
             window::next_frame().await;
