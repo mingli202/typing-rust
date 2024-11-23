@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::rc::Rc;
 use std::time::Instant;
 
-use macroquad::{input, window};
+use macroquad::window;
 
 use crate::screen::util;
 use crate::screen::{self, theme::Theme, Letter, Screen};
@@ -15,8 +15,6 @@ pub struct TextBoxState {
     pub id: i32,
     pub letters: Vec<Letter>,
     pub index: usize,
-    pub accuracy: f64,
-    pub speed: Vec<i32>,
     pub time_started: Instant,
     pub started: bool,
 }
@@ -70,8 +68,6 @@ impl TextBox {
                 id: -1,
                 letters,
                 index: 0,
-                accuracy: 0.0,
-                speed: vec![],
                 time_started: Instant::now(),
                 started: false,
             },
