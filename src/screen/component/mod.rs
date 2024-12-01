@@ -108,10 +108,10 @@ impl Style {
                 ..
             } = self;
 
-            let p_x = match padding_x {
-                Some(p) => p.get(),
-                _ => 0.0,
-            };
+            //let p_x = match padding_x {
+            //    Some(p) => p.get(),
+            //    _ => 0.0,
+            //};
 
             let p_y = match padding_y {
                 Some(p) => p.get(),
@@ -121,16 +121,16 @@ impl Style {
             let color = *theme.bg.borrow();
 
             // left mask
-            shapes::draw_rectangle(0.0, 0.0, x.get() + p_x, window::screen_height(), color);
-
-            // right mask
-            shapes::draw_rectangle(
-                x.get() + width.get() - p_x,
-                0.0,
-                window::screen_width() - (width.get() + x.get() - p_x),
-                window::screen_height(),
-                color,
-            );
+            //shapes::draw_rectangle(0.0, 0.0, x.get() + p_x, window::screen_height(), color);
+            //
+            //// right mask
+            //shapes::draw_rectangle(
+            //    x.get() + width.get() - p_x,
+            //    0.0,
+            //    window::screen_width() - (width.get() + x.get() - p_x),
+            //    window::screen_height(),
+            //    color,
+            //);
 
             // top
             shapes::draw_rectangle(x.get(), 0.0, width.get(), y.get() + p_y, color);
