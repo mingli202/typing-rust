@@ -139,7 +139,7 @@ mod tests {
         let data = Data::new_offline(None, None).unwrap();
         assert_eq!(3001, data.words.len());
         assert_eq!(
-            30,
+            32,
             data.quotes
                 .iter()
                 .map(|q| q.source.clone())

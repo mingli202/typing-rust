@@ -11,7 +11,9 @@ mod theme;
 
 use self::component::tracker::Tracker;
 use self::component::{next_button, quit_button};
-use self::component::{restart_button::RestartButton, textbox::TextBox, wpm::Wmp};
+use self::component::{
+    restart_button::RestartButton, textbox::TextBox, theme_button::ThemeButton, wpm::Wmp,
+};
 use component::{Component, Style};
 mod text;
 mod util;
@@ -31,6 +33,7 @@ impl Default for Mode {
 enum State {
     Typing(Mode),
     EndScreen,
+    ThemeSelect,
 }
 
 pub struct Screen {
@@ -61,6 +64,7 @@ impl Screen {
         match *self.state.borrow() {
             State::Typing(_) => "typing",
             State::EndScreen => "endscreen",
+            State::ThemeSelect => "theme_select",
         }
     }
 
@@ -76,11 +80,15 @@ impl Screen {
         let mut tracker = Tracker::new(&self.style, Rc::clone(&typingbox));
 
         self.buttons.entry("typing").and_modify(|v| {
-            v.push(Box::new(RestartButton::new(
-                &self.style,
-                Rc::clone(&self.focus),
-                Rc::clone(&typingbox),
-            )))
+            v.append(&mut vec![
+                Box::new(RestartButton::new(
+                    &self.style,
+                    Rc::clone(&self.focus),
+                    Rc::clone(&typingbox),
+                    0,
+                )),
+                Box::new(ThemeButton::new(&self.style, Rc::clone(&self.focus), 1)),
+            ])
         });
 
         self.buttons.entry("endscreen").and_modify(|v| {
@@ -173,6 +181,13 @@ impl Screen {
                     wmp.update();
 
                     self.buttons.entry("endscreen").and_modify(|comps| {
+                        for comp in comps {
+                            comp.update();
+                        }
+                    });
+                }
+                "theme_select" => {
+                    self.buttons.entry("theme_select").and_modify(|comps| {
                         for comp in comps {
                             comp.update();
                         }
