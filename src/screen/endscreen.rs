@@ -1,10 +1,11 @@
 use std::process;
 
-use macroquad::input::{self, KeyCode};
+use macroquad::input::{self, KeyCode, MouseButton};
+use macroquad::math::Vec2;
 use macroquad::window;
 
 use super::component::{next_button, quit_button, wpm};
-use super::{Screen, State};
+use super::{util, Screen, State};
 
 enum Focus {
     NextButton,
@@ -48,6 +49,27 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
                     }
                 }
             }
+        }
+
+        if input::is_mouse_button_pressed(MouseButton::Left) {
+            match focus {
+                Focus::NextButton => return State::TypingTest,
+                Focus::QuitButton => process::exit(0),
+                _ => (),
+            }
+        }
+
+        match input::mouse_delta_position() {
+            Vec2 { x: dx, y: dy } if dx != 0.0 && dy != 0.0 => {
+                focus = if util::is_hover(&next_button.style) {
+                    Focus::NextButton
+                } else if util::is_hover(&quit_button.style) {
+                    Focus::QuitButton
+                } else {
+                    Focus::Nothing
+                }
+            }
+            _ => (),
         }
 
         window::clear_background(*scr.style.theme.bg.borrow());

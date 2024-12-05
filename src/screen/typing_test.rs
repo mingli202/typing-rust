@@ -1,5 +1,8 @@
-use macroquad::input::{self, KeyCode};
+use macroquad::input::{self, KeyCode, MouseButton};
+use macroquad::math::Vec2;
 use macroquad::window;
+
+use crate::screen::util;
 
 use super::component::restart_button::RestartButton;
 use super::component::textbox::TextBox;
@@ -60,6 +63,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                     input::clear_input_queue();
                     focus.next();
                 }
+
                 KeyCode::Backspace => {
                     input::clear_input_queue();
                     focus = Focus::TypingBox;
@@ -77,6 +81,32 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                     }
                 }
             }
+        }
+
+        if input::is_mouse_button_pressed(MouseButton::Left) {
+            match focus {
+                Focus::RestartButton => {
+                    typingbox.refresh();
+                    focus = Focus::Nothing;
+                }
+                Focus::ThemeButton => {
+                    return State::ThemeSelect;
+                }
+                _ => (),
+            }
+        }
+
+        match input::mouse_delta_position() {
+            Vec2 { x: dx, y: dy } if dx != 0.0 && dy != 0.0 => {
+                focus = if util::is_hover(&restart_button.style) {
+                    Focus::RestartButton
+                } else if util::is_hover(&theme_button.style) {
+                    Focus::ThemeButton
+                } else {
+                    Focus::Nothing
+                }
+            }
+            _ => (),
         }
 
         window::clear_background(*scr.style.theme.bg.borrow());
