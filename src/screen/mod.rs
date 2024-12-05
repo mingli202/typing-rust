@@ -9,12 +9,10 @@ use std::rc::Rc;
 mod component;
 mod theme;
 
-use self::component::tracker::Tracker;
-use self::component::{next_button, quit_button};
-use self::component::{
-    restart_button::RestartButton, textbox::TextBox, theme_button::ThemeButton, wpm::Wmp,
+use component::{
+    next_button, quit_button, restart_button::RestartButton, textbox::TextBox,
+    theme_button::ThemeButton, tracker::Tracker, wpm::Wmp, Component, Style,
 };
-use component::{Component, Style};
 mod text;
 mod util;
 
@@ -30,8 +28,15 @@ impl Default for Mode {
     }
 }
 
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
+enum TypingState {
+    Waiting,
+    Typing,
+}
+
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
 enum State {
-    Typing(Mode),
+    TypingTest(TypingState),
     EndScreen,
     ThemeSelect,
 }
@@ -40,7 +45,7 @@ pub struct Screen {
     style: Style,
     state: Rc<RefCell<State>>,
     data: Data,
-    buttons: HashMap<&'static str, Vec<Box<dyn Component>>>,
+    buttons: HashMap<State, Vec<Box<dyn Component>>>,
     focus: Rc<RefCell<i32>>,
 }
 
@@ -48,8 +53,13 @@ impl Screen {
     pub fn new(data: Data) -> Self {
         Screen {
             data,
-            state: Rc::new(RefCell::new(State::Typing(Mode::default()))),
-            buttons: HashMap::from([("typing", vec![]), ("endscreen", vec![])]),
+            state: Rc::new(RefCell::new(State::TypingTest(TypingState::Waiting))),
+            buttons: HashMap::from([
+                (State::TypingTest(TypingState::Waiting), vec![]),
+                (State::TypingTest(TypingState::Typing), vec![]),
+                (State::EndScreen, vec![]),
+                (State::ThemeSelect, vec![]),
+            ]),
             focus: Rc::new(RefCell::new(-1)),
             style: Style {
                 font_size: 30.0,
@@ -62,7 +72,7 @@ impl Screen {
 
     fn get_state(&self) -> &str {
         match *self.state.borrow() {
-            State::Typing(_) => "typing",
+            State::TypingTest(_) => "typing",
             State::EndScreen => "endscreen",
             State::ThemeSelect => "theme_select",
         }
@@ -71,27 +81,26 @@ impl Screen {
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
         let current_text = self.data.get_random_quote().quote.clone();
 
-        let typingbox: Rc<RefCell<TextBox>> = Rc::new(RefCell::new(TextBox::new(
-            current_text,
-            &self.style,
-            Rc::clone(&self.focus),
-        )));
+        let typingbox: Rc<RefCell<TextBox>> =
+            Rc::new(RefCell::new(TextBox::new(current_text, &self.style)));
 
         let mut tracker = Tracker::new(&self.style, Rc::clone(&typingbox));
 
-        self.buttons.entry("typing").and_modify(|v| {
-            v.append(&mut vec![
-                Box::new(RestartButton::new(
-                    &self.style,
-                    Rc::clone(&self.focus),
-                    Rc::clone(&typingbox),
-                    0,
-                )),
-                Box::new(ThemeButton::new(&self.style, Rc::clone(&self.focus), 1)),
-            ])
-        });
+        self.buttons
+            .entry(State::TypingTest(TypingState::Waiting))
+            .and_modify(|v| {
+                v.append(&mut vec![
+                    Box::new(RestartButton::new(
+                        &self.style,
+                        Rc::clone(&self.focus),
+                        Rc::clone(&typingbox),
+                        0,
+                    )),
+                    Box::new(ThemeButton::new(&self.style, Rc::clone(&self.focus), 1)),
+                ])
+            });
 
-        self.buttons.entry("endscreen").and_modify(|v| {
+        self.buttons.entry(State::EndScreen).and_modify(|v| {
             v.append(&mut vec![
                 Box::new(next_button::NextButton::new(
                     &self.style,
@@ -114,21 +123,25 @@ impl Screen {
                         input::clear_input_queue();
                         let current = *self.focus.borrow();
                         if current >= 0 {
-                            self.buttons.get(self.get_state()).unwrap()[current as usize]
-                                .click(self);
+                            self.buttons.get(&self.state.borrow()).unwrap()[current as usize]
+                                .on_click(self);
                         }
                     }
                     KeyCode::Tab => {
                         input::clear_input_queue();
-                        let len = self.buttons.get(self.get_state()).unwrap().len() as i32;
-                        if len > 0 {
-                            let next = (*self.focus.borrow() + 1) % len;
-                            *self.focus.borrow_mut() = next;
+                        if *self.focus.borrow() < 0 {
+                            *self.focus.borrow_mut() = 0;
+                        } else {
+                            let len = self.buttons.get(&self.state.borrow()).unwrap().len() as i32;
+                            if len > 0 {
+                                let next = (*self.focus.borrow() + 1) % len;
+                                *self.focus.borrow_mut() = next;
+                            }
                         }
                     }
                     KeyCode::Backspace => {
                         input::clear_input_queue();
-                        if let State::Typing(_) = *self.state.borrow() {
+                        if let State::TypingTest(_) = *self.state.borrow() {
                             typingbox.borrow_mut().delete_char();
                         }
                     }
@@ -136,7 +149,7 @@ impl Screen {
                     _ => {
                         if let Some(c) = input::get_char_pressed() {
                             if self.get_state() == "typing" {
-                                *self.focus.borrow_mut() = -1;
+                                *self.focus.borrow_mut() = -2;
                                 if typingbox.borrow_mut().ontype(c) {
                                     typingbox.borrow_mut().state.started = false;
                                     wmp = Wmp::new(&self.style, typingbox.borrow().get_wpm());
@@ -146,7 +159,8 @@ impl Screen {
                                 match c {
                                     'q' => break,
                                     'n' => {
-                                        self.buttons.get(self.get_state()).unwrap()[0].click(self);
+                                        self.buttons.get(&self.state.borrow()).unwrap()[0]
+                                            .on_click(self);
                                     }
                                     _ => (),
                                 }
@@ -159,35 +173,38 @@ impl Screen {
             if input::is_mouse_button_pressed(MouseButton::Left) {
                 let current = *self.focus.borrow();
                 if current >= 0 {
-                    self.buttons.get(self.get_state()).unwrap()[current as usize].click(self);
+                    self.buttons.get(&self.state.borrow()).unwrap()[current as usize]
+                        .on_click(self);
                 }
             }
 
             window::clear_background(*self.style.theme.bg.borrow());
 
-            match self.get_state() {
-                "typing" => {
+            match &self.state.borrow() {
+                State::TypingTest(typing_state) => {
                     typingbox.borrow_mut().update();
                     tracker.update();
 
-                    self.buttons.entry("typing").and_modify(|comps| {
-                        for comp in comps {
-                            comp.update();
-                        }
-                    });
+                    self.buttons
+                        .entry(State::TypingTest(typing_state))
+                        .and_modify(|comps| {
+                            for comp in comps {
+                                comp.update();
+                            }
+                        });
                 }
-                "endscreen" => {
+                State::EndScreen => {
                     // TODO: speed graph like in monkeytype.
                     wmp.update();
 
-                    self.buttons.entry("endscreen").and_modify(|comps| {
+                    self.buttons.entry(State::EndScreen).and_modify(|comps| {
                         for comp in comps {
                             comp.update();
                         }
                     });
                 }
-                "theme_select" => {
-                    self.buttons.entry("theme_select").and_modify(|comps| {
+                State::ThemeSelect => {
+                    self.buttons.entry(State::ThemeSelect).and_modify(|comps| {
                         for comp in comps {
                             comp.update();
                         }
