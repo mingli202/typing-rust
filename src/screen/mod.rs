@@ -8,20 +8,22 @@ mod theme;
 
 use component::Style;
 mod text;
-mod typing_test;
 mod util;
 
-pub enum Mode {
-    WordCount(usize),
-    TimeSec(usize),
-    Quote,
-}
+mod endscreen;
+mod typing_test;
 
-impl Default for Mode {
-    fn default() -> Self {
-        Mode::TimeSec(30)
-    }
-}
+//pub enum Mode {
+//    WordCount(usize),
+//    TimeSec(usize),
+//    Quote,
+//}
+//
+//impl Default for Mode {
+//    fn default() -> Self {
+//        Mode::TimeSec(30)
+//    }
+//}
 
 #[derive(Eq, Hash, PartialEq, Clone, Debug)]
 enum State {
@@ -34,8 +36,6 @@ pub struct Screen {
     style: Style,
     state: State,
     data: Data,
-    // buttons: HashMap<State, Vec<Box<dyn Component>>>,
-    // focus: Rc<RefCell<i32>>,
 }
 
 impl Screen {
@@ -54,14 +54,12 @@ impl Screen {
 }
 
 pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
-    //let mut next_button =
-    //    next_button::NextButton::new(&scr.style, Rc::clone(&scr.focus), Rc::clone(&typingbox));
-    //let mut quit_button = quit_button::QuitButton::new(&scr.style, Rc::clone(&scr.focus));
+    let mut wpm = 0;
 
     loop {
-        (*scr).state = match scr.state {
-            State::TypingTest => typing_test::run(scr).await,
-            State::EndScreen => State::EndScreen,
+        scr.state = match scr.state {
+            State::TypingTest => typing_test::run(scr, &mut wpm).await,
+            State::EndScreen => endscreen::run(scr, &wpm).await,
             State::ThemeSelect => State::ThemeSelect,
         };
     }

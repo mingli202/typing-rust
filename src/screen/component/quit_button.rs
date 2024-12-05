@@ -1,50 +1,24 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use macroquad::{text, window};
 
 use super::{BorderParams, Component, Style, Value};
-use crate::screen::util;
-use crate::screen::{self, theme::Theme, Screen};
-
-pub struct QuitButtonState {
-    pub text: String,
-    pub focus: Rc<RefCell<i32>>,
-    pub id: i32,
-}
+use crate::screen::{self, theme::Theme};
 
 pub struct QuitButton {
     pub style: Style,
-    pub state: QuitButtonState,
+
+    pub text: String,
 }
 
 impl Component for QuitButton {
-    fn update(&mut self) {
-        screen::text::print_text(
-            &self.style,
-            &self.state.text,
-            self.style.x.get(),
-            self.style.y.get(),
-        );
-
-        if *self.state.focus.borrow() == self.state.id {
-            self.style.draw_border();
-        }
-
-        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
-    }
-
-    fn on_click(&self, _screen: &Screen) {
-        std::process::exit(1);
-    }
-
     fn get_style(&self) -> Option<&Style> {
         Some(&self.style)
     }
 }
 
 impl QuitButton {
-    pub fn new(style: &Style, focus: Rc<RefCell<i32>>) -> QuitButton {
+    pub fn new(style: &Style) -> QuitButton {
         let text = "Quit (q)".to_string();
 
         let dim = text::measure_text(&text, None, style.font_size as u16, 1.0);
@@ -53,11 +27,7 @@ impl QuitButton {
         let font_size = style.font_size;
 
         QuitButton {
-            state: QuitButtonState {
-                text: text.to_string(),
-                id: 1,
-                focus: Rc::clone(&focus),
-            },
+            text: text.to_string(),
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
@@ -82,5 +52,14 @@ impl QuitButton {
                 ..Style::default()
             },
         }
+    }
+
+    pub fn update(&self) {
+        screen::text::print_text(
+            &self.style,
+            &self.text,
+            self.style.x.get(),
+            self.style.y.get(),
+        );
     }
 }

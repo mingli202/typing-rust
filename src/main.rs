@@ -1,6 +1,6 @@
 use macroquad::window::Conf;
 use std::error::Error;
-use typing_test::screen::Screen;
+use typing_test::screen::{self, Screen};
 
 #[macroquad::main(window_conf)]
 async fn main() -> Result<(), Box<dyn Error>> {

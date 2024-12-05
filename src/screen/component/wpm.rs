@@ -8,25 +8,15 @@ use crate::screen::{
     theme::Theme,
 };
 
-pub struct Wmp {
+pub struct Wpm {
     pub wmp: String,
     pub style: Style,
 }
 
-impl Component for Wmp {
-    fn update(&mut self) {
-        macroquad::text::draw_text(
-            &self.wmp,
-            self.style.x.get(),
-            self.style.y.get(),
-            self.style.font_size,
-            *self.style.theme.text.borrow(),
-        );
-    }
-}
+impl Component for Wpm {}
 
-impl Wmp {
-    pub fn new(style: &Style, wmp: u16) -> Wmp {
+impl Wpm {
+    pub fn new(style: &Style, wmp: u16) -> Wpm {
         let wmp = format!("WPM: {}", wmp);
         let TextDimensions {
             width,
@@ -34,7 +24,7 @@ impl Wmp {
             offset_y,
         } = macroquad::text::measure_text(&wmp, None, style.font_size as u16, 1.0);
 
-        Wmp {
+        Wpm {
             wmp,
             style: Style {
                 x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
@@ -51,5 +41,15 @@ impl Wmp {
                 ..Style::default()
             },
         }
+    }
+
+    pub fn update(&self) {
+        macroquad::text::draw_text(
+            &self.wmp,
+            self.style.x.get(),
+            self.style.y.get(),
+            self.style.font_size,
+            *self.style.theme.text.borrow(),
+        );
     }
 }

@@ -7,14 +7,13 @@ use crate::screen::{text, theme::Theme};
 use super::{Component, Style, Value};
 
 pub struct Tracker {
-    len: usize,
     style: Style,
 }
 
 impl Component for Tracker {}
 
 impl Tracker {
-    pub fn new(style: &Style, len: usize) -> Tracker {
+    pub fn new(style: &Style) -> Tracker {
         let font_size = style.font_size;
 
         Tracker {
@@ -32,14 +31,13 @@ impl Tracker {
                 font_size: style.font_size,
                 ..Style::default()
             },
-            len,
         }
     }
 
-    pub fn update(&self, index: usize) {
+    pub fn update(&self, index: usize, len: usize) {
         text::print_text(
             &self.style,
-            &format!("{}/{}", index, self.len),
+            &format!("{}/{}", index, len),
             self.style.x.get(),
             self.style.y.get(),
         );
