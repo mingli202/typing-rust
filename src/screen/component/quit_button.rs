@@ -29,7 +29,7 @@ impl QuitButton {
                 }),
                 x: Value::Relative(Box::new(move || window::screen_width() / 2.0 + 10.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height()) / 2.0 + font_size
+                    (window::screen_height() + font_size) / 2.0
                 })),
                 font_size: style.font_size,
                 theme: Theme {

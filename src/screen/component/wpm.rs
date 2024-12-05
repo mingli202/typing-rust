@@ -22,12 +22,14 @@ impl Wpm {
             offset_y,
         } = macroquad::text::measure_text(&wmp, None, style.font_size as u16, 1.0);
 
+        let font_size = style.font_size;
+
         Wpm {
             wmp,
             style: Style {
                 x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - height + offset_y) / 2.0
+                    (window::screen_height() - height + offset_y - font_size) / 2.0
                 })),
                 font_size: style.font_size,
                 theme: Theme {

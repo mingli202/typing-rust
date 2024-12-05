@@ -6,8 +6,6 @@ use crate::screen::theme::Theme;
 
 use super::{BorderParams, Style, Value};
 
-pub struct NextButtonState {}
-
 pub struct NextButton {
     pub text: String,
     pub style: Style,
@@ -30,10 +28,10 @@ impl NextButton {
                     color: Rc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
-                    window::screen_width() / 2.0 - width - 10.0
+                    window::screen_width() / 2.0 - width - font_size
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height()) / 2.0 + font_size
+                    (window::screen_height() + font_size) / 2.0
                 })),
                 font_size: style.font_size,
                 theme: Theme {

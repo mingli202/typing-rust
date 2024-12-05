@@ -28,7 +28,9 @@ impl ThemeButton {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
+                x: Value::Relative(Box::new(move || {
+                    (window::screen_width() - width - 20.0) / 2.0
+                })),
                 y: Value::Relative(Box::new(move || {
                     (window::screen_height() - font_size * 3.0) / 2.0 - 10.0 - 3.0 * font_size
                 })),
