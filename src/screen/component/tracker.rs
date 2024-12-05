@@ -4,13 +4,11 @@ use macroquad::window;
 
 use crate::screen::{text, theme::Theme};
 
-use super::{Component, Style, Value};
+use super::{Style, Value};
 
 pub struct Tracker {
     style: Style,
 }
-
-impl Component for Tracker {}
 
 impl Tracker {
     pub fn new(style: &Style) -> Tracker {

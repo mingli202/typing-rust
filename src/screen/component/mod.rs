@@ -9,13 +9,6 @@ pub mod wpm;
 pub mod style;
 pub use style::{BorderParams, Style};
 
-pub trait Component {
-    /// Function that will be called on each frame
-    fn get_style(&self) -> Option<&Style> {
-        None
-    }
-}
-
 pub enum Value<T> {
     Relative(Box<dyn Fn() -> T>),
     Absolute(T),

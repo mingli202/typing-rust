@@ -7,7 +7,7 @@ use macroquad::window;
 use crate::data_provider::Data;
 use crate::screen::{self, theme::Theme, Letter};
 
-use super::{BorderParams, Component, Style, Value};
+use super::{BorderParams, Style, Value};
 
 pub struct TextBoxState<'a> {
     pub letters: Vec<Letter>,
@@ -177,11 +177,5 @@ impl<'a> TextBox<'a> {
             self.state.started = true;
             self.state.time_started = Instant::now();
         }
-    }
-}
-
-impl<'a> Component for TextBox<'a> {
-    fn get_style(&self) -> Option<&Style> {
-        Some(&self.style)
     }
 }

@@ -4,17 +4,11 @@ use macroquad::{text, window};
 
 use crate::screen::{self, theme::Theme};
 
-use super::{BorderParams, Component, Style, Value};
+use super::{BorderParams, Style, Value};
 
 pub struct RestartButton {
     pub style: Style,
     pub text: String,
-}
-
-impl Component for RestartButton {
-    fn get_style(&self) -> Option<&Style> {
-        Some(&self.style)
-    }
 }
 
 impl RestartButton {

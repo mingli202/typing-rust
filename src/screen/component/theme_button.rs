@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use macroquad::{text, window};
@@ -6,17 +5,11 @@ use macroquad::{text, window};
 use crate::screen::theme::Theme;
 use crate::screen::{self};
 
-use super::{BorderParams, Component, Style, Value};
+use super::{BorderParams, Style, Value};
 
 pub struct ThemeButton {
     pub style: Style,
     pub text: String,
-}
-
-impl Component for ThemeButton {
-    fn get_style(&self) -> Option<&Style> {
-        Some(&self.style)
-    }
 }
 
 impl ThemeButton {

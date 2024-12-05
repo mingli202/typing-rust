@@ -4,7 +4,7 @@ use macroquad::text::TextDimensions;
 use macroquad::window;
 
 use crate::screen::{
-    component::{Component, Style, Value},
+    component::{Style, Value},
     theme::Theme,
 };
 
@@ -12,8 +12,6 @@ pub struct Wpm {
     pub wmp: String,
     pub style: Style,
 }
-
-impl Component for Wpm {}
 
 impl Wpm {
     pub fn new(style: &Style, wmp: u16) -> Wpm {

@@ -2,19 +2,13 @@ use std::rc::Rc;
 
 use macroquad::{text, window};
 
-use super::{BorderParams, Component, Style, Value};
+use super::{BorderParams, Style, Value};
 use crate::screen::{self, theme::Theme};
 
 pub struct QuitButton {
     pub style: Style,
 
     pub text: String,
-}
-
-impl Component for QuitButton {
-    fn get_style(&self) -> Option<&Style> {
-        Some(&self.style)
-    }
 }
 
 impl QuitButton {
