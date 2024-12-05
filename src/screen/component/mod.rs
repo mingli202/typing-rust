@@ -1,5 +1,3 @@
-use super::Screen;
-
 pub mod next_button;
 pub mod quit_button;
 pub mod restart_button;
@@ -13,9 +11,6 @@ pub use style::{BorderParams, Style};
 
 pub trait Component {
     /// Function that will be called on each frame
-    fn update(&mut self);
-    fn on_click(&self, _screen: &Screen) {}
-
     fn get_style(&self) -> Option<&Style> {
         None
     }

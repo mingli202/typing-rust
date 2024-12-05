@@ -6,7 +6,6 @@ use macroquad::window;
 use crate::screen::{
     component::{Component, Style, Value},
     theme::Theme,
-    Screen,
 };
 
 pub struct Wmp {
@@ -15,7 +14,6 @@ pub struct Wmp {
 }
 
 impl Component for Wmp {
-    fn on_click(&self, _screen: &Screen) {}
     fn update(&mut self) {
         macroquad::text::draw_text(
             &self.wmp,

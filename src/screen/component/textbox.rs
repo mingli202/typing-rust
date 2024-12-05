@@ -4,24 +4,29 @@ use std::time::Instant;
 
 use macroquad::window;
 
+use crate::data_provider::Data;
 use crate::screen::{self, theme::Theme, Letter};
 
 use super::{BorderParams, Component, Style, Value};
 
-pub struct TextBoxState {
+pub struct TextBoxState<'a> {
     pub letters: Vec<Letter>,
     pub index: usize,
     pub time_started: Instant,
     pub started: bool,
+    pub data: &'a Data,
 }
 
-pub struct TextBox {
+pub struct TextBox<'a> {
     pub style: Style,
-    pub state: TextBoxState,
+    pub state: TextBoxState<'a>,
 }
 
-impl TextBox {
-    pub fn new(text: String, style: &Style) -> TextBox {
+impl<'a> TextBox<'a> {
+    pub fn new(style: &Style, data: &'a Data) -> TextBox<'a> {
+        // TODO:remove clone
+        let text = data.get_random_quote().quote.clone();
+
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()
@@ -64,11 +69,31 @@ impl TextBox {
                 index: 0,
                 time_started: Instant::now(),
                 started: false,
+                data,
             },
         }
     }
 
-    pub fn ontype(&mut self, c: char) -> bool {
+    pub fn refresh(&mut self) {
+        let text = self.state.data.get_random_quote().quote.clone();
+        let letters: Vec<Letter> = text
+            .chars()
+            .enumerate()
+            .map(|(id, c)| Letter {
+                letter: c,
+                color: Rc::clone(&self.style.theme.ghost),
+                id,
+            })
+            .collect();
+
+        self.state.letters = letters;
+        self.state.index = 0;
+        self.state.started = false;
+
+        self.style.offset_y = None;
+    }
+
+    pub fn on_type(&mut self, c: char) -> bool {
         if self.state.index == self.state.letters.len() - 1 {
             return true;
         }
@@ -139,10 +164,7 @@ impl TextBox {
 
         (1000 * 60 * (self.state.letters.len() as f32 / 5.0 - wrongs) as u128 / time_passed) as u16
     }
-}
-
-impl Component for TextBox {
-    fn update(&mut self) {
+    pub fn update(&mut self) {
         self.style.draw_bg();
 
         let line_breaks =
@@ -156,7 +178,9 @@ impl Component for TextBox {
             self.state.time_started = Instant::now();
         }
     }
+}
 
+impl<'a> Component for TextBox<'a> {
     fn get_style(&self) -> Option<&Style> {
         Some(&self.style)
     }

@@ -1,59 +1,24 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use macroquad::{text, window};
 
-use crate::screen::util;
-use crate::screen::{self, theme::Theme, Screen};
+use crate::screen::{self, theme::Theme};
 
-use super::textbox::TextBox;
 use super::{BorderParams, Component, Style, Value};
-
-pub struct NextButtonState {
-    pub text: String,
-    pub focus: Rc<RefCell<i32>>,
-    pub id: i32,
-}
 
 pub struct RestartButton {
     pub style: Style,
-    pub state: NextButtonState,
-    pub typingbox_ref: Rc<RefCell<TextBox>>,
+    pub text: String,
 }
 
 impl Component for RestartButton {
-    fn update(&mut self) {
-        screen::text::print_text(
-            &self.style,
-            &self.state.text,
-            self.style.x.get(),
-            self.style.y.get(),
-        );
-
-        if *self.state.focus.borrow() == self.state.id {
-            self.style.draw_border();
-        }
-        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
-    }
-
-    fn on_click(&self, screen: &Screen) {
-        *self.typingbox_ref.borrow_mut() =
-            TextBox::new(screen.data.get_random_quote().quote.clone(), &screen.style);
-        *screen.focus.borrow_mut() = -2;
-    }
-
     fn get_style(&self) -> Option<&Style> {
         Some(&self.style)
     }
 }
 
 impl RestartButton {
-    pub fn new(
-        style: &Style,
-        focus: Rc<RefCell<i32>>,
-        typingbox_ref: Rc<RefCell<TextBox>>,
-        id: i32,
-    ) -> RestartButton {
+    pub fn new(style: &Style) -> RestartButton {
         let text = "Restart".to_string();
 
         let dim = text::measure_text(&text, None, style.font_size as u16, 1.0);
@@ -62,12 +27,8 @@ impl RestartButton {
         let font_size = style.font_size;
 
         RestartButton {
-            state: NextButtonState {
-                text: "Restart".to_string(),
-                id,
-                focus: Rc::clone(&focus),
-            },
-            typingbox_ref,
+            text: "Restart".to_string(),
+
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
@@ -92,5 +53,14 @@ impl RestartButton {
                 ..Style::default()
             },
         }
+    }
+
+    pub fn update(&mut self) {
+        screen::text::print_text(
+            &self.style,
+            &self.text,
+            self.style.x.get(),
+            self.style.y.get(),
+        );
     }
 }

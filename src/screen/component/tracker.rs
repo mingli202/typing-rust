@@ -1,33 +1,20 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use macroquad::window;
 
 use crate::screen::{text, theme::Theme};
 
-use super::textbox::TextBox;
 use super::{Component, Style, Value};
 
 pub struct Tracker {
-    typingbox_ref: Rc<RefCell<TextBox>>,
+    len: usize,
     style: Style,
 }
 
-impl Component for Tracker {
-    fn update(&mut self) {
-        let i = self.typingbox_ref.borrow().state.index;
-        let len = self.typingbox_ref.borrow().state.letters.len();
-        text::print_text(
-            &self.style,
-            &format!("{}/{}", i, len),
-            self.style.x.get(),
-            self.style.y.get(),
-        );
-    }
-}
+impl Component for Tracker {}
 
 impl Tracker {
-    pub fn new(style: &Style, typingbox_ref: Rc<RefCell<TextBox>>) -> Tracker {
+    pub fn new(style: &Style, len: usize) -> Tracker {
         let font_size = style.font_size;
 
         Tracker {
@@ -45,7 +32,16 @@ impl Tracker {
                 font_size: style.font_size,
                 ..Style::default()
             },
-            typingbox_ref: Rc::clone(&typingbox_ref),
+            len,
         }
+    }
+
+    pub fn update(&self, index: usize) {
+        text::print_text(
+            &self.style,
+            &format!("{}/{}", index, self.len),
+            self.style.x.get(),
+            self.style.y.get(),
+        );
     }
 }

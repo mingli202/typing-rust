@@ -4,52 +4,23 @@ use std::rc::Rc;
 use macroquad::{text, window};
 
 use crate::screen::theme::Theme;
-use crate::screen::{self, util, Screen, State};
+use crate::screen::{self};
 
 use super::{BorderParams, Component, Style, Value};
 
-pub struct ThemeButtonState {
-    pub text: String,
-    pub focus: Rc<RefCell<i32>>,
-    pub id: i32,
-}
-
 pub struct ThemeButton {
     pub style: Style,
-    pub state: ThemeButtonState,
+    pub text: String,
 }
 
 impl Component for ThemeButton {
-    fn update(&mut self) {
-        if *self.state.focus.borrow() == -2 {
-            return;
-        }
-
-        screen::text::print_text(
-            &self.style,
-            &self.state.text,
-            self.style.x.get(),
-            self.style.y.get(),
-        );
-
-        if *self.state.focus.borrow() == self.state.id {
-            self.style.draw_border();
-        }
-
-        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
-    }
-
-    fn on_click(&self, screen: &Screen) {
-        *screen.state.borrow_mut() = State::ThemeSelect;
-    }
-
     fn get_style(&self) -> Option<&Style> {
         Some(&self.style)
     }
 }
 
 impl ThemeButton {
-    pub fn new(style: &Style, focus: Rc<RefCell<i32>>, id: i32) -> Self {
+    pub fn new(style: &Style) -> Self {
         let text = "Theme".to_string();
 
         let dim = text::measure_text(&text, None, style.font_size as u16, 1.0);
@@ -58,11 +29,7 @@ impl ThemeButton {
         let font_size = style.font_size;
 
         ThemeButton {
-            state: ThemeButtonState {
-                text,
-                id,
-                focus: Rc::clone(&focus),
-            },
+            text,
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
@@ -87,5 +54,14 @@ impl ThemeButton {
                 ..Style::default()
             },
         }
+    }
+
+    pub fn update(&self) {
+        screen::text::print_text(
+            &self.style,
+            &self.text,
+            self.style.x.get(),
+            self.style.y.get(),
+        );
     }
 }
