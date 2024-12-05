@@ -15,7 +15,7 @@ pub struct Wmp {
 }
 
 impl Component for Wmp {
-    fn click(&self, _screen: &Screen) {}
+    fn on_click(&self, _screen: &Screen) {}
     fn update(&mut self) {
         macroquad::text::draw_text(
             &self.wmp,
@@ -35,8 +35,6 @@ impl Wmp {
             height,
             offset_y,
         } = macroquad::text::measure_text(&wmp, None, style.font_size as u16, 1.0);
-
-        let font_size = style.font_size;
 
         Wmp {
             wmp,

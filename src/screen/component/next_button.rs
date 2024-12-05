@@ -4,7 +4,7 @@ use std::rc::Rc;
 use macroquad::{text, window};
 
 use crate::screen::theme::Theme;
-use crate::screen::{util, Mode, Screen, State};
+use crate::screen::{util, Screen, State, TypingState};
 
 use super::textbox::TextBox;
 use super::{BorderParams, Component, Style, Value};
@@ -37,14 +37,15 @@ impl Component for NextButton {
         util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
-    fn click(&self, screen: &Screen) {
-        *self.typingbox_ref.borrow_mut() = TextBox::new(
-            screen.data.get_random_quote().quote.clone(),
-            &screen.style,
-            Rc::clone(&screen.focus),
-        );
-        *screen.focus.borrow_mut() = -1;
-        *screen.state.borrow_mut() = State::Typing(Mode::Quote);
+    fn on_click(&self, screen: &Screen) {
+        *self.typingbox_ref.borrow_mut() =
+            TextBox::new(screen.data.get_random_quote().quote.clone(), &screen.style);
+        *screen.focus.borrow_mut() = -2;
+        *screen.state.borrow_mut() = State::TypingTest(TypingState::Waiting);
+    }
+
+    fn get_style(&self) -> Option<&Style> {
+        Some(&self.style)
     }
 }
 

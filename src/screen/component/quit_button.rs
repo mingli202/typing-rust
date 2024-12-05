@@ -34,8 +34,12 @@ impl Component for QuitButton {
         util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
-    fn click(&self, _screen: &Screen) {
+    fn on_click(&self, _screen: &Screen) {
         std::process::exit(1);
+    }
+
+    fn get_style(&self) -> Option<&Style> {
+        Some(&self.style)
     }
 }
 

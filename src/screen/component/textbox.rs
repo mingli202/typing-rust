@@ -1,18 +1,14 @@
-use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::rc::Rc;
 use std::time::Instant;
 
 use macroquad::window;
 
-use crate::screen::util;
-use crate::screen::{self, theme::Theme, Letter, Screen};
+use crate::screen::{self, theme::Theme, Letter};
 
 use super::{BorderParams, Component, Style, Value};
 
 pub struct TextBoxState {
-    pub focus: Rc<RefCell<i32>>,
-    pub id: i32,
     pub letters: Vec<Letter>,
     pub index: usize,
     pub time_started: Instant,
@@ -25,7 +21,7 @@ pub struct TextBox {
 }
 
 impl TextBox {
-    pub fn new(text: String, style: &Style, focus: Rc<RefCell<i32>>) -> TextBox {
+    pub fn new(text: String, style: &Style) -> TextBox {
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()
@@ -56,16 +52,14 @@ impl TextBox {
                     (window::screen_height() - font_size * 3.0) / 2.0
                 })),
                 width: Value::Relative(Box::new(|| window::screen_width() / 2.0)),
-                height: Value::Absolute(style.font_size * 3.0 + 10.0),
+                height: Value::Absolute(style.font_size * 3.0),
                 clip: true,
                 offset_y: None,
                 offset_x: None,
-                padding_x: Some(Value::Absolute(10.0)),
-                padding_y: Some(Value::Absolute(10.0)),
+                padding_x: None,
+                padding_y: None,
             },
             state: TextBoxState {
-                focus: Rc::clone(&focus),
-                id: -1,
                 letters,
                 index: 0,
                 time_started: Instant::now(),
@@ -156,18 +150,14 @@ impl Component for TextBox {
         self.update_position(&line_breaks);
 
         self.style.draw_mask();
-        if *self.state.focus.borrow() == self.state.id {
-            self.style.draw_border();
-        }
 
         if self.state.index > 0 && !self.state.started {
             self.state.started = true;
             self.state.time_started = Instant::now();
         }
-
-        util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
-    fn click(&self, _screen: &Screen) {
-        *self.state.focus.borrow_mut() = self.state.id;
+
+    fn get_style(&self) -> Option<&Style> {
+        Some(&self.style)
     }
 }

@@ -36,13 +36,14 @@ impl Component for RestartButton {
         util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
-    fn click(&self, screen: &Screen) {
-        *self.typingbox_ref.borrow_mut() = TextBox::new(
-            screen.data.get_random_quote().quote.clone(),
-            &screen.style,
-            Rc::clone(&screen.focus),
-        );
-        *screen.focus.borrow_mut() = -1;
+    fn on_click(&self, screen: &Screen) {
+        *self.typingbox_ref.borrow_mut() =
+            TextBox::new(screen.data.get_random_quote().quote.clone(), &screen.style);
+        *screen.focus.borrow_mut() = -2;
+    }
+
+    fn get_style(&self) -> Option<&Style> {
+        Some(&self.style)
     }
 }
 
@@ -74,7 +75,7 @@ impl RestartButton {
                 }),
                 x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + font_size * 3.0 + 10.0) / 2.0 + 30.0
+                    (window::screen_height() + font_size * 3.0 + 10.0) / 2.0
                 })),
                 width: Value::Absolute(width + 20.0),
                 height: Value::Absolute(font_size + 5.0),

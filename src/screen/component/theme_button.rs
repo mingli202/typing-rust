@@ -21,6 +21,10 @@ pub struct ThemeButton {
 
 impl Component for ThemeButton {
     fn update(&mut self) {
+        if *self.state.focus.borrow() == -2 {
+            return;
+        }
+
         screen::text::print_text(
             &self.style,
             &self.state.text,
@@ -35,8 +39,12 @@ impl Component for ThemeButton {
         util::handle_mouse_focus(&self.style, self.state.id, Rc::clone(&self.state.focus));
     }
 
-    fn click(&self, screen: &Screen) {
+    fn on_click(&self, screen: &Screen) {
         *screen.state.borrow_mut() = State::ThemeSelect;
+    }
+
+    fn get_style(&self) -> Option<&Style> {
+        Some(&self.style)
     }
 }
 
