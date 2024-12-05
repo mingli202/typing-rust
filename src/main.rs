@@ -6,7 +6,7 @@ use typing_test::screen::Screen;
 async fn main() -> Result<(), Box<dyn Error>> {
     let data = typing_test::parse_args(std::env::args())?;
     let mut screen = Screen::new(data);
-    screen.main_loop().await?;
+    screen::main_loop(&mut screen).await?;
 
     Ok(())
 }
