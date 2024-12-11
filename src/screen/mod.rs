@@ -11,6 +11,7 @@ mod text;
 mod util;
 
 mod endscreen;
+mod theme_select;
 mod typing_test;
 
 //pub enum Mode {
@@ -60,7 +61,7 @@ pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
         scr.state = match scr.state {
             State::TypingTest => typing_test::run(scr, &mut wpm).await,
             State::EndScreen => endscreen::run(scr, &wpm).await,
-            State::ThemeSelect => State::ThemeSelect,
+            State::ThemeSelect => theme_select::run(scr).await,
         };
     }
 }
