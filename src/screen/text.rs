@@ -1,8 +1,7 @@
 use macroquad::shapes;
 use macroquad::text::{self, TextDimensions};
 
-use super::component::Style;
-use super::Letter;
+use super::{Letter, Style};
 
 pub fn print_letter(
     style: &Style,

@@ -2,9 +2,7 @@ use std::rc::Rc;
 
 use macroquad::{text, window};
 
-use crate::screen::theme::Theme;
-
-use super::{BorderParams, Style, Value};
+use crate::screen::{theme::Theme, BorderParams, Style, Value};
 
 pub struct NextButton {
     pub text: String,

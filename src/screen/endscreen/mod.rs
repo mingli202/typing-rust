@@ -4,7 +4,10 @@ use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
-use super::component::{next_button, quit_button, wpm};
+mod next_button;
+mod quit_button;
+mod wpm;
+
 use super::{util, Screen, State};
 
 enum Focus {

@@ -1,7 +1,7 @@
 use macroquad::color::Color;
 use macroquad::{input, shapes, window};
 
-use super::component::Style;
+use super::Style;
 
 pub fn is_hover(style: &Style) -> bool {
     let (x, y) = input::mouse_position();

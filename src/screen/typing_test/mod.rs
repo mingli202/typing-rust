@@ -4,10 +4,18 @@ use macroquad::window;
 
 use crate::screen::util;
 
-use super::component::restart_button::RestartButton;
-use super::component::textbox::TextBox;
-use super::component::theme_button::ThemeButton;
-use super::component::tracker::Tracker;
+mod restart_button;
+use restart_button::RestartButton;
+
+mod textbox;
+use textbox::TextBox;
+
+mod theme_button;
+use theme_button::ThemeButton;
+
+mod tracker;
+use tracker::Tracker;
+
 use super::{Screen, State};
 
 #[derive(PartialEq)]

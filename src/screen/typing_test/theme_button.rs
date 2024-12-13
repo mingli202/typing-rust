@@ -2,27 +2,24 @@ use std::rc::Rc;
 
 use macroquad::{text, window};
 
-use crate::screen::{self, theme::Theme};
+use crate::screen::{self, theme::Theme, BorderParams, Style, Value};
 
-use super::{BorderParams, Style, Value};
-
-pub struct RestartButton {
+pub struct ThemeButton {
     pub style: Style,
     pub text: String,
 }
 
-impl RestartButton {
-    pub fn new(style: &Style) -> RestartButton {
-        let text = "Restart".to_string();
+impl ThemeButton {
+    pub fn new(style: &Style) -> Self {
+        let text = "Theme".to_string();
 
         let dim = text::measure_text(&text, None, style.font_size as u16, 1.0);
         let width = dim.width;
         let o_y = dim.offset_y;
         let font_size = style.font_size;
 
-        RestartButton {
-            text: "Restart".to_string(),
-
+        ThemeButton {
+            text,
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
@@ -32,7 +29,7 @@ impl RestartButton {
                     (window::screen_width() - width - 20.0) / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + font_size * 3.0 + 10.0) / 2.0
+                    (window::screen_height() - font_size * 3.0) / 2.0 - 10.0 - 3.0 * font_size
                 })),
                 width: Value::Absolute(width + 20.0),
                 height: Value::Absolute(font_size + 5.0),
@@ -51,7 +48,7 @@ impl RestartButton {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&self) {
         screen::text::print_text(
             &self.style,
             &self.text,

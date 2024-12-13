@@ -3,28 +3,16 @@ use macroquad::color::Color;
 use std::cell::RefCell;
 use std::error::Error;
 use std::rc::Rc;
-mod component;
 mod theme;
 
-use component::Style;
+mod style;
+use style::{BorderParams, Style};
 mod text;
 mod util;
 
 mod endscreen;
 mod theme_select;
 mod typing_test;
-
-//pub enum Mode {
-//    WordCount(usize),
-//    TimeSec(usize),
-//    Quote,
-//}
-//
-//impl Default for Mode {
-//    fn default() -> Self {
-//        Mode::TimeSec(30)
-//    }
-//}
 
 #[derive(Eq, Hash, PartialEq, Clone, Debug)]
 enum State {
@@ -71,4 +59,18 @@ pub struct Letter {
     pub letter: char,
     pub color: Rc<RefCell<Color>>,
     pub id: usize,
+}
+
+pub enum Value<T> {
+    Relative(Box<dyn Fn() -> T>),
+    Absolute(T),
+}
+
+impl<T: Clone> Value<T> {
+    pub fn get(&self) -> T {
+        match self {
+            Self::Absolute(v) => v.clone(),
+            Self::Relative(v) => v(),
+        }
+    }
 }

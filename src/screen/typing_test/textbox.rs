@@ -5,9 +5,7 @@ use std::time::Instant;
 use macroquad::window;
 
 use crate::data_provider::Data;
-use crate::screen::{self, theme::Theme, Letter};
-
-use super::{BorderParams, Style, Value};
+use crate::screen::{self, theme::Theme, BorderParams, Letter, Style, Value};
 
 pub struct TextBoxState<'a> {
     pub letters: Vec<Letter>,
