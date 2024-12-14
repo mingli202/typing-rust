@@ -9,6 +9,14 @@ pub struct Theme {
     pub ghost: Rc<RefCell<Color>>,
 }
 
+#[derive(PartialEq, Hash, Eq)]
+pub enum ThemeName {
+    Catppuccin,
+    Atom,
+    Tokyonight,
+    Gruvbox,
+}
+
 impl Theme {
     fn new() -> Self {
         Theme {
@@ -19,41 +27,46 @@ impl Theme {
         }
     }
 
-    fn set(&self, bg: u32, text: u32, error: u32, ghost: Option<u32>) {
+    fn set(&self, theme_name: ThemeName) {
+        let (bg, text, error, ghost) = match theme_name {
+            ThemeName::Atom => (0x161719, 0xc5c8c6, 0xfd5ff1, 0x444444),
+            ThemeName::Gruvbox => (0x1b1b1b, 0xebdbb2, 0xcc241d, 0x665c54),
+            ThemeName::Catppuccin => (0x1e1e2e, 0xcdd6f4, 0xf38ba8, 0x585b70),
+            ThemeName::Tokyonight => (0x1a1b26, 0xc0caf5, 0xf7768e, 0x33467c),
+        };
+
         *self.bg.borrow_mut() = Color::from_hex(bg);
         *self.text.borrow_mut() = Color::from_hex(text);
         *self.error.borrow_mut() = Color::from_hex(error);
-        *self.ghost.borrow_mut() = if let Some(color) = ghost {
-            Color::from_hex(color)
-        } else {
-            Color {
-                a: 0.5,
-                ..Color::from_hex(text)
-            }
-        }
-    }
-
-    pub fn set_atom(&self) {
-        self.set(0x161719, 0xc5c8c6, 0xfd5ff1, Some(0x444444))
-    }
-
-    pub fn set_gruvbox(&self) {
-        self.set(0x1b1b1b, 0xebdbb2, 0xcc241d, Some(0x665c54))
-    }
-
-    pub fn set_catppuccin(&self) {
-        self.set(0x1e1e2e, 0xcdd6f4, 0xf38ba8, Some(0x585b70))
-    }
-
-    pub fn set_tokyonight(&self) {
-        self.set(0x1a1b26, 0xc0caf5, 0xf7768e, Some(0x33467c))
+        *self.ghost.borrow_mut() = Color::from_hex(ghost);
     }
 }
 
 impl Default for Theme {
     fn default() -> Self {
         let theme = Self::new();
-        theme.set_gruvbox();
+        theme.set(ThemeName::Gruvbox);
         theme
     }
+}
+
+pub fn from_hex(
+    bg: u32,
+    text: u32,
+    error: u32,
+    ghost: Option<u32>,
+) -> (Color, Color, Color, Color) {
+    (
+        Color::from_hex(bg),
+        Color::from_hex(text),
+        Color::from_hex(error),
+        if let Some(color) = ghost {
+            Color::from_hex(color)
+        } else {
+            Color {
+                a: 0.5,
+                ..Color::from_hex(text)
+            }
+        },
+    )
 }
