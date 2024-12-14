@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use macroquad::text::TextDimensions;
 use macroquad::{text, window};
 
 use crate::screen::{theme::Theme, BorderParams, Style, Value};
@@ -13,9 +14,11 @@ impl NextButton {
     pub fn new(style: &Style) -> NextButton {
         let text = "Next (n)".to_string();
 
-        let dim = text::measure_text(&text, None, style.font_size as u16, 1.0);
-        let width = dim.width;
-        let o_y = dim.offset_y;
+        let TextDimensions {
+            width,
+            height,
+            offset_y,
+        } = text::measure_text(&text, None, style.font_size as u16, 1.0);
         let font_size = style.font_size;
 
         NextButton {
@@ -40,9 +43,9 @@ impl NextButton {
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                offset_y: Some(Value::Absolute(o_y)),
+                offset_y: Some(Value::Absolute(offset_y)),
                 width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(font_size + 10.0),
+                height: Value::Absolute(height + 20.0),
                 ..Style::default()
             },
         }
