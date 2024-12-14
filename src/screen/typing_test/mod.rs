@@ -2,53 +2,28 @@ use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
+use crate::screen::focus::{Focus, TypingTestFocus::*};
 use crate::screen::util;
 
 mod restart_button;
-use restart_button::RestartButton;
-
 mod textbox;
-use textbox::TextBox;
-
 mod theme_button;
-use theme_button::ThemeButton;
-
 mod tracker;
-use tracker::Tracker;
 
 use super::{Screen, State};
-
-#[derive(PartialEq)]
-enum Focus {
-    RestartButton,
-    ThemeButton,
-    TypingBox,
-    Nothing,
-}
-
-impl Focus {
-    fn next(&mut self) {
-        match self {
-            Focus::Nothing => *self = Focus::RestartButton,
-            Focus::TypingBox => *self = Focus::RestartButton,
-            Focus::RestartButton => *self = Focus::ThemeButton,
-            Focus::ThemeButton => *self = Focus::RestartButton,
-        }
-    }
-}
 
 pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
     assert_eq!(scr.state, State::TypingTest);
 
-    let mut focus = Focus::Nothing;
+    let mut focus = Nothing;
 
-    let mut typingbox: TextBox = TextBox::new(&scr.style, &scr.data);
+    let mut typingbox = textbox::TextBox::new(&scr.style, &scr.data);
 
-    let tracker = Tracker::new(&scr.style);
+    let tracker = tracker::Tracker::new(&scr.style);
 
-    let mut restart_button = RestartButton::new(&scr.style);
+    let mut restart_button = restart_button::RestartButton::new(&scr.style);
 
-    let theme_button = ThemeButton::new(&scr.style);
+    let theme_button = theme_button::ThemeButton::new(&scr.style);
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -56,11 +31,11 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                 KeyCode::Enter => {
                     input::clear_input_queue();
                     match focus {
-                        Focus::RestartButton => {
+                        RestartButton => {
                             typingbox.refresh();
-                            focus = Focus::Nothing;
+                            focus = Nothing;
                         }
-                        Focus::ThemeButton => {
+                        ThemeButton => {
                             return State::ThemeSelect;
                         }
                         _ => (),
@@ -74,13 +49,13 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
 
                 KeyCode::Backspace => {
                     input::clear_input_queue();
-                    focus = Focus::TypingBox;
+                    focus = TypingBox;
                     typingbox.delete_char();
                 }
                 // this passes the keytrokes to type
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
-                        focus = Focus::TypingBox;
+                        focus = TypingBox;
 
                         if typingbox.on_type(c) {
                             *wpm = typingbox.get_wpm();
@@ -93,11 +68,11 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
-                Focus::RestartButton => {
+                RestartButton => {
                     typingbox.refresh();
-                    focus = Focus::Nothing;
+                    focus = Nothing;
                 }
-                Focus::ThemeButton => {
+                ThemeButton => {
                     return State::ThemeSelect;
                 }
                 _ => (),
@@ -107,11 +82,11 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
         match input::mouse_delta_position() {
             Vec2 { x: dx, y: dy } if dx != 0.0 && dy != 0.0 => {
                 focus = if util::is_hover(&restart_button.style) {
-                    Focus::RestartButton
+                    RestartButton
                 } else if util::is_hover(&theme_button.style) {
-                    Focus::ThemeButton
+                    ThemeButton
                 } else {
-                    Focus::Nothing
+                    Nothing
                 }
             }
             _ => (),
@@ -122,14 +97,14 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
         typingbox.update();
         tracker.update(typingbox.state.index, typingbox.state.letters.len());
 
-        if focus != Focus::TypingBox {
+        if focus != TypingBox {
             restart_button.update();
             theme_button.update();
         }
 
         match focus {
-            Focus::ThemeButton => theme_button.style.draw_border(),
-            Focus::RestartButton => restart_button.style.draw_border(),
+            ThemeButton => theme_button.style.draw_border(),
+            RestartButton => restart_button.style.draw_border(),
             _ => (),
         }
 

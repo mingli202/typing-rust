@@ -8,26 +8,11 @@ mod next_button;
 mod quit_button;
 mod wpm;
 
+use super::focus::{EndscreenFocus::*, Focus};
 use super::{util, Screen, State};
 
-enum Focus {
-    NextButton,
-    QuitButton,
-    Nothing,
-}
-
-impl Focus {
-    fn next(&mut self) {
-        match self {
-            Focus::Nothing => *self = Focus::NextButton,
-            Focus::NextButton => *self = Focus::QuitButton,
-            Focus::QuitButton => *self = Focus::NextButton,
-        }
-    }
-}
-
 pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
-    let mut focus = Focus::Nothing;
+    let mut focus = Nothing;
 
     let next_button = next_button::NextButton::new(&scr.style);
     let quit_button = quit_button::QuitButton::new(&scr.style);
@@ -38,8 +23,8 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
             match k {
                 KeyCode::Tab => focus.next(),
                 KeyCode::Enter => match focus {
-                    Focus::NextButton => return State::TypingTest,
-                    Focus::QuitButton => process::exit(0),
+                    NextButton => return State::TypingTest,
+                    QuitButton => process::exit(0),
                     _ => (),
                 },
                 _ => {
@@ -56,8 +41,8 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
-                Focus::NextButton => return State::TypingTest,
-                Focus::QuitButton => process::exit(0),
+                NextButton => return State::TypingTest,
+                QuitButton => process::exit(0),
                 _ => (),
             }
         }
@@ -65,11 +50,11 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
         match input::mouse_delta_position() {
             Vec2 { x: dx, y: dy } if dx != 0.0 && dy != 0.0 => {
                 focus = if util::is_hover(&next_button.style) {
-                    Focus::NextButton
+                    NextButton
                 } else if util::is_hover(&quit_button.style) {
-                    Focus::QuitButton
+                    QuitButton
                 } else {
-                    Focus::Nothing
+                    Nothing
                 }
             }
             _ => (),
@@ -82,8 +67,8 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
         wpm.update();
 
         match focus {
-            Focus::QuitButton => quit_button.style.draw_border(),
-            Focus::NextButton => next_button.style.draw_border(),
+            QuitButton => quit_button.style.draw_border(),
+            NextButton => next_button.style.draw_border(),
             _ => (),
         }
 

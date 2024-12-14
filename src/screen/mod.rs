@@ -7,10 +7,12 @@ mod theme;
 
 mod style;
 use style::{BorderParams, Style};
+
 mod text;
 mod util;
 
 mod endscreen;
+mod focus;
 mod theme_select;
 mod typing_test;
 
