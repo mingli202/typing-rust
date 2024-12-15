@@ -55,7 +55,9 @@ pub async fn run(scr: &mut Screen) -> State {
             match c {
                 // enter
                 '\u{000d}' => {
-                    scr.theme_name = buttons[focus as usize].theme_name.clone();
+                    if focus > 0 {
+                        scr.theme_name = buttons[focus as usize].theme_name.clone();
+                    }
                     return State::TypingTest;
                 }
                 // escape
