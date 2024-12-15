@@ -12,3 +12,6 @@ Fast and minimal typing test binary crate written in rust
 
 Tech Stack:
 - macroquad for graphics library and keyboard input
+
+
+[![Handwritten numbers](https://img.youtube.com/vi/b2UXfyey8tA/0.jpg)](https://youtu.be/b2UXfyey8tA)
