@@ -61,7 +61,7 @@ fn help() {
         "                           to that source is separated by a new line character.",
         "                           See built-in quotes at the repository.",
         //"   -o, --online            Get quotes from the web. Must be connected to the internet.",
-        "   -c, --config <file>     Provide custom config file. Default is ~/.config/.typing_test.toml",
+        "   -c, --config <file>     Provide custom config file. Default is ~/.typing_test.toml",
         "   -h, --help              Print this help.",
     ]
     .join("\n");
