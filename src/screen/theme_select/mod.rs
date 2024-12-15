@@ -1,11 +1,12 @@
 use std::rc::Rc;
 
+use macroquad::input::MouseButton;
 use macroquad::text::TextDimensions;
 use macroquad::{input, text, window};
 
 use super::style::BorderParams;
 use super::theme::ThemeName::*;
-use super::{Screen, State, Value};
+use super::{util, Screen, State, Value};
 
 mod button;
 
@@ -25,9 +26,6 @@ pub async fn run(scr: &mut Screen) -> State {
                 // tab
                 '\u{0009}' => {
                     focus = (focus + 1) % buttons.len() as i32;
-                    if focus >= 0 {
-                        scr.style.theme.set(&buttons[focus as usize].theme_name);
-                    }
                 }
                 // enter
                 '\u{000d}' => return State::TypingTest,
@@ -37,6 +35,12 @@ pub async fn run(scr: &mut Screen) -> State {
                     return State::TypingTest;
                 }
                 _ => (),
+            }
+        }
+
+        for (i, button) in buttons.iter().enumerate() {
+            if util::is_hover(&button.style) {
+                focus = i as i32;
             }
         }
 
@@ -55,9 +59,8 @@ pub async fn run(scr: &mut Screen) -> State {
             button.style.x = Value::Absolute(x);
             button.style.y = Value::Absolute(y);
 
-            button.update();
-
             if i as i32 == focus {
+                focus = i as i32;
                 *button.style.border.as_mut().unwrap() = BorderParams {
                     size: 2.0,
                     color: Rc::clone(&button.style.theme.text),
@@ -69,7 +72,21 @@ pub async fn run(scr: &mut Screen) -> State {
                 }
             }
 
-            x += width + 50.0
+            button.update();
+            x += width + 50.0;
+        }
+
+        if focus >= 0 {
+            scr.style.theme.set(&buttons[focus as usize].theme_name);
+
+            if input::is_mouse_button_pressed(MouseButton::Left) {
+                if util::is_hover(&buttons[focus as usize].style) {
+                    return State::TypingTest;
+                } else {
+                    scr.style.theme.set(&current);
+                    return State::TypingTest;
+                }
+            }
         }
 
         window::next_frame().await;
