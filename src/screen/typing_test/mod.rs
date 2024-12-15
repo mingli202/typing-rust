@@ -18,11 +18,8 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
     let mut focus = Nothing;
 
     let mut typingbox = textbox::TextBox::new(&scr.style, &scr.data);
-
     let tracker = tracker::Tracker::new(&scr.style);
-
     let mut restart_button = restart_button::RestartButton::new(&scr.style);
-
     let theme_button = theme_button::ThemeButton::new(&scr.style);
 
     loop {
