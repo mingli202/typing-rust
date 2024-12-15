@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use macroquad::input::MouseButton;
+use macroquad::input::{KeyCode, MouseButton};
 use macroquad::text::TextDimensions;
 use macroquad::{input, text, window};
 
@@ -22,22 +22,39 @@ pub async fn run(scr: &mut Screen) -> State {
     let cancel_button = cancel_button::CancelButton::new(&scr.style);
 
     let mut is_mouse_held = true;
+    let mut is_held = false;
 
     loop {
         window::clear_background(*scr.style.theme.bg.borrow());
 
-        if let Some(k) = input::get_char_pressed() {
-            match k {
-                // tab
-                '\u{0009}' => {
-                    if focus < 0 {
-                        focus = 0;
+        let keys = input::get_keys_down();
+
+        if keys.contains(&KeyCode::Tab) {
+            if !is_held {
+                if keys.contains(&KeyCode::LeftShift) || keys.contains(&KeyCode::RightShift) {
+                    if focus == -1 {
+                        focus = buttons.len() as i32 - 1;
                     } else {
-                        focus = (focus + 1) % buttons.len() as i32;
+                        focus -= 1;
                     }
+                } else if focus == buttons.len() as i32 - 1 {
+                    focus = -1;
+                } else {
+                    focus = (focus + 1) % buttons.len() as i32;
                 }
+            }
+            is_held = true;
+        } else {
+            is_held = false;
+        }
+
+        if let Some(c) = input::get_char_pressed() {
+            match c {
                 // enter
-                '\u{000d}' => return State::TypingTest,
+                '\u{000d}' => {
+                    scr.theme_name = buttons[focus as usize].theme_name.clone();
+                    return State::TypingTest;
+                }
                 // escape
                 '\u{001b}' => {
                     scr.style.theme.set(&current);
@@ -79,6 +96,16 @@ pub async fn run(scr: &mut Screen) -> State {
             x += width + 50.0;
         }
 
+        cancel_button.update();
+
+        if util::is_hover(&cancel_button.style) || focus == -1 {
+            focus = -1;
+            cancel_button.style.draw_border();
+            scr.style.theme.set(&current);
+        }
+
+        window::next_frame().await;
+
         for (i, button) in buttons.iter().enumerate() {
             if util::is_hover(&button.style) {
                 focus = i as i32;
@@ -92,6 +119,7 @@ pub async fn run(scr: &mut Screen) -> State {
         if input::is_mouse_button_down(MouseButton::Left) {
             if !is_mouse_held {
                 if focus >= 0 && util::is_hover(&buttons[focus as usize].style) {
+                    scr.theme_name = buttons[focus as usize].theme_name.clone();
                     return State::TypingTest;
                 } else if focus != -2 {
                     scr.style.theme.set(&current);
@@ -102,9 +130,5 @@ pub async fn run(scr: &mut Screen) -> State {
         } else {
             is_mouse_held = false;
         }
-
-        cancel_button.update();
-
-        window::next_frame().await;
     }
 }
