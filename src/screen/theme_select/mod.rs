@@ -47,12 +47,6 @@ pub async fn run(scr: &mut Screen) -> State {
             }
         }
 
-        for (i, button) in buttons.iter().enumerate() {
-            if util::is_hover(&button.style) {
-                focus = i as i32;
-            }
-        }
-
         let mut x = 0.25 * window::screen_width();
         let mut y = 0.24 * window::screen_height();
 
@@ -83,6 +77,12 @@ pub async fn run(scr: &mut Screen) -> State {
 
             button.update();
             x += width + 50.0;
+        }
+
+        for (i, button) in buttons.iter().enumerate() {
+            if util::is_hover(&button.style) {
+                focus = i as i32;
+            }
         }
 
         if focus >= 0 {
