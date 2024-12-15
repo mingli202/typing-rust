@@ -21,6 +21,7 @@ pub async fn run(scr: &mut Screen) -> State {
 
     let cancel_button = cancel_button::CancelButton::new(&scr.style);
 
+    // to deal with holding
     let mut is_mouse_held = true;
     let mut is_held = false;
 
@@ -29,9 +30,11 @@ pub async fn run(scr: &mut Screen) -> State {
 
         let keys = input::get_keys_down();
 
+        // tab and shift-tab
         if keys.contains(&KeyCode::Tab) {
             if !is_held {
                 if keys.contains(&KeyCode::LeftShift) || keys.contains(&KeyCode::RightShift) {
+                    // cycle to -1 as well
                     if focus == -1 {
                         focus = buttons.len() as i32 - 1;
                     } else {
