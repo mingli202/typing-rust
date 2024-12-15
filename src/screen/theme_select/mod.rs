@@ -9,6 +9,7 @@ use super::theme::ThemeName::*;
 use super::{util, Screen, State, Value};
 
 mod button;
+mod cancel_button;
 
 pub async fn run(scr: &mut Screen) -> State {
     let current = scr.theme_name.clone();
@@ -18,6 +19,10 @@ pub async fn run(scr: &mut Screen) -> State {
     let themes = [Atom, Catppuccin, Gruvbox, Tokyonight];
     let mut buttons = themes.map(|t| button::Button::new(t, &scr.style));
 
+    let cancel_button = cancel_button::CancelButton::new(&scr.style);
+
+    let mut is_mouse_held = true;
+
     loop {
         window::clear_background(*scr.style.theme.bg.borrow());
 
@@ -25,7 +30,11 @@ pub async fn run(scr: &mut Screen) -> State {
             match k {
                 // tab
                 '\u{0009}' => {
-                    focus = (focus + 1) % buttons.len() as i32;
+                    if focus < 0 {
+                        focus = 0;
+                    } else {
+                        focus = (focus + 1) % buttons.len() as i32;
+                    }
                 }
                 // enter
                 '\u{000d}' => return State::TypingTest,
@@ -78,16 +87,23 @@ pub async fn run(scr: &mut Screen) -> State {
 
         if focus >= 0 {
             scr.style.theme.set(&buttons[focus as usize].theme_name);
+        }
 
-            if input::is_mouse_button_pressed(MouseButton::Left) {
-                if util::is_hover(&buttons[focus as usize].style) {
+        if input::is_mouse_button_down(MouseButton::Left) {
+            if !is_mouse_held {
+                if focus >= 0 && util::is_hover(&buttons[focus as usize].style) {
                     return State::TypingTest;
-                } else {
+                } else if focus != -2 {
                     scr.style.theme.set(&current);
                     return State::TypingTest;
                 }
             }
+            is_mouse_held = true;
+        } else {
+            is_mouse_held = false;
         }
+
+        cancel_button.update();
 
         window::next_frame().await;
     }
