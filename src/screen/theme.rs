@@ -1,4 +1,5 @@
 use macroquad::color::Color;
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -9,11 +10,13 @@ pub struct Theme {
     pub ghost: Rc<RefCell<Color>>,
 }
 
-#[derive(PartialEq, Hash, Eq, Debug, Clone)]
+#[derive(PartialEq, Hash, Eq, Debug, Clone, Serialize, Deserialize, Default)]
 pub enum ThemeName {
     Catppuccin,
     Atom,
     Tokyonight,
+
+    #[default]
     Gruvbox,
 }
 
@@ -51,7 +54,7 @@ impl Theme {
 impl Default for Theme {
     fn default() -> Self {
         let theme = Self::new();
-        theme.set(&ThemeName::Gruvbox);
+        theme.set(&ThemeName::default());
         theme
     }
 }

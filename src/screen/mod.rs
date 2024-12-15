@@ -1,4 +1,5 @@
 use crate::data_provider::Data;
+use crate::Config;
 use macroquad::color::Color;
 use std::cell::RefCell;
 use std::error::Error;
@@ -8,7 +9,8 @@ mod theme;
 mod style;
 use style::{BorderParams, Style};
 
-use self::theme::ThemeName;
+use self::theme::Theme;
+pub use self::theme::ThemeName;
 
 mod text;
 mod util;
@@ -29,19 +31,20 @@ pub struct Screen {
     style: Style,
     state: State,
     data: Data,
-    theme_name: ThemeName,
+    config: Config,
 }
 
 impl Screen {
-    pub fn new(data: Data) -> Self {
+    pub fn new(data: Data, config: Config) -> Self {
         Screen {
             data,
             state: State::TypingTest,
             style: Style {
                 font_size: 30.0,
+                theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },
-            theme_name: ThemeName::Gruvbox,
+            config,
         }
 
         // TODO: animation library use threads to mutate value over time (maybe)

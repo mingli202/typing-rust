@@ -1,6 +1,6 @@
 [package]
 name = "typing_test"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Typing speed test in rust"
@@ -10,3 +10,5 @@ authors = ["mingli202"]
 [dependencies]
 macroquad = "0.4.13"
 rand = "0.8.5"
+serde = { version = "1.0.216", features = ["derive"] }
+toml = "0.8.19"

@@ -12,7 +12,7 @@ mod button;
 mod cancel_button;
 
 pub async fn run(scr: &mut Screen) -> State {
-    let current = scr.theme_name.clone();
+    let current = scr.config.theme.clone();
 
     let mut focus = -1;
 
@@ -55,8 +55,9 @@ pub async fn run(scr: &mut Screen) -> State {
             match c {
                 // enter
                 '\u{000d}' => {
-                    if focus > 0 {
-                        scr.theme_name = buttons[focus as usize].theme_name.clone();
+                    if focus >= 0 {
+                        scr.config.theme = buttons[focus as usize].theme_name.clone();
+                        scr.config.update_file();
                     }
                     return State::TypingTest;
                 }
@@ -124,7 +125,8 @@ pub async fn run(scr: &mut Screen) -> State {
         if input::is_mouse_button_down(MouseButton::Left) {
             if !is_mouse_held {
                 if focus >= 0 && util::is_hover(&buttons[focus as usize].style) {
-                    scr.theme_name = buttons[focus as usize].theme_name.clone();
+                    scr.config.theme = buttons[focus as usize].theme_name.clone();
+                    scr.config.update_file();
                     return State::TypingTest;
                 } else if focus != -2 {
                     scr.style.theme.set(&current);
