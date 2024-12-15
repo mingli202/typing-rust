@@ -22,18 +22,20 @@ pub async fn run(scr: &mut Screen) -> State {
 
         if let Some(k) = input::get_char_pressed() {
             match k {
+                // tab
                 '\u{0009}' => {
                     focus = (focus + 1) % buttons.len() as i32;
                     if focus >= 0 {
                         scr.style.theme.set(&buttons[focus as usize].theme_name);
                     }
                 }
+                // enter
                 '\u{000d}' => return State::TypingTest,
+                // escape
                 '\u{001b}' => {
                     scr.style.theme.set(&current);
                     return State::TypingTest;
                 }
-
                 _ => (),
             }
         }

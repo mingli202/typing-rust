@@ -13,7 +13,7 @@ mod tracker;
 use super::{Screen, State};
 
 pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
-    assert_eq!(scr.state, State::TypingTest);
+    input::clear_input_queue();
 
     let mut focus = Nothing;
 
@@ -28,25 +28,6 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
     loop {
         if let Some(k) = input::get_last_key_pressed() {
             match k {
-                KeyCode::Enter => {
-                    input::clear_input_queue();
-                    match focus {
-                        RestartButton => {
-                            typingbox.refresh();
-                            focus = Nothing;
-                        }
-                        ThemeButton => {
-                            return State::ThemeSelect;
-                        }
-                        _ => (),
-                    }
-                }
-
-                KeyCode::Tab => {
-                    input::clear_input_queue();
-                    focus.next();
-                }
-
                 KeyCode::Backspace => {
                     input::clear_input_queue();
                     focus = TypingBox;
@@ -55,11 +36,33 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                 // this passes the keytrokes to type
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
-                        focus = TypingBox;
-
-                        if typingbox.on_type(c) {
-                            *wpm = typingbox.get_wpm();
-                            return State::EndScreen;
+                        match c {
+                            // enter
+                            '\u{000d}' => {
+                                input::clear_input_queue();
+                                match focus {
+                                    RestartButton => {
+                                        typingbox.refresh();
+                                        focus = Nothing;
+                                    }
+                                    ThemeButton => {
+                                        return State::ThemeSelect;
+                                    }
+                                    _ => (),
+                                }
+                            }
+                            // tab
+                            '\u{0009}' => {
+                                input::clear_input_queue();
+                                focus.next();
+                            }
+                            _ => {
+                                focus = TypingBox;
+                                if typingbox.on_type(c) {
+                                    *wpm = typingbox.get_wpm();
+                                    return State::EndScreen;
+                                }
+                            }
                         }
                     }
                 }
