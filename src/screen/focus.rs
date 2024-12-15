@@ -37,12 +37,3 @@ impl Focus for EndscreenFocus {
         }
     }
 }
-
-#[derive(PartialEq)]
-pub enum ThemeSelectFocus {
-    Nothing,
-}
-
-impl Focus for ThemeSelectFocus {
-    fn next(&mut self) {}
-}

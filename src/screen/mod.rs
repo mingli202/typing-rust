@@ -8,6 +8,8 @@ mod theme;
 mod style;
 use style::{BorderParams, Style};
 
+use self::theme::ThemeName;
+
 mod text;
 mod util;
 
@@ -27,6 +29,7 @@ pub struct Screen {
     style: Style,
     state: State,
     data: Data,
+    theme_name: ThemeName,
 }
 
 impl Screen {
@@ -38,6 +41,7 @@ impl Screen {
                 font_size: 30.0,
                 ..Style::default()
             },
+            theme_name: ThemeName::Gruvbox,
         }
 
         // TODO: animation library use threads to mutate value over time (maybe)

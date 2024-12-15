@@ -9,7 +9,7 @@ pub struct Theme {
     pub ghost: Rc<RefCell<Color>>,
 }
 
-#[derive(PartialEq, Hash, Eq)]
+#[derive(PartialEq, Hash, Eq, Debug, Clone)]
 pub enum ThemeName {
     Catppuccin,
     Atom,
@@ -18,7 +18,7 @@ pub enum ThemeName {
 }
 
 impl Theme {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Theme {
             bg: Rc::new(RefCell::new(Color::new(0.0, 0.0, 0.0, 1.0))),
             text: Rc::new(RefCell::new(Color::new(1.0, 1.0, 1.0, 1.0))),
@@ -27,7 +27,7 @@ impl Theme {
         }
     }
 
-    fn set(&self, theme_name: ThemeName) {
+    pub fn set(&self, theme_name: &ThemeName) {
         let (bg, text, error, ghost) = match theme_name {
             ThemeName::Atom => (0x161719, 0xc5c8c6, 0xfd5ff1, 0x444444),
             ThemeName::Gruvbox => (0x1b1b1b, 0xebdbb2, 0xcc241d, 0x665c54),
@@ -40,33 +40,18 @@ impl Theme {
         *self.error.borrow_mut() = Color::from_hex(error);
         *self.ghost.borrow_mut() = Color::from_hex(ghost);
     }
+
+    pub fn get_theme(theme_name: &ThemeName) -> Self {
+        let theme = Self::new();
+        theme.set(theme_name);
+        theme
+    }
 }
 
 impl Default for Theme {
     fn default() -> Self {
         let theme = Self::new();
-        theme.set(ThemeName::Gruvbox);
+        theme.set(&ThemeName::Gruvbox);
         theme
     }
-}
-
-pub fn from_hex(
-    bg: u32,
-    text: u32,
-    error: u32,
-    ghost: Option<u32>,
-) -> (Color, Color, Color, Color) {
-    (
-        Color::from_hex(bg),
-        Color::from_hex(text),
-        Color::from_hex(error),
-        if let Some(color) = ghost {
-            Color::from_hex(color)
-        } else {
-            Color {
-                a: 0.5,
-                ..Color::from_hex(text)
-            }
-        },
-    )
 }
