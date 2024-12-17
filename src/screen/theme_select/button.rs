@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use macroquad::text::{self, TextDimensions};
+use macroquad::text;
 
 use crate::screen::style::{BorderParams, Style};
 use crate::screen::theme::{Theme, ThemeName};
@@ -16,33 +16,48 @@ impl Button {
     pub fn new(theme_name: ThemeName, style: &Style) -> Self {
         let theme = Theme::get_theme(&theme_name);
 
-        let text = format!("{:?}", theme_name)
-            .split("::")
-            .last()
-            .unwrap()
-            .to_string();
+        let f1 = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
+        let f3 = Rc::clone(&style.font_size);
 
-        let TextDimensions {
-            width,
-            offset_y,
-            height,
-        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+        let tn = theme_name.clone();
 
         Button {
-            theme_name,
-            text,
+            theme_name: theme_name.clone(),
+            text: format!("{:?}", theme_name)
+                .split("::")
+                .last()
+                .unwrap()
+                .to_string(),
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
                     color: Rc::clone(&theme.ghost),
                 }),
                 theme,
-                width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(height + 20.0),
-                offset_y: Some(Value::Absolute(offset_y)),
+                width: Value::Relative(Box::new(move || {
+                    text::measure_text(
+                        format!("{:?}", tn).split("::").last().unwrap(),
+                        None,
+                        *f2.borrow() as u16,
+                        1.0,
+                    )
+                    .width
+                        + 20.0
+                })),
+                height: Value::Relative(Box::new(move || {
+                    text::measure_text(
+                        format!("{:?}", theme_name).split("::").last().unwrap(),
+                        None,
+                        *f3.borrow() as u16,
+                        1.0,
+                    )
+                    .height
+                        + 20.0
+                })),
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                font_size: Rc::clone(&style.font_size),
+                font_size: f1,
                 ..Style::default()
             },
         }
