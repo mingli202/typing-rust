@@ -14,9 +14,6 @@ impl NextButton {
     pub fn new(style: &Style) -> NextButton {
         let text = "Next (n)".to_string();
 
-        let TextDimensions { width, .. } =
-            text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
-
         let f1 = Rc::clone(&style.font_size);
         let f2 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
@@ -30,7 +27,9 @@ impl NextButton {
                     color: Rc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
-                    window::screen_width() / 2.0 - width - *f1.borrow()
+                    (window::screen_width() - *f1.borrow()) / 2.0
+                        - text::measure_text(&text, None, *f1.borrow() as u16, 1.0).width
+                        - 20.0
                 })),
                 y: Value::Relative(Box::new(move || {
                     (window::screen_height() + *f2.borrow()) / 2.0
@@ -45,10 +44,10 @@ impl NextButton {
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
                 width: Value::Relative(Box::new(move || {
-                    text::measure_text("Restart", None, *f3.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text("Next (n)", None, *f3.borrow() as u16, 1.0).width + 20.0
                 })),
                 height: Value::Relative(Box::new(move || {
-                    text::measure_text("Restart", None, *f4.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text("Next (n)", None, *f4.borrow() as u16, 1.0).height + 20.0
                 })),
                 ..Style::default()
             },
