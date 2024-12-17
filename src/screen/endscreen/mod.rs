@@ -93,8 +93,6 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
             _ => (),
         }
 
-        util::draw_midpoint();
-
         window::next_frame().await;
     }
 }
