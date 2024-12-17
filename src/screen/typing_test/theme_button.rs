@@ -14,12 +14,11 @@ impl ThemeButton {
     pub fn new(style: &Style) -> Self {
         let text = "Theme".to_string();
 
-        let TextDimensions {
-            width,
-            height,
-            offset_y,
-        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+        let TextDimensions { width, .. } =
+            text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
         let font_size = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
+        let f3 = Rc::clone(&style.font_size);
 
         ThemeButton {
             text,
@@ -36,8 +35,12 @@ impl ThemeButton {
                         - 10.0
                         - 3.0 * *font_size.borrow()
                 })),
-                width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(height + 20.0),
+                width: Value::Relative(Box::new(move || {
+                    text::measure_text("Theme", None, *f2.borrow() as u16, 1.0).width + 20.0
+                })),
+                height: Value::Relative(Box::new(move || {
+                    text::measure_text("Theme", None, *f3.borrow() as u16, 1.0).height + 20.0
+                })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
@@ -47,7 +50,6 @@ impl ThemeButton {
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                offset_y: Some(Value::Absolute(offset_y)),
                 ..Style::default()
             },
         }

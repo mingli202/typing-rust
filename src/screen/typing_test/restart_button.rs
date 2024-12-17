@@ -16,11 +16,8 @@ impl RestartButton {
     pub fn new(style: &Style) -> RestartButton {
         let text = "Restart".to_string();
 
-        let TextDimensions {
-            width,
-            offset_y,
-            height,
-        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+        let TextDimensions { width, .. } =
+            text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
 
         let font_size = Rc::clone(&style.font_size);
         let f2 = Rc::clone(&style.font_size);
