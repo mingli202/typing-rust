@@ -179,10 +179,13 @@ pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
         _ => 0.0,
     };
 
+    let TextDimensions { offset_y, .. } =
+        macroquad::text::measure_text(text, None, *style.font_size.borrow() as u16, 1.0);
+
     text::draw_text(
         text,
         x + p_x + o_x,
-        y + p_y + o_y,
+        y + p_y + o_y + offset_y,
         *style.font_size.borrow(),
         *style.theme.text.borrow(),
     );
