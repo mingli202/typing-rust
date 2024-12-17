@@ -13,7 +13,7 @@ pub fn print_letter(
     let dimensions = text::measure_text(
         &letter.letter.to_string(),
         None,
-        style.font_size as u16,
+        *style.font_size.borrow() as u16,
         1.0,
     );
 
@@ -44,17 +44,17 @@ pub fn print_letter(
         &letter.letter.to_string(),
         x,
         y,
-        style.font_size,
+        *style.font_size.borrow(),
         *letter.color.borrow(),
     );
 
     if *letter.color.borrow() == *style.theme.error.borrow() {
         shapes::draw_line(
             x,
-            y + 0.2 * style.font_size,
+            y + 0.2 * *style.font_size.borrow(),
             x + dimensions.width,
-            y + 0.2 * style.font_size,
-            1.5,
+            y + 0.2 * *style.font_size.borrow(),
+            0.05 * *style.font_size.borrow(),
             *letter.color.borrow(),
         );
     }
@@ -64,7 +64,7 @@ pub fn print_letter(
             "|",
             x - dimensions.width / 2.0,
             y,
-            style.font_size,
+            *style.font_size.borrow(),
             *style.theme.text.borrow(),
         );
     }
@@ -79,7 +79,7 @@ pub fn print_letters(style: &Style, letters: &[&Letter], x: f32, y: f32, cursor_
             .iter()
             .fold(String::new(), |acc, l| acc + &l.letter.to_string()),
         None,
-        style.font_size as u16,
+        *style.font_size.borrow() as u16,
         1.0,
     )
     .offset_y;
@@ -121,7 +121,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
         if text::measure_text(
             &(line_merged + &word_merged),
             None,
-            style.font_size as u16,
+            *style.font_size.borrow() as u16,
             1.0,
         )
         .width
@@ -131,7 +131,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
                 style,
                 &line,
                 style.x.get(),
-                style.y.get() + lines * style.font_size,
+                style.y.get() + lines * *style.font_size.borrow(),
                 cursor_index,
             );
             lines += 1.0;
@@ -151,7 +151,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
         style,
         &line,
         style.x.get(),
-        style.y.get() + lines * style.font_size,
+        style.y.get() + lines * *style.font_size.borrow(),
         cursor_index,
     );
 
@@ -183,7 +183,7 @@ pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
         text,
         x + p_x + o_x,
         y + p_y + o_y,
-        style.font_size,
+        *style.font_size.borrow(),
         *style.theme.text.borrow(),
     );
 }

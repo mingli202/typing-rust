@@ -10,13 +10,14 @@ pub struct Tracker {
 
 impl Tracker {
     pub fn new(style: &Style) -> Tracker {
-        let font_size = style.font_size;
+        let font_size = Rc::clone(&style.font_size);
 
         Tracker {
             style: Style {
                 x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - font_size * 3.0) / 2.0 - font_size
+                    (window::screen_height() - *font_size.borrow() * 3.0) / 2.0
+                        - *font_size.borrow()
                 })),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
@@ -24,7 +25,7 @@ impl Tracker {
                     text: Rc::clone(&style.theme.ghost),
                     error: Rc::clone(&style.theme.error),
                 },
-                font_size: style.font_size,
+                font_size: Rc::clone(&style.font_size),
                 ..Style::default()
             },
         }

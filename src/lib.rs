@@ -85,6 +85,7 @@ pub struct Config {
     pub config_file: PathBuf,
 
     pub theme: ThemeName,
+    pub font_size: f32,
     // extra_themes: HashMap<String, ThemeParams>,
 }
 
@@ -95,6 +96,7 @@ impl Default for Config {
                 .iter()
                 .collect(),
             theme: ThemeName::default(),
+            font_size: 30.0,
         }
     }
 }

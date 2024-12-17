@@ -24,8 +24,8 @@ impl CancelButton {
             width,
             height,
             offset_y,
-        } = text::measure_text(&text, None, style.font_size as u16, 1.0);
-        let font_size = style.font_size;
+        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+        let font_size = Rc::clone(&style.font_size);
 
         CancelButton {
             text: text.to_string(),
@@ -36,9 +36,9 @@ impl CancelButton {
                 }),
                 x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + font_size) / 2.0
+                    (window::screen_height() + *font_size.borrow()) / 2.0
                 })),
-                font_size: style.font_size,
+                font_size: Rc::clone(&style.font_size),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
                     ghost: Rc::clone(&style.theme.ghost),

@@ -40,7 +40,7 @@ impl Screen {
             data,
             state: State::TypingTest,
             style: Style {
-                font_size: 30.0,
+                font_size: Rc::new(RefCell::new(config.font_size)),
                 theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },

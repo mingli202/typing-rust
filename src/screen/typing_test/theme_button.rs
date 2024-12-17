@@ -18,8 +18,8 @@ impl ThemeButton {
             width,
             height,
             offset_y,
-        } = text::measure_text(&text, None, style.font_size as u16, 1.0);
-        let font_size = style.font_size;
+        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+        let font_size = Rc::clone(&style.font_size);
 
         ThemeButton {
             text,
@@ -32,11 +32,13 @@ impl ThemeButton {
                     (window::screen_width() - width - 20.0) / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - font_size * 3.0) / 2.0 - 10.0 - 3.0 * font_size
+                    (window::screen_height() - *font_size.borrow() * 3.0) / 2.0
+                        - 10.0
+                        - 3.0 * *font_size.borrow()
                 })),
                 width: Value::Absolute(width + 20.0),
                 height: Value::Absolute(height + 20.0),
-                font_size: style.font_size,
+                font_size: Rc::clone(&style.font_size),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
                     ghost: Rc::clone(&style.theme.ghost),

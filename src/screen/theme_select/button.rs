@@ -26,7 +26,7 @@ impl Button {
             width,
             offset_y,
             height,
-        } = text::measure_text(&text, None, style.font_size as u16, 1.0);
+        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
 
         Button {
             theme_name,
@@ -42,7 +42,7 @@ impl Button {
                 offset_y: Some(Value::Absolute(offset_y)),
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                font_size: style.font_size,
+                font_size: Rc::clone(&style.font_size),
                 ..Style::default()
             },
         }
