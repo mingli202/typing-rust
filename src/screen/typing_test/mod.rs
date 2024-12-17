@@ -81,6 +81,12 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
             }
         }
 
+        if focus == TypingBox {
+            input::show_mouse(false);
+        } else {
+            input::show_mouse(true);
+        }
+
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 RestartButton => {
