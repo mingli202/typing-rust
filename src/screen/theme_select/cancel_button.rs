@@ -20,12 +20,10 @@ impl CancelButton {
     pub fn new(style: &Style) -> CancelButton {
         let text = "Cancel (ESC)".to_string();
 
-        let TextDimensions {
-            width,
-            height,
-            offset_y,
-        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
         let font_size = Rc::clone(&style.font_size);
+        let f1 = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
+        let f3 = Rc::clone(&style.font_size);
 
         CancelButton {
             text: text.to_string(),
@@ -34,7 +32,11 @@ impl CancelButton {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
+                x: Value::Relative(Box::new(move || {
+                    (window::screen_width()
+                        - text::measure_text(&text, None, *f3.borrow() as u16, 1.0).width)
+                        / 2.0
+                })),
                 y: Value::Relative(Box::new(move || {
                     (window::screen_height() + *font_size.borrow()) / 2.0
                 })),
@@ -47,9 +49,12 @@ impl CancelButton {
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                offset_y: Some(Value::Absolute(offset_y)),
-                width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(height + 20.0),
+                width: Value::Relative(Box::new(move || {
+                    text::measure_text("Cancel (ESC)", None, *f1.borrow() as u16, 1.0).width + 20.0
+                })),
+                height: Value::Relative(Box::new(move || {
+                    text::measure_text("Cancel (ESC)", None, *f2.borrow() as u16, 1.0).height + 20.0
+                })),
                 ..Style::default()
             },
         }
