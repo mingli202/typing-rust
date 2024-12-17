@@ -21,11 +21,13 @@ impl RestartButton {
             offset_y,
             height,
         } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+
         let font_size = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
+        let f3 = Rc::clone(&style.font_size);
 
         RestartButton {
             text: "Restart".to_string(),
-
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
@@ -35,10 +37,16 @@ impl RestartButton {
                     (window::screen_width() - width - 20.0) / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + *font_size.borrow() * 3.0 + 10.0) / 2.0
+                    (window::screen_height() + *font_size.borrow() * 3.0) / 2.0
+                        + *font_size.borrow()
                 })),
-                width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(height + 20.0),
+                width: Value::Relative(Box::new(move || {
+                    text::measure_text("Restart", None, *f2.borrow() as u16, 1.0).width + 20.0
+                })),
+                height: Value::Relative(Box::new(move || {
+                    text::measure_text("Restart", None, *f3.borrow() as u16, 1.0).height + 20.0
+                })),
+
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
@@ -48,7 +56,6 @@ impl RestartButton {
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                offset_y: Some(Value::Absolute(offset_y)),
                 ..Style::default()
             },
         }
