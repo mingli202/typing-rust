@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use macroquad::text::TextDimensions;
 use macroquad::{text, window};
 
 use crate::screen::{theme::Theme, BorderParams, Style, Value};
