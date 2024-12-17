@@ -27,6 +27,27 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
                     QuitButton => process::exit(0),
                     _ => (),
                 },
+                KeyCode::Equal
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() += 5.0;
+                }
+                KeyCode::Minus
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() -= 5.0;
+                }
+                KeyCode::Key0
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                }
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
@@ -71,6 +92,8 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
             NextButton => next_button.style.draw_border(),
             _ => (),
         }
+
+        util::draw_midpoint();
 
         window::next_frame().await;
     }

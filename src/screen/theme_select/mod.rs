@@ -23,62 +23,81 @@ pub async fn run(scr: &mut Screen) -> State {
 
     // to deal with holding
     let mut is_mouse_held = true;
-    let mut is_held = false;
 
     loop {
-        window::clear_background(*scr.style.theme.bg.borrow());
-
-        let keys = input::get_keys_down();
-
-        // tab and shift-tab
-        if keys.contains(&KeyCode::Tab) {
-            if !is_held {
-                if keys.contains(&KeyCode::LeftShift) || keys.contains(&KeyCode::RightShift) {
-                    // cycle to -1 as well
-                    if focus == -1 {
-                        focus = buttons.len() as i32 - 1;
+        if let Some(k) = input::get_last_key_pressed() {
+            match k {
+                KeyCode::Equal
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() += 5.0;
+                }
+                KeyCode::Minus
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() -= 5.0;
+                }
+                KeyCode::Key0
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                }
+                KeyCode::Tab => {
+                    if input::is_key_down(KeyCode::LeftShift)
+                        || input::is_key_down(KeyCode::RightShift)
+                    {
+                        // cycle to -1 as well
+                        if focus == -1 {
+                            focus = buttons.len() as i32 - 1;
+                        } else {
+                            focus -= 1;
+                        }
+                    } else if focus == buttons.len() as i32 - 1 {
+                        focus = -1;
                     } else {
-                        focus -= 1;
+                        focus = (focus + 1) % buttons.len() as i32;
                     }
-                } else if focus == buttons.len() as i32 - 1 {
-                    focus = -1;
-                } else {
-                    focus = (focus + 1) % buttons.len() as i32;
                 }
-            }
-            is_held = true;
-        } else {
-            is_held = false;
-        }
-
-        if let Some(c) = input::get_char_pressed() {
-            match c {
-                // enter
-                '\u{000d}' => {
-                    if focus >= 0 {
-                        scr.config.theme = buttons[focus as usize].theme_name.clone();
-                        scr.config.update_file();
-                    }
-                    return State::TypingTest;
-                }
-                // escape
-                '\u{001b}' => {
+                KeyCode::Escape => {
                     scr.style.theme.set(&current);
                     return State::TypingTest;
                 }
-                _ => (),
+                _ => {
+                    if let Some(c) = input::get_char_pressed() {
+                        // enter
+                        if c == '\u{000d}' {
+                            if focus >= 0 {
+                                scr.config.theme = buttons[focus as usize].theme_name.clone();
+                                scr.config.update_file();
+                            }
+                            return State::TypingTest;
+                        }
+                    }
+                }
             }
         }
+
+        window::clear_background(*scr.style.theme.bg.borrow());
 
         let mut x = 0.25 * window::screen_width();
         let mut y = 0.24 * window::screen_height();
 
         for (i, button) in buttons.iter_mut().enumerate() {
-            let TextDimensions { width, .. } =
-                text::measure_text(&button.text, None, button.style.font_size as u16, 1.0);
+            let TextDimensions { width, .. } = text::measure_text(
+                &button.text,
+                None,
+                *button.style.font_size.borrow() as u16,
+                1.0,
+            );
 
             if x + width > 0.75 * window::screen_width() {
-                y += button.style.font_size + 30.0;
+                y += *button.style.font_size.borrow() + 30.0;
                 x = 0.25 * window::screen_width();
             }
 

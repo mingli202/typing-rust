@@ -30,36 +30,51 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                     focus = TypingBox;
                     typingbox.delete_char();
                 }
+                KeyCode::Equal
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() += 5.0;
+                }
+                KeyCode::Minus
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() -= 5.0;
+                }
+                KeyCode::Key0
+                    if (input::is_key_down(KeyCode::LeftSuper)
+                        || input::is_key_down(KeyCode::RightSuper)) =>
+                {
+                    input::clear_input_queue();
+                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                }
+                KeyCode::Enter => {
+                    input::clear_input_queue();
+                    match focus {
+                        RestartButton => {
+                            typingbox.refresh();
+                            focus = Nothing;
+                        }
+                        ThemeButton => {
+                            return State::ThemeSelect;
+                        }
+                        _ => (),
+                    }
+                }
+                KeyCode::Tab => {
+                    input::clear_input_queue();
+                    focus.next();
+                }
                 // this passes the keytrokes to type
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
-                        match c {
-                            // enter
-                            '\u{000d}' => {
-                                input::clear_input_queue();
-                                match focus {
-                                    RestartButton => {
-                                        typingbox.refresh();
-                                        focus = Nothing;
-                                    }
-                                    ThemeButton => {
-                                        return State::ThemeSelect;
-                                    }
-                                    _ => (),
-                                }
-                            }
-                            // tab
-                            '\u{0009}' => {
-                                input::clear_input_queue();
-                                focus.next();
-                            }
-                            _ => {
-                                focus = TypingBox;
-                                if typingbox.on_type(c) {
-                                    *wpm = typingbox.get_wpm();
-                                    return State::EndScreen;
-                                }
-                            }
+                        focus = TypingBox;
+                        if typingbox.on_type(c) {
+                            *wpm = typingbox.get_wpm();
+                            return State::EndScreen;
                         }
                     }
                 }
