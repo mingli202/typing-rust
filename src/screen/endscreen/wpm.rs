@@ -1,31 +1,44 @@
 use std::rc::Rc;
 
-use macroquad::text::TextDimensions;
+use macroquad::text::{self, TextDimensions};
 use macroquad::window;
 
 use crate::screen::{theme::Theme, Style, Value};
 
 pub struct Wpm {
-    pub wmp: String,
+    pub wpm: String,
     pub style: Style,
 }
 
 impl Wpm {
     pub fn new(style: &Style, wmp: u16) -> Wpm {
-        let wmp = format!("WPM: {}", wmp);
-        let TextDimensions {
-            width,
-            height,
-            offset_y,
-        } = macroquad::text::measure_text(&wmp, None, *style.font_size.borrow() as u16, 1.0);
-
         let font_size = Rc::clone(&style.font_size);
+        let f1 = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
 
         Wpm {
-            wmp,
+            wpm: format!("WPM: {}", wmp),
             style: Style {
-                x: Value::Relative(Box::new(move || (window::screen_width() - width) / 2.0)),
+                x: Value::Relative(Box::new(move || {
+                    (window::screen_width()
+                        - text::measure_text(
+                            &format!("WPM: {}", wmp),
+                            None,
+                            *f1.borrow() as u16,
+                            1.0,
+                        )
+                        .width)
+                        / 2.0
+                })),
                 y: Value::Relative(Box::new(move || {
+                    let TextDimensions {
+                        height, offset_y, ..
+                    } = text::measure_text(
+                        &format!("WPM: {}", wmp),
+                        None,
+                        *f2.borrow() as u16,
+                        1.0,
+                    );
                     (window::screen_height() - height + offset_y - *font_size.borrow()) / 2.0
                 })),
                 font_size: Rc::clone(&style.font_size),
@@ -42,7 +55,7 @@ impl Wpm {
 
     pub fn update(&self) {
         macroquad::text::draw_text(
-            &self.wmp,
+            &self.wpm,
             self.style.x.get(),
             self.style.y.get(),
             *self.style.font_size.borrow(),
