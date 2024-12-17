@@ -43,7 +43,6 @@ impl RestartButton {
                 height: Value::Relative(Box::new(move || {
                     text::measure_text("Restart", None, *f3.borrow() as u16, 1.0).height + 20.0
                 })),
-
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),

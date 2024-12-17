@@ -14,14 +14,13 @@ impl NextButton {
     pub fn new(style: &Style) -> NextButton {
         let text = "Next (n)".to_string();
 
-        let TextDimensions {
-            width,
-            height,
-            offset_y,
-        } = text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+        let TextDimensions { width, .. } =
+            text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
 
         let f1 = Rc::clone(&style.font_size);
         let f2 = Rc::clone(&style.font_size);
+        let f3 = Rc::clone(&style.font_size);
+        let f4 = Rc::clone(&style.font_size);
 
         NextButton {
             text: text.to_string(),
@@ -45,9 +44,12 @@ impl NextButton {
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                offset_y: Some(Value::Absolute(offset_y)),
-                width: Value::Absolute(width + 20.0),
-                height: Value::Absolute(height + 20.0),
+                width: Value::Relative(Box::new(move || {
+                    text::measure_text("Restart", None, *f3.borrow() as u16, 1.0).width + 20.0
+                })),
+                height: Value::Relative(Box::new(move || {
+                    text::measure_text("Restart", None, *f4.borrow() as u16, 1.0).height + 20.0
+                })),
                 ..Style::default()
             },
         }
