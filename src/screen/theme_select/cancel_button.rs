@@ -1,9 +1,6 @@
 use std::rc::Rc;
 
-use macroquad::{
-    text::{self, TextDimensions},
-    window,
-};
+use macroquad::{text, window};
 
 use crate::screen::Value;
 use crate::screen::{
