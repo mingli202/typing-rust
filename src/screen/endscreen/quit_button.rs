@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use macroquad::{text, window};
 
@@ -14,38 +14,40 @@ impl QuitButton {
     pub fn new(style: &Style) -> QuitButton {
         let text = "Quit (q)".to_string();
 
-        let font_size = Rc::clone(&style.font_size);
-        let f1 = Rc::clone(&style.font_size);
-        let f3 = Rc::clone(&style.font_size);
-        let f4 = Rc::clone(&style.font_size);
+        let font_size = Arc::clone(&style.font_size);
+        let f1 = Arc::clone(&style.font_size);
+        let f3 = Arc::clone(&style.font_size);
+        let f4 = Arc::clone(&style.font_size);
 
         QuitButton {
             text: text.to_string(),
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
-                    color: Rc::clone(&style.theme.text),
+                    color: Arc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
-                    (window::screen_width() + *f1.borrow()) / 2.0
+                    (window::screen_width() + *f1.lock().unwrap()) / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + *font_size.borrow()) / 2.0
+                    (window::screen_height() + *font_size.lock().unwrap()) / 2.0
                 })),
-                font_size: Rc::clone(&style.font_size),
+                font_size: Arc::clone(&style.font_size),
                 theme: Theme {
-                    bg: Rc::clone(&style.theme.bg),
-                    ghost: Rc::clone(&style.theme.ghost),
-                    text: Rc::clone(&style.theme.ghost),
-                    error: Rc::clone(&style.theme.error),
+                    bg: Arc::clone(&style.theme.bg),
+                    ghost: Arc::clone(&style.theme.ghost),
+                    text: Arc::clone(&style.theme.ghost),
+                    error: Arc::clone(&style.theme.error),
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
                 width: Value::Relative(Box::new(move || {
-                    text::measure_text("Next (n)", None, *f3.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text("Next (n)", None, *f3.lock().unwrap() as u16, 1.0).width
+                        + 20.0
                 })),
                 height: Value::Relative(Box::new(move || {
-                    text::measure_text("Next (n)", None, *f4.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text("Next (n)", None, *f4.lock().unwrap() as u16, 1.0).height
+                        + 20.0
                 })),
                 ..Style::default()
             },
