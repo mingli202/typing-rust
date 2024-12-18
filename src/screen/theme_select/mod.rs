@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use macroquad::input::{KeyCode, MouseButton};
 use macroquad::text::TextDimensions;
@@ -32,21 +32,21 @@ pub async fn run(scr: &mut Screen) -> State {
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() += 5.0;
+                    *scr.style.font_size.lock().unwrap() += 5.0;
                 }
                 KeyCode::Minus
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() -= 5.0;
+                    *scr.style.font_size.lock().unwrap() -= 5.0;
                 }
                 KeyCode::Key0
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                    *scr.style.font_size.lock().unwrap() = scr.config.font_size;
                 }
                 KeyCode::Tab => {
                     if input::is_key_down(KeyCode::LeftShift)
@@ -83,7 +83,7 @@ pub async fn run(scr: &mut Screen) -> State {
             }
         }
 
-        window::clear_background(*scr.style.theme.bg.borrow());
+        window::clear_background(*scr.style.theme.bg.lock().unwrap());
 
         let mut x = 0.25 * window::screen_width();
         let mut y = 0.24 * window::screen_height();
@@ -92,12 +92,12 @@ pub async fn run(scr: &mut Screen) -> State {
             let TextDimensions { width, .. } = text::measure_text(
                 &button.text,
                 None,
-                *button.style.font_size.borrow() as u16,
+                *button.style.font_size.lock().unwrap() as u16,
                 1.0,
             );
 
             if x + width > 0.75 * window::screen_width() {
-                y += *button.style.font_size.borrow() + 30.0;
+                y += *button.style.font_size.lock().unwrap() + 30.0;
                 x = 0.25 * window::screen_width();
             }
 
@@ -108,12 +108,12 @@ pub async fn run(scr: &mut Screen) -> State {
                 focus = i as i32;
                 *button.style.border.as_mut().unwrap() = BorderParams {
                     size: 2.0,
-                    color: Rc::clone(&button.style.theme.text),
+                    color: Arc::clone(&button.style.theme.text),
                 }
             } else {
                 *button.style.border.as_mut().unwrap() = BorderParams {
                     size: 2.0,
-                    color: Rc::clone(&button.style.theme.ghost),
+                    color: Arc::clone(&button.style.theme.ghost),
                 }
             }
 
