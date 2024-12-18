@@ -1,6 +1,5 @@
 use macroquad::{color::Color, shapes, window};
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 use crate::screen::theme::Theme;
 
@@ -8,7 +7,7 @@ use super::Value;
 
 pub struct BorderParams {
     pub size: f32,
-    pub color: Rc<RefCell<Color>>,
+    pub color: Arc<Mutex<Color>>,
 }
 
 pub struct Style {
@@ -16,7 +15,7 @@ pub struct Style {
     pub y: Value<f32>,
     pub width: Value<f32>,
     pub height: Value<f32>,
-    pub font_size: Rc<RefCell<f32>>,
+    pub font_size: Arc<Mutex<f32>>,
     pub theme: Theme,
     pub border: Option<BorderParams>,
     pub clip: bool,
@@ -33,7 +32,7 @@ impl Default for Style {
             y: Value::Absolute(0.0),
             width: Value::Absolute(0.0),
             height: Value::Absolute(0.0),
-            font_size: Rc::new(RefCell::new(0.0)),
+            font_size: Arc::new(Mutex::new(0.0)),
             theme: Theme::default(),
             border: None,
             clip: false,
@@ -54,7 +53,7 @@ impl Style {
                 self.width.get(),
                 self.height.get(),
                 border.size,
-                *border.color.borrow(),
+                *border.color.lock().unwrap(),
             );
         }
     }
@@ -65,7 +64,7 @@ impl Style {
             self.y.get(),
             self.width.get(),
             self.height.get(),
-            *self.theme.bg.borrow(),
+            *self.theme.bg.lock().unwrap(),
         );
     }
 
@@ -86,7 +85,7 @@ impl Style {
                 _ => 0.0,
             };
 
-            let color = *theme.bg.borrow();
+            let color = *theme.bg.lock().unwrap();
 
             // top
             shapes::draw_rectangle(x.get(), 0.0, width.get(), y.get() + p_y, color);
