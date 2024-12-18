@@ -12,7 +12,6 @@ pub struct Wpm {
 
 impl Wpm {
     pub fn new(style: &Style, wmp: u16) -> Wpm {
-        let font_size = Arc::clone(&style.font_size);
         let f1 = Arc::clone(&style.font_size);
         let f2 = Arc::clone(&style.font_size);
 
@@ -20,26 +19,17 @@ impl Wpm {
             wpm: format!("WPM: {}", wmp),
             style: Style {
                 x: Value::Relative(Box::new(move || {
+                    let f = *f1.lock().unwrap();
                     (window::screen_width()
-                        - text::measure_text(
-                            &format!("WPM: {}", wmp),
-                            None,
-                            *f1.lock().unwrap() as u16,
-                            1.0,
-                        )
-                        .width)
+                        - text::measure_text(&format!("WPM: {}", wmp), None, f as u16, 1.0).width)
                         / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
+                    let f = *f2.lock().unwrap();
                     let TextDimensions {
                         height, offset_y, ..
-                    } = text::measure_text(
-                        &format!("WPM: {}", wmp),
-                        None,
-                        *f2.lock().unwrap() as u16,
-                        1.0,
-                    );
-                    (window::screen_height() - height + offset_y - *font_size.lock().unwrap()) / 2.0
+                    } = text::measure_text(&format!("WPM: {}", wmp), None, f as u16, 1.0);
+                    (window::screen_height() - height + offset_y - f) / 2.0
                 })),
                 font_size: Arc::clone(&style.font_size),
                 theme: Theme {
@@ -54,12 +44,9 @@ impl Wpm {
     }
 
     pub fn update(&self) {
-        macroquad::text::draw_text(
-            &self.wpm,
-            self.style.x.get(),
-            self.style.y.get(),
-            *self.style.font_size.lock().unwrap(),
-            *self.style.theme.text.lock().unwrap(),
-        );
+        let f = *self.style.font_size.lock().unwrap();
+        let t = *self.style.theme.text.lock().unwrap();
+
+        macroquad::text::draw_text(&self.wpm, self.style.x.get(), self.style.y.get(), f, t);
     }
 }
