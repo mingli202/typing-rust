@@ -1,13 +1,12 @@
 use macroquad::color::Color;
 use serde::{Deserialize, Serialize};
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 pub struct Theme {
-    pub bg: Rc<RefCell<Color>>,
-    pub text: Rc<RefCell<Color>>,
-    pub error: Rc<RefCell<Color>>,
-    pub ghost: Rc<RefCell<Color>>,
+    pub bg: Arc<Mutex<Color>>,
+    pub text: Arc<Mutex<Color>>,
+    pub error: Arc<Mutex<Color>>,
+    pub ghost: Arc<Mutex<Color>>,
 }
 
 #[derive(PartialEq, Hash, Eq, Debug, Clone, Serialize, Deserialize, Default)]
@@ -19,14 +18,15 @@ pub enum ThemeName {
     #[default]
     Gruvbox,
 }
-
+// TODO: add all themes from iterm themes
+// TODO: implement scrolling because there will be too many themes
 impl Theme {
     pub fn new() -> Self {
         Theme {
-            bg: Rc::new(RefCell::new(Color::new(0.0, 0.0, 0.0, 1.0))),
-            text: Rc::new(RefCell::new(Color::new(1.0, 1.0, 1.0, 1.0))),
-            error: Rc::new(RefCell::new(Color::new(1.0, 0.0, 0.0, 1.0))),
-            ghost: Rc::new(RefCell::new(Color::new(1.0, 1.0, 1.0, 0.5))),
+            bg: Arc::new(Mutex::new(Color::new(0.0, 0.0, 0.0, 1.0))),
+            text: Arc::new(Mutex::new(Color::new(1.0, 1.0, 1.0, 1.0))),
+            error: Arc::new(Mutex::new(Color::new(1.0, 0.0, 0.0, 1.0))),
+            ghost: Arc::new(Mutex::new(Color::new(1.0, 1.0, 1.0, 0.5))),
         }
     }
 
@@ -38,10 +38,10 @@ impl Theme {
             ThemeName::Tokyonight => (0x1a1b26, 0xc0caf5, 0xf7768e, 0x33467c),
         };
 
-        *self.bg.borrow_mut() = Color::from_hex(bg);
-        *self.text.borrow_mut() = Color::from_hex(text);
-        *self.error.borrow_mut() = Color::from_hex(error);
-        *self.ghost.borrow_mut() = Color::from_hex(ghost);
+        *self.bg.lock().unwrap() = Color::from_hex(bg);
+        *self.text.lock().unwrap() = Color::from_hex(text);
+        *self.error.lock().unwrap() = Color::from_hex(error);
+        *self.ghost.lock().unwrap() = Color::from_hex(ghost);
     }
 
     pub fn get_theme(theme_name: &ThemeName) -> Self {

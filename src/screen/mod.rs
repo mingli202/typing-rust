@@ -1,9 +1,8 @@
 use crate::data_provider::Data;
 use crate::Config;
 use macroquad::color::Color;
-use std::cell::RefCell;
 use std::error::Error;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 mod theme;
 
 mod style;
@@ -40,7 +39,7 @@ impl Screen {
             data,
             state: State::TypingTest,
             style: Style {
-                font_size: Rc::new(RefCell::new(config.font_size)),
+                font_size: Arc::new(Mutex::new(config.font_size)),
                 theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },
@@ -66,7 +65,7 @@ pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
 #[derive(Debug, Clone)]
 pub struct Letter {
     pub letter: char,
-    pub color: Rc<RefCell<Color>>,
+    pub color: Arc<Mutex<Color>>,
     pub id: usize,
 }
 
