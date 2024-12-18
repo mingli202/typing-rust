@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use macroquad::window;
 
@@ -10,22 +10,22 @@ pub struct Tracker {
 
 impl Tracker {
     pub fn new(style: &Style) -> Tracker {
-        let font_size = Rc::clone(&style.font_size);
+        let font_size = Arc::clone(&style.font_size);
 
         Tracker {
             style: Style {
                 x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - *font_size.borrow() * 3.0) / 2.0
-                        - *font_size.borrow()
+                    (window::screen_height() - *font_size.lock().unwrap() * 3.0) / 2.0
+                        - *font_size.lock().unwrap()
                 })),
                 theme: Theme {
-                    bg: Rc::clone(&style.theme.bg),
-                    ghost: Rc::clone(&style.theme.ghost),
-                    text: Rc::clone(&style.theme.ghost),
-                    error: Rc::clone(&style.theme.error),
+                    bg: Arc::clone(&style.theme.bg),
+                    ghost: Arc::clone(&style.theme.ghost),
+                    text: Arc::clone(&style.theme.ghost),
+                    error: Arc::clone(&style.theme.error),
                 },
-                font_size: Rc::clone(&style.font_size),
+                font_size: Arc::clone(&style.font_size),
                 ..Style::default()
             },
         }
