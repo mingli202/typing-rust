@@ -194,9 +194,10 @@ impl<'a> TextBox<'a> {
         let mut is_word_wrong = false;
 
         for letter in &self.state.letters {
-            if *letter.color.lock().unwrap() == *self.style.theme.error.lock().unwrap()
-                && !is_word_wrong
-            {
+            let letter_color = *letter.color.lock().unwrap();
+            let error_color = *self.style.theme.error.lock().unwrap();
+
+            if letter_color == error_color && !is_word_wrong {
                 wrongs += 1.0;
                 is_word_wrong = true;
             }
