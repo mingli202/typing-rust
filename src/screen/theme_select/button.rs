@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use macroquad::text;
 
@@ -16,9 +16,9 @@ impl Button {
     pub fn new(theme_name: ThemeName, style: &Style) -> Self {
         let theme = Theme::get_theme(&theme_name);
 
-        let f1 = Rc::clone(&style.font_size);
-        let f2 = Rc::clone(&style.font_size);
-        let f3 = Rc::clone(&style.font_size);
+        let f1 = Arc::clone(&style.font_size);
+        let f2 = Arc::clone(&style.font_size);
+        let f3 = Arc::clone(&style.font_size);
 
         let tn = theme_name.clone();
 
@@ -32,14 +32,14 @@ impl Button {
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
-                    color: Rc::clone(&theme.ghost),
+                    color: Arc::clone(&theme.ghost),
                 }),
                 theme,
                 width: Value::Relative(Box::new(move || {
                     text::measure_text(
                         format!("{:?}", tn).split("::").last().unwrap(),
                         None,
-                        *f2.borrow() as u16,
+                        *f2.lock().unwrap() as u16,
                         1.0,
                     )
                     .width
@@ -49,7 +49,7 @@ impl Button {
                     text::measure_text(
                         format!("{:?}", theme_name).split("::").last().unwrap(),
                         None,
-                        *f3.borrow() as u16,
+                        *f3.lock().unwrap() as u16,
                         1.0,
                     )
                     .height
