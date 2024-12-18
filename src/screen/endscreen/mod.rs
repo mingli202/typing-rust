@@ -32,21 +32,21 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() += 5.0;
+                    *scr.style.font_size.lock().unwrap() += 5.0;
                 }
                 KeyCode::Minus
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() -= 5.0;
+                    *scr.style.font_size.lock().unwrap() -= 5.0;
                 }
                 KeyCode::Key0
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                    *scr.style.font_size.lock().unwrap() = scr.config.font_size;
                 }
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
@@ -81,7 +81,7 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
             _ => (),
         }
 
-        window::clear_background(*scr.style.theme.bg.borrow());
+        window::clear_background(*scr.style.theme.bg.lock().unwrap());
 
         next_button.update();
         quit_button.update();
