@@ -1,7 +1,5 @@
 use std::cmp::Ordering;
-use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use std::thread;
 use std::time::Instant;
 
 use macroquad::window;
