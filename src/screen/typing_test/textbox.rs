@@ -57,10 +57,14 @@ impl<'a> TextBox<'a> {
                 },
                 x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - *f1.lock().unwrap() * 3.0) / 2.0
+                    let f1 = *f1.lock().unwrap();
+                    (window::screen_height() - f1 * 3.0) / 2.0
                 })),
                 width: Value::Relative(Box::new(|| window::screen_width() / 2.0)),
-                height: Value::Relative(Box::new(move || *f2.lock().unwrap() * 3.0)),
+                height: Value::Relative(Box::new(move || {
+                    let f2 = *f2.lock().unwrap();
+                    f2 * 3.0
+                })),
                 clip: true,
                 offset_y: None,
                 offset_x: None,

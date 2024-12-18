@@ -16,8 +16,8 @@ impl Tracker {
             style: Style {
                 x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() - *font_size.lock().unwrap() * 3.0) / 2.0
-                        - *font_size.lock().unwrap()
+                    let f = *font_size.lock().unwrap();
+                    (window::screen_height() - f * 3.0) / 2.0 - f
                 })),
                 theme: Theme {
                     bg: Arc::clone(&style.theme.bg),
