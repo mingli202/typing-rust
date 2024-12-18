@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use macroquad::text::{self, TextDimensions};
 use macroquad::window;
@@ -12,9 +12,9 @@ pub struct Wpm {
 
 impl Wpm {
     pub fn new(style: &Style, wmp: u16) -> Wpm {
-        let font_size = Rc::clone(&style.font_size);
-        let f1 = Rc::clone(&style.font_size);
-        let f2 = Rc::clone(&style.font_size);
+        let font_size = Arc::clone(&style.font_size);
+        let f1 = Arc::clone(&style.font_size);
+        let f2 = Arc::clone(&style.font_size);
 
         Wpm {
             wpm: format!("WPM: {}", wmp),
@@ -24,7 +24,7 @@ impl Wpm {
                         - text::measure_text(
                             &format!("WPM: {}", wmp),
                             None,
-                            *f1.borrow() as u16,
+                            *f1.lock().unwrap() as u16,
                             1.0,
                         )
                         .width)
@@ -36,17 +36,17 @@ impl Wpm {
                     } = text::measure_text(
                         &format!("WPM: {}", wmp),
                         None,
-                        *f2.borrow() as u16,
+                        *f2.lock().unwrap() as u16,
                         1.0,
                     );
-                    (window::screen_height() - height + offset_y - *font_size.borrow()) / 2.0
+                    (window::screen_height() - height + offset_y - *font_size.lock().unwrap()) / 2.0
                 })),
-                font_size: Rc::clone(&style.font_size),
+                font_size: Arc::clone(&style.font_size),
                 theme: Theme {
-                    bg: Rc::clone(&style.theme.bg),
-                    ghost: Rc::clone(&style.theme.ghost),
-                    text: Rc::clone(&style.theme.text),
-                    error: Rc::clone(&style.theme.error),
+                    bg: Arc::clone(&style.theme.bg),
+                    ghost: Arc::clone(&style.theme.ghost),
+                    text: Arc::clone(&style.theme.text),
+                    error: Arc::clone(&style.theme.error),
                 },
                 ..Style::default()
             },
@@ -58,8 +58,8 @@ impl Wpm {
             &self.wpm,
             self.style.x.get(),
             self.style.y.get(),
-            *self.style.font_size.borrow(),
-            *self.style.theme.text.borrow(),
+            *self.style.font_size.lock().unwrap(),
+            *self.style.theme.text.lock().unwrap(),
         );
     }
 }
