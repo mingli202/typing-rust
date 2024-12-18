@@ -116,7 +116,8 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
             _ => (),
         }
 
-        window::clear_background(*scr.style.theme.bg.lock().unwrap());
+        let bg = *scr.style.theme.bg.lock().unwrap();
+        window::clear_background(bg);
 
         typingbox.update();
         tracker.update(typingbox.state.index, typingbox.state.letters.len());
