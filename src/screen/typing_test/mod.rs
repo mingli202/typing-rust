@@ -35,21 +35,24 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.lock().unwrap() += 5.0;
+                    let mut font_size = scr.style.font_size.lock().unwrap();
+                    *font_size += 5.0;
                 }
                 KeyCode::Minus
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.lock().unwrap() -= 5.0;
+                    let mut font_size = scr.style.font_size.lock().unwrap();
+                    *font_size -= 5.0;
                 }
                 KeyCode::Key0
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.lock().unwrap() = scr.config.font_size;
+                    let mut font_size = scr.style.font_size.lock().unwrap();
+                    *font_size = scr.config.font_size;
                 }
                 KeyCode::Enter => {
                     input::clear_input_queue();
