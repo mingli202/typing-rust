@@ -36,20 +36,22 @@ impl Button {
                 }),
                 theme,
                 width: Value::Relative(Box::new(move || {
+                    let f = *f2.lock().unwrap();
                     text::measure_text(
                         format!("{:?}", tn).split("::").last().unwrap(),
                         None,
-                        *f2.lock().unwrap() as u16,
+                        f as u16,
                         1.0,
                     )
                     .width
                         + 20.0
                 })),
                 height: Value::Relative(Box::new(move || {
+                    let f = *f3.lock().unwrap();
                     text::measure_text(
                         format!("{:?}", theme_name).split("::").last().unwrap(),
                         None,
-                        *f3.lock().unwrap() as u16,
+                        f as u16,
                         1.0,
                     )
                     .height
