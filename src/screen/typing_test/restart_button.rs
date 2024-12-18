@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use macroquad::text::TextDimensions;
 use macroquad::{text, window};
@@ -17,38 +17,40 @@ impl RestartButton {
         let text = "Restart".to_string();
 
         let TextDimensions { width, .. } =
-            text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
+            text::measure_text(&text, None, *style.font_size.lock().unwrap() as u16, 1.0);
 
-        let font_size = Rc::clone(&style.font_size);
-        let f2 = Rc::clone(&style.font_size);
-        let f3 = Rc::clone(&style.font_size);
+        let font_size = Arc::clone(&style.font_size);
+        let f2 = Arc::clone(&style.font_size);
+        let f3 = Arc::clone(&style.font_size);
 
         RestartButton {
             text: "Restart".to_string(),
             style: Style {
                 border: Some(BorderParams {
                     size: 2.0,
-                    color: Rc::clone(&style.theme.text),
+                    color: Arc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
                     (window::screen_width() - width - 20.0) / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() + *font_size.borrow() * 3.0) / 2.0
-                        + *font_size.borrow()
+                    (window::screen_height() + *font_size.lock().unwrap() * 3.0) / 2.0
+                        + *font_size.lock().unwrap()
                 })),
                 width: Value::Relative(Box::new(move || {
-                    text::measure_text("Restart", None, *f2.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text("Restart", None, *f2.lock().unwrap() as u16, 1.0).width
+                        + 20.0
                 })),
                 height: Value::Relative(Box::new(move || {
-                    text::measure_text("Restart", None, *f3.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text("Restart", None, *f3.lock().unwrap() as u16, 1.0).height
+                        + 20.0
                 })),
-                font_size: Rc::clone(&style.font_size),
+                font_size: Arc::clone(&style.font_size),
                 theme: Theme {
-                    bg: Rc::clone(&style.theme.bg),
-                    ghost: Rc::clone(&style.theme.ghost),
-                    text: Rc::clone(&style.theme.ghost),
-                    error: Rc::clone(&style.theme.error),
+                    bg: Arc::clone(&style.theme.bg),
+                    ghost: Arc::clone(&style.theme.ghost),
+                    text: Arc::clone(&style.theme.ghost),
+                    error: Arc::clone(&style.theme.error),
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
