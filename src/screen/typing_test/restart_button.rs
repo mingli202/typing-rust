@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use macroquad::text::TextDimensions;
 use macroquad::{text, window};
 
 use crate::screen::{self, theme::Theme};
@@ -14,12 +13,8 @@ pub struct RestartButton {
 
 impl RestartButton {
     pub fn new(style: &Style) -> RestartButton {
-        let text = "Restart".to_string();
-
-        let TextDimensions { width, .. } =
-            text::measure_text(&text, None, *style.font_size.borrow() as u16, 1.0);
-
         let font_size = Rc::clone(&style.font_size);
+        let f1 = Rc::clone(&style.font_size);
         let f2 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
 
@@ -31,7 +26,10 @@ impl RestartButton {
                     color: Rc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
-                    (window::screen_width() - width - 20.0) / 2.0
+                    (window::screen_width()
+                        - text::measure_text("Restart", None, *f1.borrow() as u16, 1.0).width
+                        - 20.0)
+                        / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
                     (window::screen_height() + *font_size.borrow() * 3.0) / 2.0
