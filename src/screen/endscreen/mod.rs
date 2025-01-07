@@ -6,16 +6,19 @@ use macroquad::window;
 
 mod next_button;
 mod quit_button;
+mod restart_button;
 mod wpm;
 
 use super::focus::{EndscreenFocus::*, Focus};
 use super::{util, Screen, State};
 
-pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
+pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
+    input::show_mouse(true);
     let mut focus = Nothing;
 
     let next_button = next_button::NextButton::new(&scr.style);
     let quit_button = quit_button::QuitButton::new(&scr.style);
+    let restart_button = restart_button::RestartButton::new(&scr.style);
     let wpm = wpm::Wpm::new(&scr.style, *wpm);
 
     loop {
@@ -23,7 +26,11 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
             match k {
                 KeyCode::Tab => focus.next(),
                 KeyCode::Enter => match focus {
-                    NextButton => return State::TypingTest,
+                    NextButton => {
+                        *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                        return State::TypingTest;
+                    }
+                    RestartButton => return State::TypingTest,
                     QuitButton => process::exit(0),
                     _ => (),
                 },
@@ -52,6 +59,7 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
                             'n' => return State::TypingTest,
+                            'r' => return State::TypingTest,
                             'q' => process::exit(0),
                             _ => (),
                         }
@@ -62,7 +70,11 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
-                NextButton => return State::TypingTest,
+                NextButton => {
+                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                    return State::TypingTest;
+                }
+                RestartButton => return State::TypingTest,
                 QuitButton => process::exit(0),
                 _ => (),
             }
@@ -74,6 +86,8 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
                     NextButton
                 } else if util::is_hover(&quit_button.style) {
                     QuitButton
+                } else if util::is_hover(&restart_button.style) {
+                    RestartButton
                 } else {
                     Nothing
                 }
@@ -85,11 +99,13 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
 
         next_button.update();
         quit_button.update();
+        restart_button.update();
         wpm.update();
 
         match focus {
             QuitButton => quit_button.style.draw_border(),
             NextButton => next_button.style.draw_border(),
+            RestartButton => restart_button.style.draw_border(),
             _ => (),
         }
 

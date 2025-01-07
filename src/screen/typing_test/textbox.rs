@@ -23,10 +23,8 @@ pub struct TextBox<'a> {
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(style: &Style, data: &'a Data) -> TextBox<'a> {
+    pub fn new(style: &Style, text: String, data: &'a Data) -> TextBox<'a> {
         // TODO:remove clone
-        let text = data.get_random_quote().quote.clone();
-
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()
@@ -77,8 +75,7 @@ impl<'a> TextBox<'a> {
         }
     }
 
-    pub fn refresh(&mut self) {
-        let text = self.state.data.get_random_quote().quote.clone();
+    pub fn refresh(&mut self, text: String) {
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()

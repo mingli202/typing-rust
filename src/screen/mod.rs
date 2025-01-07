@@ -53,11 +53,12 @@ impl Screen {
 
 pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
     let mut wpm = 0;
+    let mut text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
 
     loop {
         scr.state = match scr.state {
-            State::TypingTest => typing_test::run(scr, &mut wpm).await,
-            State::EndScreen => endscreen::run(scr, &wpm).await,
+            State::TypingTest => typing_test::run(scr, &mut wpm, &mut text).await,
+            State::EndScreen => endscreen::run(scr, &wpm, &mut text).await,
             State::ThemeSelect => theme_select::run(scr).await,
         };
     }

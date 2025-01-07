@@ -5,6 +5,7 @@ use macroquad::window;
 use crate::screen::focus::{Focus, TypingTestFocus::*};
 use crate::screen::util;
 
+mod next_button;
 mod restart_button;
 mod textbox;
 mod theme_button;
@@ -12,14 +13,16 @@ mod tracker;
 
 use super::{Screen, State};
 
-pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
+pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
     input::clear_input_queue();
 
     let mut focus = Nothing;
 
-    let mut typingbox = textbox::TextBox::new(&scr.style, &scr.data);
+    // TODO: remove clone
+    let mut typingbox = textbox::TextBox::new(&scr.style, text.clone(), &scr.data);
     let tracker = tracker::Tracker::new(&scr.style);
-    let mut restart_button = restart_button::RestartButton::new(&scr.style);
+    let next_button = next_button::NextButton::new(&scr.style);
+    let restart_button = restart_button::RestartButton::new(&scr.style);
     let theme_button = theme_button::ThemeButton::new(&scr.style);
 
     loop {
@@ -54,8 +57,13 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                 KeyCode::Enter => {
                     input::clear_input_queue();
                     match focus {
+                        NextButton => {
+                            *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                            typingbox.refresh(text.to_string());
+                            focus = Nothing;
+                        }
                         RestartButton => {
-                            typingbox.refresh();
+                            typingbox.refresh(text.to_string());
                             focus = Nothing;
                         }
                         ThemeButton => {
@@ -89,8 +97,13 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
+                NextButton => {
+                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                    typingbox.refresh(text.to_string());
+                    focus = Nothing;
+                }
                 RestartButton => {
-                    typingbox.refresh();
+                    typingbox.refresh(text.to_string());
                     focus = Nothing;
                 }
                 ThemeButton => {
@@ -106,6 +119,8 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                     RestartButton
                 } else if util::is_hover(&theme_button.style) {
                     ThemeButton
+                } else if util::is_hover(&next_button.style) {
+                    NextButton
                 } else {
                     Nothing
                 }
@@ -123,6 +138,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
         );
 
         if focus != TypingBox {
+            next_button.update();
             restart_button.update();
             theme_button.update();
         }
@@ -130,6 +146,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
         match focus {
             ThemeButton => theme_button.style.draw_border(),
             RestartButton => restart_button.style.draw_border(),
+            NextButton => next_button.style.draw_border(),
             _ => (),
         }
 

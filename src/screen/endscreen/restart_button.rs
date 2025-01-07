@@ -4,24 +4,21 @@ use macroquad::{text, window};
 
 use crate::screen::{self, theme::Theme, BorderParams, Style, Value};
 
-pub struct QuitButton {
+pub struct RestartButton {
     pub style: Style,
     pub text: String,
 }
 
-impl QuitButton {
-    pub fn new(style: &Style) -> QuitButton {
-        let text = "Quit (q)".to_string();
-        let t = text.clone();
-        let t1 = text.clone();
-        let t2 = text.clone();
+impl RestartButton {
+    pub fn new(style: &Style) -> RestartButton {
+        let text = "Restart (r)".to_string();
 
         let font_size = Rc::clone(&style.font_size);
         let f1 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
         let f4 = Rc::clone(&style.font_size);
 
-        QuitButton {
+        RestartButton {
             text: text.to_string(),
             style: Style {
                 border: Some(BorderParams {
@@ -29,13 +26,10 @@ impl QuitButton {
                     color: Rc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
-                    (window::screen_width()
-                        - text::measure_text(&t, None, *f1.borrow() as u16, 1.0).width
-                        - 20.0)
-                        / 2.0
+                    (window::screen_width() + *f1.borrow()) / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
-                    (window::screen_height() / 2.0) + 2.0 * *font_size.borrow()
+                    (window::screen_height() + *font_size.borrow()) / 2.0
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
@@ -47,10 +41,10 @@ impl QuitButton {
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
                 width: Value::Relative(Box::new(move || {
-                    text::measure_text(&t1, None, *f3.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text("Restart (r)", None, *f3.borrow() as u16, 1.0).width + 20.0
                 })),
                 height: Value::Relative(Box::new(move || {
-                    text::measure_text(&t2, None, *f4.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text("Restart (r)", None, *f4.borrow() as u16, 1.0).height + 20.0
                 })),
                 ..Style::default()
             },

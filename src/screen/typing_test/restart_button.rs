@@ -26,10 +26,7 @@ impl RestartButton {
                     color: Rc::clone(&style.theme.text),
                 }),
                 x: Value::Relative(Box::new(move || {
-                    (window::screen_width()
-                        - text::measure_text("Restart", None, *f1.borrow() as u16, 1.0).width
-                        - 20.0)
-                        / 2.0
+                    window::screen_width() / 2.0 + *f1.borrow() / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
                     (window::screen_height() + *font_size.borrow() * 3.0) / 2.0
@@ -55,7 +52,7 @@ impl RestartButton {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&self) {
         screen::text::print_text(
             &self.style,
             &self.text,
