@@ -16,9 +16,9 @@ impl Focus for TypingTestFocus {
         match self {
             TypingTestFocus::Nothing => *self = TypingTestFocus::NextButton,
             TypingTestFocus::NextButton => *self = TypingTestFocus::RestartButton,
-            TypingTestFocus::TypingBox => *self = TypingTestFocus::RestartButton,
             TypingTestFocus::RestartButton => *self = TypingTestFocus::ThemeButton,
             TypingTestFocus::ThemeButton => *self = TypingTestFocus::NextButton,
+            TypingTestFocus::TypingBox => *self = TypingTestFocus::NextButton,
         }
     }
 }

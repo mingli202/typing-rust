@@ -62,6 +62,10 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
                             typingbox.refresh(text.to_string());
                             focus = Nothing;
                         }
+                        RestartButton => {
+                            typingbox.refresh(text.to_string());
+                            focus = Nothing;
+                        }
                         ThemeButton => {
                             return State::ThemeSelect;
                         }
@@ -95,6 +99,10 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
             match focus {
                 NextButton => {
                     *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                    typingbox.refresh(text.to_string());
+                    focus = Nothing;
+                }
+                RestartButton => {
                     typingbox.refresh(text.to_string());
                     focus = Nothing;
                 }
