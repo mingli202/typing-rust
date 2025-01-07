@@ -31,12 +31,18 @@ impl Tracker {
         }
     }
 
-    pub fn update(&self, index: usize, len: usize) {
+    pub fn update(&self, index: usize, len: usize, wpm: &u16) {
         text::print_text(
             &self.style,
             &format!("{}/{}", index, len),
             self.style.x.get(),
             self.style.y.get(),
+        );
+        text::print_text(
+            &self.style,
+            &format!("{}", wpm),
+            self.style.x.get(),
+            self.style.y.get() - *self.style.font_size.borrow(),
         );
     }
 }

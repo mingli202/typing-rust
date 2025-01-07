@@ -13,6 +13,8 @@ pub struct TextBoxState<'a> {
     pub time_started: Instant,
     pub started: bool,
     pub data: &'a Data,
+    pub incemental_wpm: Vec<u16>,
+    pub timer: Instant,
 }
 
 pub struct TextBox<'a> {
@@ -69,6 +71,8 @@ impl<'a> TextBox<'a> {
                 time_started: Instant::now(),
                 started: false,
                 data,
+                incemental_wpm: vec![],
+                timer: Instant::now(),
             },
         }
     }
@@ -88,6 +92,7 @@ impl<'a> TextBox<'a> {
         self.state.letters = letters;
         self.state.index = 0;
         self.state.started = false;
+        self.state.incemental_wpm = vec![];
 
         self.style.offset_y = None;
     }
@@ -148,12 +153,18 @@ impl<'a> TextBox<'a> {
         ));
     }
 
-    pub fn get_wpm(&self) -> u16 {
+    pub fn get_wpm(&self, end: Option<usize>) -> u16 {
+        // thread::sleep(Duration::from_secs(1));
+        let end = end.unwrap_or(self.state.letters.len());
+
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
+
         let mut wrongs = 0.0;
         let mut is_word_wrong = false;
 
-        for letter in &self.state.letters {
+        for i in 0..end {
+            let letter = &self.state.letters[i];
+
             if *letter.color.borrow() == *self.style.theme.error.borrow() && !is_word_wrong {
                 wrongs += 1.0;
                 is_word_wrong = true;
@@ -163,8 +174,21 @@ impl<'a> TextBox<'a> {
             }
         }
 
-        (1000 * 60 * (self.state.letters.len() as f32 / 5.0 - wrongs) as u128 / time_passed) as u16
+        (1000 * 60 * (end as f32 / 5.0 - wrongs) as u128 / time_passed) as u16
     }
+
+    pub fn get_incremental_wpm(&mut self) {
+        let t = self.state.timer.elapsed();
+        if !self.state.started || t.as_millis() < 500 {
+            return;
+        }
+        self.state.timer = Instant::now();
+
+        self.state
+            .incemental_wpm
+            .push(self.get_wpm(Some(self.state.index)));
+    }
+
     pub fn update(&mut self) {
         self.style.draw_bg();
 
@@ -177,6 +201,8 @@ impl<'a> TextBox<'a> {
         if self.state.index > 0 && !self.state.started {
             self.state.started = true;
             self.state.time_started = Instant::now();
+            self.state.timer = Instant::now();
         }
+        self.get_incremental_wpm();
     }
 }

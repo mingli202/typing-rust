@@ -71,7 +71,7 @@ pub struct Letter {
 }
 
 pub enum Value<T> {
-    Relative(Box<dyn Fn() -> T>),
+    Relative(Box<dyn Fn() -> T + 'static>),
     Absolute(T),
 }
 

@@ -73,7 +73,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                     if let Some(c) = input::get_char_pressed() {
                         focus = TypingBox;
                         if typingbox.on_type(c) {
-                            *wpm = typingbox.get_wpm();
+                            *wpm = typingbox.get_wpm(None);
                             return State::EndScreen;
                         }
                     }
@@ -116,7 +116,11 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
         window::clear_background(*scr.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(typingbox.state.index, typingbox.state.letters.len());
+        tracker.update(
+            typingbox.state.index,
+            typingbox.state.letters.len(),
+            typingbox.state.incemental_wpm.last().unwrap_or(&0),
+        );
 
         if focus != TypingBox {
             restart_button.update();

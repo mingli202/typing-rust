@@ -8,6 +8,7 @@ repository = "https://github.com/mingli202/typing-rust"
 authors = ["mingli202"]
 
 [dependencies]
+futures = "0.3.31"
 macroquad = "0.4.13"
 rand = "0.8.5"
 serde = { version = "1.0.216", features = ["derive"] }
