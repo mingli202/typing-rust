@@ -5,6 +5,7 @@ pub trait Focus {
 #[derive(PartialEq)]
 pub enum TypingTestFocus {
     RestartButton,
+    NextButton,
     ThemeButton,
     TypingBox,
     Nothing,
@@ -13,10 +14,11 @@ pub enum TypingTestFocus {
 impl Focus for TypingTestFocus {
     fn next(&mut self) {
         match self {
-            TypingTestFocus::Nothing => *self = TypingTestFocus::RestartButton,
+            TypingTestFocus::Nothing => *self = TypingTestFocus::NextButton,
+            TypingTestFocus::NextButton => *self = TypingTestFocus::RestartButton,
             TypingTestFocus::TypingBox => *self = TypingTestFocus::RestartButton,
             TypingTestFocus::RestartButton => *self = TypingTestFocus::ThemeButton,
-            TypingTestFocus::ThemeButton => *self = TypingTestFocus::RestartButton,
+            TypingTestFocus::ThemeButton => *self = TypingTestFocus::NextButton,
         }
     }
 }
