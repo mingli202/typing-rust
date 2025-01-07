@@ -12,12 +12,13 @@ mod tracker;
 
 use super::{Screen, State};
 
-pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
+pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
     input::clear_input_queue();
 
     let mut focus = Nothing;
 
-    let mut typingbox = textbox::TextBox::new(&scr.style, &scr.data);
+    // TODO: remove clone
+    let mut typingbox = textbox::TextBox::new(&scr.style, text.clone(), &scr.data);
     let tracker = tracker::Tracker::new(&scr.style);
     let mut restart_button = restart_button::RestartButton::new(&scr.style);
     let theme_button = theme_button::ThemeButton::new(&scr.style);
@@ -55,7 +56,8 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
                     input::clear_input_queue();
                     match focus {
                         RestartButton => {
-                            typingbox.refresh();
+                            *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                            typingbox.refresh(text.to_string());
                             focus = Nothing;
                         }
                         ThemeButton => {
@@ -90,7 +92,8 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16) -> State {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 RestartButton => {
-                    typingbox.refresh();
+                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                    typingbox.refresh(text.to_string());
                     focus = Nothing;
                 }
                 ThemeButton => {

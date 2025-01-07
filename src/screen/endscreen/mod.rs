@@ -12,7 +12,7 @@ mod wpm;
 use super::focus::{EndscreenFocus::*, Focus};
 use super::{util, Screen, State};
 
-pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
+pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
     input::show_mouse(true);
     let mut focus = Nothing;
 
@@ -26,7 +26,11 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
             match k {
                 KeyCode::Tab => focus.next(),
                 KeyCode::Enter => match focus {
-                    NextButton => return State::TypingTest,
+                    NextButton => {
+                        *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                        return State::TypingTest;
+                    }
+                    RestartButton => return State::TypingTest,
                     QuitButton => process::exit(0),
                     _ => (),
                 },
@@ -55,6 +59,7 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
                             'n' => return State::TypingTest,
+                            'r' => return State::TypingTest,
                             'q' => process::exit(0),
                             _ => (),
                         }
@@ -65,7 +70,11 @@ pub async fn run(scr: &mut Screen, wpm: &u16) -> State {
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
-                NextButton => return State::TypingTest,
+                NextButton => {
+                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                    return State::TypingTest;
+                }
+                RestartButton => return State::TypingTest,
                 QuitButton => process::exit(0),
                 _ => (),
             }
