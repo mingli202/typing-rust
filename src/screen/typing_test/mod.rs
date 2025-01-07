@@ -146,8 +146,6 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
             _ => (),
         }
 
-        util::draw_midpoint();
-
         window::next_frame().await;
     }
 }

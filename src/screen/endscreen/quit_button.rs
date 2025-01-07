@@ -30,7 +30,8 @@ impl QuitButton {
                 }),
                 x: Value::Relative(Box::new(move || {
                     (window::screen_width()
-                        - text::measure_text(&t, None, *f1.borrow() as u16, 1.0).width)
+                        - text::measure_text(&t, None, *f1.borrow() as u16, 1.0).width
+                        - 20.0)
                         / 2.0
                 })),
                 y: Value::Relative(Box::new(move || {
