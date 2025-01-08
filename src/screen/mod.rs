@@ -1,4 +1,4 @@
-use crate::data_provider::Data;
+use crate::data_provider::{Data, Quote};
 use crate::Config;
 use macroquad::color::Color;
 use std::cell::RefCell;
@@ -19,13 +19,6 @@ mod endscreen;
 mod focus;
 mod theme_select;
 mod typing_test;
-
-#[derive(Eq, Hash, PartialEq, Clone, Debug)]
-enum State {
-    TypingTest,
-    EndScreen,
-    ThemeSelect,
-}
 
 pub struct Screen {
     style: Style,
@@ -53,14 +46,83 @@ impl Screen {
 
 pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
     let mut wpm = 0;
-    let mut text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+
+    let quote = scr.data.get_random_quote();
+    let mut mode = Mode::from_quote(quote);
 
     loop {
         scr.state = match scr.state {
-            State::TypingTest => typing_test::run(scr, &mut wpm, &mut text).await,
+            State::TypingTest => typing_test::run(scr, &mut wpm, &mut mode).await,
             State::EndScreen => endscreen::run(scr, &wpm, &mut text).await,
             State::ThemeSelect => theme_select::run(scr).await,
         };
+    }
+}
+
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
+enum State {
+    TypingTest,
+    EndScreen,
+    ThemeSelect,
+}
+
+enum Mode<'a> {
+    Quote(&'a Quote),
+    Words(String),
+}
+
+impl<'a> Mode<'a> {
+    pub fn from_quote(quote: &'a Quote) -> Self {
+        Mode::Quote(quote)
+    }
+
+    pub fn from_words(words: Vec<&String>) -> Self {
+        Mode::Words(words.iter().fold(String::new(), |acc, s| acc + s))
+    }
+
+    pub fn get_text(&self) -> &str {
+        match self {
+            Mode::Words(words) => words,
+            Mode::Quote(quote) => &quote.quote,
+        }
+    }
+
+    pub fn next(&mut self, data: &'a Data) {
+        *self = match self {
+            Mode::Words(words) => Mode::from_words(data.get_n_random_words(words.len())),
+            Mode::Quote(_) => Mode::from_quote(data.get_random_quote()),
+        }
+    }
+}
+
+pub struct Word {
+    pub word: Vec<Letter>,
+    pub index: usize,
+    pub is_correct: bool,
+}
+
+impl Word {
+    pub fn new(word: Vec<Letter>, index: usize) -> Word {
+        Word {
+            word,
+            index,
+            is_correct: true,
+        }
+    }
+
+    pub fn from_str(word: &str, ghost: Rc<RefCell<Color>>, index: usize) -> Self {
+        Word {
+            word: word
+                .chars()
+                .map(|c| Letter {
+                    letter: c,
+                    color: Rc::clone(&ghost),
+                    id: 0,
+                })
+                .collect(),
+            is_correct: true,
+            index,
+        }
     }
 }
 
