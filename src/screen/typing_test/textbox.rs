@@ -23,8 +23,7 @@ pub struct TextBox<'a> {
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(style: &Style, text: String, data: &'a Data) -> TextBox<'a> {
-        // TODO:remove clone
+    pub fn new(style: &Style, text: &str, data: &'a Data) -> TextBox<'a> {
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()
@@ -75,7 +74,7 @@ impl<'a> TextBox<'a> {
         }
     }
 
-    pub fn refresh(&mut self, text: String) {
+    pub fn refresh(&mut self, text: &str) {
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()
