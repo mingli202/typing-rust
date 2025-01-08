@@ -22,7 +22,6 @@ mod typing_test;
 
 pub struct Screen {
     style: Style,
-    state: State,
     data: Data,
     config: Config,
 }
@@ -31,7 +30,6 @@ impl Screen {
     pub fn new(data: Data, config: Config) -> Self {
         Screen {
             data,
-            state: State::TypingTest,
             style: Style {
                 font_size: Rc::new(RefCell::new(config.font_size)),
                 theme: Theme::get_theme(&config.theme),
@@ -44,16 +42,19 @@ impl Screen {
     }
 }
 
+type ReturnType<'a> = (State, u16, Mode<'a>);
+
 pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
     let mut wpm = 0;
 
     let quote = scr.data.get_random_quote();
     let mut mode = Mode::from_quote(quote);
+    let mut state = State::TypingTest;
 
     loop {
-        scr.state = match scr.state {
-            State::TypingTest => typing_test::run(scr, &mut wpm, &mut mode).await,
-            State::EndScreen => endscreen::run(scr, &wpm, &mut text).await,
+        (state, wpm, mode) = match state {
+            State::TypingTest => typing_test::run(scr, wpm, mode).await,
+            State::EndScreen => endscreen::run(scr, wpm, mode).await,
             State::ThemeSelect => theme_select::run(scr).await,
         };
     }
