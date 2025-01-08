@@ -2,7 +2,10 @@ use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
-use crate::screen::focus::{Focus, TypingTestFocus::*};
+use crate::screen::focus::{
+    Focus,
+    TypingTestFocus::{self, *},
+};
 use crate::screen::util;
 
 mod next_button;
@@ -11,21 +14,23 @@ mod textbox;
 mod theme_button;
 mod tracker;
 
-use super::{Screen, State};
+use super::{Mode, Screen, State};
 
-pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
+pub async fn run<'a>(scr: &'a mut Screen, wpm: &mut u16, mode: &'a mut Mode<'a>) -> State {
     input::clear_input_queue();
 
+    let mut state = State::TypingTest;
     let mut focus = Nothing;
 
-    // TODO: remove clone
-    let mut typingbox = textbox::TextBox::new(&scr.style, text.clone(), &scr.data);
+    let mut typingbox = textbox::TextBox::new(&scr.style, mode.get_text(), &scr.data);
     let tracker = tracker::Tracker::new(&scr.style);
     let next_button = next_button::NextButton::new(&scr.style);
     let restart_button = restart_button::RestartButton::new(&scr.style);
     let theme_button = theme_button::ThemeButton::new(&scr.style);
 
-    loop {
+    let mut run = true;
+
+    while run {
         if let Some(k) = input::get_last_key_pressed() {
             match k {
                 KeyCode::Backspace => {
@@ -55,22 +60,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
                     *scr.style.font_size.borrow_mut() = scr.config.font_size;
                 }
                 KeyCode::Enter => {
-                    input::clear_input_queue();
-                    match focus {
-                        NextButton => {
-                            *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                            typingbox.refresh(text.to_string());
-                            focus = Nothing;
-                        }
-                        RestartButton => {
-                            typingbox.refresh(text.to_string());
-                            focus = Nothing;
-                        }
-                        ThemeButton => {
-                            return State::ThemeSelect;
-                        }
-                        _ => (),
-                    }
+                    handle_click(scr, &mut focus, mode, &mut state, &mut run, &mut typingbox)
                 }
                 KeyCode::Tab => {
                     input::clear_input_queue();
@@ -96,21 +86,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
         }
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
-            match focus {
-                NextButton => {
-                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                    typingbox.refresh(text.to_string());
-                    focus = Nothing;
-                }
-                RestartButton => {
-                    typingbox.refresh(text.to_string());
-                    focus = Nothing;
-                }
-                ThemeButton => {
-                    return State::ThemeSelect;
-                }
-                _ => (),
-            }
+            handle_click(scr, &mut focus, mode, &mut state, &mut run, &mut typingbox);
         }
 
         match input::mouse_delta_position() {
@@ -151,5 +127,34 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
         }
 
         window::next_frame().await;
+    }
+
+    state
+}
+
+fn handle_click<'a>(
+    scr: &'a Screen,
+    focus: &mut TypingTestFocus,
+    mode: &mut Mode<'a>,
+    state: &mut State,
+    run: &mut bool,
+    typingbox: &mut textbox::TextBox,
+) {
+    input::clear_input_queue();
+    match focus {
+        NextButton => {
+            mode.next(&scr.data);
+            typingbox.refresh(mode.get_text());
+            *focus = Nothing;
+        }
+        RestartButton => {
+            typingbox.refresh(mode.get_text());
+            *focus = Nothing;
+        }
+        ThemeButton => {
+            *state = State::ThemeSelect;
+            *run = false;
+        }
+        _ => (),
     }
 }
