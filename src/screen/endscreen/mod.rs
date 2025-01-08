@@ -9,31 +9,32 @@ mod quit_button;
 mod restart_button;
 mod wpm;
 
-use super::focus::{EndscreenFocus::*, Focus};
-use super::{util, Screen, State};
+use super::focus::{
+    EndscreenFocus::{self, *},
+    Focus,
+};
+use super::{util, Mode, ReturnType, Screen, State};
 
-pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
+pub async fn run<'a>(scr: &'a Screen, wpm: u16, mut mode: Mode<'a>) -> ReturnType<'a> {
     input::show_mouse(true);
+
+    let mut state = State::EndScreen;
+
     let mut focus = Nothing;
+    let mut run = true;
 
     let next_button = next_button::NextButton::new(&scr.style);
     let quit_button = quit_button::QuitButton::new(&scr.style);
     let restart_button = restart_button::RestartButton::new(&scr.style);
-    let wpm = wpm::Wpm::new(&scr.style, *wpm);
+    let wpm_indicator = wpm::Wpm::new(&scr.style, wpm);
 
-    loop {
+    while run {
         if let Some(k) = input::get_last_key_pressed() {
             match k {
                 KeyCode::Tab => focus.next(),
-                KeyCode::Enter => match focus {
-                    NextButton => {
-                        *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                        return State::TypingTest;
-                    }
-                    RestartButton => return State::TypingTest,
-                    QuitButton => process::exit(0),
-                    _ => (),
-                },
+                KeyCode::Enter => {
+                    handle_click(scr, &mut focus, &mut mode, &mut state, &mut run, ' ')
+                }
                 KeyCode::Equal
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
@@ -57,27 +58,14 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
                 }
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
-                        match c {
-                            'n' => return State::TypingTest,
-                            'r' => return State::TypingTest,
-                            'q' => process::exit(0),
-                            _ => (),
-                        }
+                        handle_click(scr, &mut focus, &mut mode, &mut state, &mut run, c);
                     }
                 }
             }
         }
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
-            match focus {
-                NextButton => {
-                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                    return State::TypingTest;
-                }
-                RestartButton => return State::TypingTest,
-                QuitButton => process::exit(0),
-                _ => (),
-            }
+            handle_click(scr, &mut focus, &mut mode, &mut state, &mut run, ' ');
         }
 
         match input::mouse_delta_position() {
@@ -100,7 +88,7 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
         next_button.update();
         quit_button.update();
         restart_button.update();
-        wpm.update();
+        wpm_indicator.update();
 
         match focus {
             QuitButton => quit_button.style.draw_border(),
@@ -111,4 +99,31 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
 
         window::next_frame().await;
     }
+
+    (state, wpm, mode)
+}
+
+fn handle_click<'a>(
+    scr: &'a Screen,
+    focus: &mut EndscreenFocus,
+    mode: &mut Mode<'a>,
+    state: &mut State,
+    run: &mut bool,
+    c: char,
+) {
+    input::clear_input_queue();
+
+    match (focus, c) {
+        (_, 'n') | (NextButton, _) => {
+            mode.next(&scr.data);
+            *state = State::TypingTest;
+            *run = false;
+        }
+        (_, 'r') | (RestartButton, _) => {
+            *state = State::TypingTest;
+            *run = false
+        }
+        (_, 'q') | (QuitButton, _) => process::exit(0),
+        _ => (),
+    };
 }

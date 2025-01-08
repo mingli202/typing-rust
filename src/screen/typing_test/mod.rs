@@ -14,9 +14,9 @@ mod textbox;
 mod theme_button;
 mod tracker;
 
-use super::{Mode, Screen, State};
+use super::{Mode, ReturnType, Screen, State};
 
-pub async fn run<'a>(scr: &'a mut Screen, wpm: &mut u16, mode: &'a mut Mode<'a>) -> State {
+pub async fn run<'a>(scr: &'a Screen, mut wpm: u16, mut mode: Mode<'a>) -> ReturnType<'a> {
     input::clear_input_queue();
 
     let mut state = State::TypingTest;
@@ -59,9 +59,14 @@ pub async fn run<'a>(scr: &'a mut Screen, wpm: &mut u16, mode: &'a mut Mode<'a>)
                     input::clear_input_queue();
                     *scr.style.font_size.borrow_mut() = scr.config.font_size;
                 }
-                KeyCode::Enter => {
-                    handle_click(scr, &mut focus, mode, &mut state, &mut run, &mut typingbox)
-                }
+                KeyCode::Enter => handle_click(
+                    scr,
+                    &mut focus,
+                    &mut mode,
+                    &mut state,
+                    &mut run,
+                    &mut typingbox,
+                ),
                 KeyCode::Tab => {
                     input::clear_input_queue();
                     focus.next();
@@ -71,8 +76,9 @@ pub async fn run<'a>(scr: &'a mut Screen, wpm: &mut u16, mode: &'a mut Mode<'a>)
                     if let Some(c) = input::get_char_pressed() {
                         focus = TypingBox;
                         if typingbox.on_type(c) {
-                            *wpm = typingbox.get_wpm(None);
-                            return State::EndScreen;
+                            wpm = typingbox.get_wpm(None);
+                            state = State::EndScreen;
+                            run = false;
                         }
                     }
                 }
@@ -86,7 +92,14 @@ pub async fn run<'a>(scr: &'a mut Screen, wpm: &mut u16, mode: &'a mut Mode<'a>)
         }
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
-            handle_click(scr, &mut focus, mode, &mut state, &mut run, &mut typingbox);
+            handle_click(
+                scr,
+                &mut focus,
+                &mut mode,
+                &mut state,
+                &mut run,
+                &mut typingbox,
+            );
         }
 
         match input::mouse_delta_position() {
@@ -129,7 +142,7 @@ pub async fn run<'a>(scr: &'a mut Screen, wpm: &mut u16, mode: &'a mut Mode<'a>)
         window::next_frame().await;
     }
 
-    state
+    (state, wpm, mode)
 }
 
 fn handle_click<'a>(
