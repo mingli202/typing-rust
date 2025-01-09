@@ -1,110 +1,74 @@
+use std::rc::Rc;
+
 use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
-use crate::screen::focus::{
-    Focus,
-    TypingTestFocus::{self, *},
-};
+use crate::screen::focus::{Focus, TypingTestFocus::*};
 use crate::screen::util;
 
 mod next_button;
 mod restart_button;
-mod textbox;
+pub mod textbox;
 mod theme_button;
 mod tracker;
 
-use super::{Mode, ReturnType, Screen, State};
+use super::state::{Action, State};
 
-pub async fn run<'a>(scr: &'a Screen, mut wpm: u16, mut mode: Mode<'a>) -> ReturnType<'a> {
+pub async fn run(state: &State) {
     input::clear_input_queue();
 
-    let mut state = State::TypingTest;
-    let mut focus = Nothing;
+    let mode = Rc::clone(&state.mode);
+    let focus = Rc::clone(&state.typingtest.focus);
 
-    let mut typingbox = textbox::TextBox::new(&scr.style, mode.get_text(), &scr.data);
-    let tracker = tracker::Tracker::new(&scr.style);
-    let next_button = next_button::NextButton::new(&scr.style);
-    let restart_button = restart_button::RestartButton::new(&scr.style);
-    let theme_button = theme_button::ThemeButton::new(&scr.style);
+    let mut typingbox = textbox::TextBox::new(&state.style, mode.borrow().get_text());
+    let tracker = tracker::Tracker::new(&state.style);
+    let next_button = next_button::NextButton::new(&state.style);
+    let restart_button = restart_button::RestartButton::new(&state.style);
+    let theme_button = theme_button::ThemeButton::new(&state.style);
 
-    let mut run = true;
-
-    while run {
+    loop {
         if let Some(k) = input::get_last_key_pressed() {
+            util::handle_resize(state);
+
             match k {
                 KeyCode::Backspace => {
                     input::clear_input_queue();
-                    focus = TypingBox;
+                    state.dispatch(Action::TypingTestFocusChange(TypingBox));
                     typingbox.delete_char();
                 }
-                KeyCode::Equal
-                    if (input::is_key_down(KeyCode::LeftSuper)
-                        || input::is_key_down(KeyCode::RightSuper)) =>
-                {
-                    input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() += 5.0;
-                }
-                KeyCode::Minus
-                    if (input::is_key_down(KeyCode::LeftSuper)
-                        || input::is_key_down(KeyCode::RightSuper)) =>
-                {
-                    input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() -= 5.0;
-                }
-                KeyCode::Key0
-                    if (input::is_key_down(KeyCode::LeftSuper)
-                        || input::is_key_down(KeyCode::RightSuper)) =>
-                {
-                    input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
-                }
-                KeyCode::Enter => handle_click(
-                    scr,
-                    &mut focus,
-                    &mut mode,
-                    &mut state,
-                    &mut run,
-                    &mut typingbox,
-                ),
+                KeyCode::Enter => state.dispatch(Action::TypingtestClick(&mut typingbox)),
                 KeyCode::Tab => {
                     input::clear_input_queue();
-                    focus.next();
+                    focus.borrow_mut().next();
                 }
                 // this passes the keytrokes to type
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
-                        focus = TypingBox;
+                        state.dispatch(Action::TypingTestFocusChange(TypingBox));
+
                         if typingbox.on_type(c) {
-                            wpm = typingbox.get_wpm(None);
-                            state = State::EndScreen;
-                            run = false;
+                            state.dispatch(Action::WpmChange(typingbox.get_wpm(None)));
+                            state.dispatch(Action::ScreenChange(super::state::Screen::EndScreen));
                         }
                     }
                 }
             }
         }
 
-        if focus == TypingBox {
+        if *focus.borrow() == TypingBox {
             input::show_mouse(false);
         } else {
             input::show_mouse(true);
         }
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
-            handle_click(
-                scr,
-                &mut focus,
-                &mut mode,
-                &mut state,
-                &mut run,
-                &mut typingbox,
-            );
+            state.dispatch(Action::TypingtestClick(&mut typingbox))
         }
 
         match input::mouse_delta_position() {
             Vec2 { x: dx, y: dy } if dx != 0.0 && dy != 0.0 => {
-                focus = if util::is_hover(&restart_button.style) {
+                let f = if util::is_hover(&restart_button.style) {
                     RestartButton
                 } else if util::is_hover(&theme_button.style) {
                     ThemeButton
@@ -112,12 +76,13 @@ pub async fn run<'a>(scr: &'a Screen, mut wpm: u16, mut mode: Mode<'a>) -> Retur
                     NextButton
                 } else {
                     Nothing
-                }
+                };
+                state.dispatch(Action::TypingTestFocusChange(f));
             }
             _ => (),
         }
 
-        window::clear_background(*scr.style.theme.bg.borrow());
+        window::clear_background(*state.style.theme.bg.borrow());
 
         typingbox.update();
         tracker.update(
@@ -126,13 +91,13 @@ pub async fn run<'a>(scr: &'a Screen, mut wpm: u16, mut mode: Mode<'a>) -> Retur
             typingbox.state.incemental_wpm.last().unwrap_or(&0),
         );
 
-        if focus != TypingBox {
+        if *focus.borrow() != TypingBox {
             next_button.update();
             restart_button.update();
             theme_button.update();
         }
 
-        match focus {
+        match *focus.borrow() {
             ThemeButton => theme_button.style.draw_border(),
             RestartButton => restart_button.style.draw_border(),
             NextButton => next_button.style.draw_border(),
@@ -140,34 +105,5 @@ pub async fn run<'a>(scr: &'a Screen, mut wpm: u16, mut mode: Mode<'a>) -> Retur
         }
 
         window::next_frame().await;
-    }
-
-    (state, wpm, mode)
-}
-
-fn handle_click<'a>(
-    scr: &'a Screen,
-    focus: &mut TypingTestFocus,
-    mode: &mut Mode<'a>,
-    state: &mut State,
-    run: &mut bool,
-    typingbox: &mut textbox::TextBox,
-) {
-    input::clear_input_queue();
-    match focus {
-        NextButton => {
-            mode.next(&scr.data);
-            typingbox.refresh(mode.get_text());
-            *focus = Nothing;
-        }
-        RestartButton => {
-            typingbox.refresh(mode.get_text());
-            *focus = Nothing;
-        }
-        ThemeButton => {
-            *state = State::ThemeSelect;
-            *run = false;
-        }
-        _ => (),
     }
 }
