@@ -4,26 +4,24 @@ use std::time::Instant;
 
 use macroquad::window;
 
-use crate::data_provider::Data;
 use crate::screen::{self, theme::Theme, BorderParams, Letter, Style, Value};
 
-pub struct TextBoxState<'a> {
+pub struct TextBoxState {
     pub letters: Vec<Letter>,
     pub index: usize,
     pub time_started: Instant,
     pub started: bool,
-    pub data: &'a Data,
     pub incemental_wpm: Vec<u16>,
     pub timer: Instant,
 }
 
-pub struct TextBox<'a> {
+pub struct TextBox {
     pub style: Style,
-    pub state: TextBoxState<'a>,
+    pub state: TextBoxState,
 }
 
-impl<'a> TextBox<'a> {
-    pub fn new(style: &Style, text: &str, data: &'a Data) -> TextBox<'a> {
+impl TextBox {
+    pub fn new(style: &Style, text: &str) -> TextBox {
         let letters: Vec<Letter> = text
             .chars()
             .enumerate()
@@ -67,7 +65,6 @@ impl<'a> TextBox<'a> {
                 index: 0,
                 time_started: Instant::now(),
                 started: false,
-                data,
                 incemental_wpm: vec![],
                 timer: Instant::now(),
             },

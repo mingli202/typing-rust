@@ -5,8 +5,7 @@ use typing_test::screen::{self, Screen};
 #[macroquad::main(window_conf)]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (data, config) = typing_test::parse_args(std::env::args())?;
-    let mut screen = Screen::new(data, config);
-    screen::main_loop(&mut screen).await?;
+    screen::main_loop(data, config).await?;
 
     Ok(())
 }

@@ -2,13 +2,13 @@ use rand::prelude::*;
 use std::error::Error;
 use std::fs;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Quote {
     pub source: String,
     pub quote: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Data {
     words: Vec<String>,
     quotes: Vec<Quote>,

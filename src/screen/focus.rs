@@ -2,12 +2,13 @@ pub trait Focus {
     fn next(&mut self);
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Default)]
 pub enum TypingTestFocus {
+    #[default]
+    TypingBox,
     RestartButton,
     NextButton,
     ThemeButton,
-    TypingBox,
     Nothing,
 }
 
