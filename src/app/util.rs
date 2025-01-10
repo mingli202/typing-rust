@@ -22,7 +22,7 @@ pub fn is_hover(style: &Style) -> bool {
     false
 }
 
-pub fn handle_resize(state: &State<AppState, AppAction>, config: &Config) -> Result<(), ()> {
+pub fn handle_resize(app_state: &State<AppState, AppAction>, config: &Config) -> Result<(), ()> {
     if let Some(k) = input::get_last_key_pressed() {
         let font_change = match k {
             KeyCode::Equal
@@ -47,7 +47,7 @@ pub fn handle_resize(state: &State<AppState, AppAction>, config: &Config) -> Res
         };
 
         input::clear_input_queue();
-        state.dispatch(AppAction::FontChange(font_change));
+        app_state.dispatch(AppAction::FontChange(font_change));
         Ok(())
     } else {
         Err(())

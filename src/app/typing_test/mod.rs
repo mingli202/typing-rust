@@ -19,11 +19,16 @@ use super::App;
 
 pub async fn run<'a>(app: &'a App<'a>) {
     input::clear_input_queue();
+
     let state = State::new(TypingtestState::default(), reducer);
+    let typing_test_state = state.sub();
 
     let style = &app.style;
+    let app_state = app.state.sub();
 
-    let typingbox = textbox::TextBox::new(style, app.state.get().mode.get_text());
+    let typingbox = textbox::TextBox::new(style, app_state.borrow().mode.get_text());
+    let typingbox_state = typingbox.state.sub();
+
     let tracker = tracker::Tracker::new(style);
     let next_button = next_button::NextButton::new(style);
     let restart_button = restart_button::RestartButton::new(style);
@@ -64,7 +69,7 @@ pub async fn run<'a>(app: &'a App<'a>) {
             }
         }
 
-        if state.get().focus == TypingTestFocus::TypingBox {
+        if typing_test_state.borrow().focus == TypingTestFocus::TypingBox {
             input::show_mouse(false);
         } else {
             input::show_mouse(true);
@@ -95,24 +100,26 @@ pub async fn run<'a>(app: &'a App<'a>) {
             _ => (),
         }
 
-        let _state = typingbox.state.get();
+        let index = typingbox_state.borrow().index;
+        let len = typingbox_state.borrow().letters.len();
+        let wpm = *typingbox_state
+            .borrow()
+            .incremental_wpm
+            .last()
+            .unwrap_or(&0);
 
         window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(
-            _state.index,
-            _state.letters.len(),
-            _state.incemental_wpm.last().unwrap_or(&0),
-        );
+        tracker.update(index, len, wpm);
 
-        if state.get().focus != TypingTestFocus::TypingBox {
+        if typing_test_state.borrow().focus != TypingTestFocus::TypingBox {
             next_button.update();
             restart_button.update();
             theme_button.update();
         }
 
-        match state.get().focus {
+        match typing_test_state.borrow().focus {
             TypingTestFocus::ThemeButton => theme_button.style.draw_border(),
             TypingTestFocus::RestartButton => restart_button.style.draw_border(),
             TypingTestFocus::NextButton => next_button.style.draw_border(),

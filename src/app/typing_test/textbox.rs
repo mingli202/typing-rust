@@ -51,8 +51,8 @@ impl TextBox {
     }
 
     pub fn on_type(&self, c: char) -> bool {
-        let state = self.state.get();
-        if state.index == state.letters.len() - 1 {
+        let state = self.state.sub();
+        if state.borrow().index == state.borrow().letters.len() - 1 {
             return true;
         }
 
@@ -66,7 +66,7 @@ impl TextBox {
     }
 
     pub fn delete_char(&self) {
-        if self.state.get().index == 0 {
+        if self.state.sub().borrow().index == 0 {
             return;
         }
 
@@ -78,7 +78,9 @@ impl TextBox {
     fn update_position(&self, line_breaks: &[usize]) {
         let mut left: i32 = 0;
         let mut right: i32 = line_breaks.len() as i32 - 1;
-        let index = self.state.get().index;
+
+        let state = self.state.sub();
+        let index = state.borrow().index;
 
         while left < right {
             let mid = (left + right) / 2;
@@ -100,23 +102,23 @@ impl TextBox {
         let font_size = *self.style.font_size.borrow();
         let scroll = -(left as f32 * font_size);
 
-        if scroll != self.state.get().scroll {
+        if scroll != state.borrow().scroll {
             self.state.dispatch(TextBoxAction::Scroll(scroll));
         }
     }
 
     pub fn get_wpm(&self, end: Option<usize>) -> u16 {
         // thread::sleep(Duration::from_secs(1));
-        let state = self.state.get();
-        let end = end.unwrap_or(state.letters.len());
+        let state = self.state.sub();
+        let end = end.unwrap_or(state.borrow().letters.len());
 
-        let time_passed: u128 = state.time_started.elapsed().as_millis();
+        let time_passed: u128 = state.borrow().time_started.elapsed().as_millis();
 
         let mut wrongs = 0.0;
         let mut is_word_wrong = false;
 
         for i in 0..end {
-            let letter = &state.letters[i];
+            let letter = &state.borrow().letters[i];
 
             if *letter.color.borrow() == *self.style.theme.error.borrow() && !is_word_wrong {
                 wrongs += 1.0;
@@ -131,33 +133,34 @@ impl TextBox {
     }
 
     pub fn get_incremental_wpm(&self) {
-        let state = self.state.get();
-        let t = state.timer.elapsed();
+        let state = self.state.sub();
+        let t = state.borrow().timer.elapsed();
 
-        if !state.started || t.as_millis() < 500 {
+        if !state.borrow().started || t.as_millis() < 500 {
             return;
         }
 
-        self.state
-            .dispatch(TextBoxAction::AddWmp(self.get_wpm(Some(state.index))));
+        self.state.dispatch(TextBoxAction::AddWmp(
+            self.get_wpm(Some(state.borrow().index)),
+        ));
     }
 
     pub fn update(&self) {
         self.style.draw_bg();
 
-        let state = self.state.get();
+        let state = self.state.sub();
 
         let line_breaks = app::text::print_letters_wrap(
             &self.style,
-            &state.letters,
-            state.index,
-            self.state.get().scroll,
+            &state.borrow().letters,
+            state.borrow().index,
+            state.borrow().scroll,
         );
         self.update_position(&line_breaks);
 
         self.style.draw_mask();
 
-        if state.index > 0 && !state.started {
+        if state.borrow().index > 0 && !state.borrow().started {
             self.state.dispatch(TextBoxAction::TimerStart);
         }
         self.get_incremental_wpm();

@@ -22,7 +22,11 @@ impl<StateType, ActionType> State<StateType, ActionType> {
         (self.reducer)(Rc::clone(&self.val), action);
     }
 
-    pub fn get(&self) -> Ref<'_, StateType> {
-        self.val.borrow()
+    //pub fn get(&self) -> Ref<'_, StateType> {
+    //    self.val.borrow()
+    //}
+
+    pub fn sub(&self) -> Rc<RefCell<StateType>> {
+        Rc::clone(&self.val)
     }
 }

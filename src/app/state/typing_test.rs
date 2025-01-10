@@ -32,6 +32,7 @@ pub enum TypingtestAction<'a, 'b> {
 pub enum TypingTestFocus {
     #[default]
     TypingBox,
+
     RestartButton,
     NextButton,
     ThemeButton,
@@ -57,8 +58,10 @@ pub fn reducer(state: Rc<RefCell<TypingtestState>>, action: TypingtestAction) {
             let focus = &state.borrow().focus;
             match focus {
                 NextButton => {
-                    let mode = &app_state.get().mode;
                     app_state.dispatch(AppAction::ModeNext(data));
+
+                    let app_state = &app_state.sub();
+                    let mode = &app_state.borrow().mode;
 
                     typingbox_state
                         .dispatch(TextBoxAction::Refresh(mode.get_text().to_string(), ghost));
@@ -66,7 +69,9 @@ pub fn reducer(state: Rc<RefCell<TypingtestState>>, action: TypingtestAction) {
                     state.borrow_mut().focus = Nothing;
                 }
                 RestartButton => {
-                    let mode = &app_state.get().mode;
+                    let app_state = &app_state.sub();
+                    let mode = &app_state.borrow().mode;
+
                     typingbox_state
                         .dispatch(TextBoxAction::Refresh(mode.get_text().to_string(), ghost));
 

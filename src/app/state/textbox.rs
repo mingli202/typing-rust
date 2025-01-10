@@ -10,7 +10,7 @@ pub struct TextBoxState {
     pub index: usize,
     pub time_started: Instant,
     pub started: bool,
-    pub incemental_wpm: Vec<u16>,
+    pub incremental_wpm: Vec<u16>,
     pub timer: Instant,
     pub scroll: f32,
 }
@@ -42,7 +42,7 @@ impl TextBoxState {
             index: 0,
             time_started: Instant::now(),
             started: false,
-            incemental_wpm: vec![],
+            incremental_wpm: vec![],
             timer: Instant::now(),
         }
     }
@@ -65,7 +65,7 @@ pub fn reducer(state: Rc<RefCell<TextBoxState>>, action: TextBoxAction) {
             state.letters = letters;
             state.index = 0;
             state.started = false;
-            state.incemental_wpm = vec![];
+            state.incremental_wpm = vec![];
 
             state.scroll = 0.0;
         }
@@ -87,9 +87,10 @@ pub fn reducer(state: Rc<RefCell<TextBoxState>>, action: TextBoxAction) {
                 }
             };
 
-            state.borrow_mut().letters[index] = updated_letter;
+            let mut state = state.borrow_mut();
+            state.letters[index] = updated_letter;
 
-            state.borrow_mut().index += 1;
+            state.index += 1;
         }
         TextBoxAction::DeleteChar(ghost) => {
             let mut state = state.borrow_mut();
@@ -105,7 +106,7 @@ pub fn reducer(state: Rc<RefCell<TextBoxState>>, action: TextBoxAction) {
         TextBoxAction::Scroll(scroll) => state.borrow_mut().scroll = scroll,
         TextBoxAction::AddWmp(wpm) => {
             let mut state = state.borrow_mut();
-            state.incemental_wpm.push(wpm);
+            state.incremental_wpm.push(wpm);
             state.timer = Instant::now();
         }
         TextBoxAction::TimerStart => {

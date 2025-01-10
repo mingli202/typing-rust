@@ -31,7 +31,7 @@ impl Tracker {
         }
     }
 
-    pub fn update(&self, index: usize, len: usize, wpm: &u16) {
+    pub fn update(&self, index: usize, len: usize, wpm: u16) {
         text::print_text(
             &self.style,
             &format!("{}/{}", index, len),
