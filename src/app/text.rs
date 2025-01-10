@@ -89,7 +89,12 @@ pub fn print_letters(style: &Style, letters: &[&Letter], x: f32, y: f32, cursor_
     }
 }
 
-pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize) -> Vec<usize> {
+pub fn print_letters_wrap(
+    style: &Style,
+    letters: &[Letter],
+    cursor_index: usize,
+    scroll: f32,
+) -> Vec<usize> {
     let mut line_breaks = vec![];
 
     let mut lines = 0.0;
@@ -131,7 +136,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
                 style,
                 &line,
                 style.x.get(),
-                style.y.get() + lines * *style.font_size.borrow(),
+                style.y.get() + lines * *style.font_size.borrow() + scroll,
                 cursor_index,
             );
             lines += 1.0;
@@ -151,7 +156,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
         style,
         &line,
         style.x.get(),
-        style.y.get() + lines * *style.font_size.borrow(),
+        style.y.get() + lines * *style.font_size.borrow() + scroll,
         cursor_index,
     );
 

@@ -1,57 +1,49 @@
+use crate::data_provider::{Data, Quote};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::data_provider::{Data, Quote};
-use crate::screen::style::Style;
-use crate::screen::theme::Theme;
-use crate::Config;
-
-pub struct ScreenState {
+pub struct AppState {
     pub mode: Mode,
     pub wpm: u16,
     pub screen: Screen,
-    pub style: Style,
-    pub data: Data,
-    pub config: Config,
+    pub font_size: f32,
 }
 
-impl ScreenState {
-    pub fn new(data: Data, config: Config) -> Self {
-        ScreenState {
+impl AppState {
+    pub fn new(data: &Data, font_size: f32) -> Self {
+        AppState {
             mode: Mode::from_quote(data.get_random_quote().clone()),
             wpm: 0,
-            style: Style {
-                font_size: Rc::new(RefCell::new(config.font_size)),
-                theme: Theme::get_theme(&config.theme),
-                ..Style::default()
-            },
-            config,
-            data,
             screen: Screen::TypingTest,
+            font_size,
         }
     }
 }
 
-pub enum ScreenAction {
+pub enum AppAction<'a> {
     FontChange(f32),
     ScreenChange(Screen),
     WpmChange(u16),
+    ModeChange(Mode),
+    ModeNext(&'a Data),
 }
 
-pub fn reducer(state: Rc<RefCell<ScreenState>>, action: ScreenAction) {
+pub fn reducer(state: Rc<RefCell<AppState>>, action: AppAction) {
     match action {
-        ScreenAction::WpmChange(n) => {
+        AppAction::WpmChange(n) => {
             let mut _state = state.borrow_mut();
             _state.wpm = n;
         }
-        ScreenAction::FontChange(f) => {
-            let _state = state.borrow_mut();
-            *_state.style.font_size.borrow_mut() = f;
+        AppAction::FontChange(f) => {
+            let mut _state = state.borrow_mut();
+            _state.font_size = f;
         }
-        ScreenAction::ScreenChange(s) => {
+        AppAction::ScreenChange(s) => {
             let mut _state = state.borrow_mut();
             _state.screen = s;
         }
+        AppAction::ModeChange(mode) => state.borrow_mut().mode = mode,
+        AppAction::ModeNext(data) => state.borrow_mut().mode.next(data),
     }
 }
 
@@ -59,7 +51,7 @@ pub fn reducer(state: Rc<RefCell<ScreenState>>, action: ScreenAction) {
 pub enum Screen {
     #[default]
     TypingTest,
-    EndScreen,
+    End,
     ThemeSelect,
 }
 

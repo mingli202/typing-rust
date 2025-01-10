@@ -1,19 +1,31 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use macroquad::color::Color;
+use macroquad::input;
+
 use self::TypingTestFocus::*;
-use crate::screen::typing_test::textbox::TextBox;
+use crate::app::focus::Focus;
+use crate::data_provider::Data;
 
-use super::screen::{Screen, ScreenState};
+use super::screen::{AppAction, AppState, Screen};
+use super::textbox::{TextBoxAction, TextBoxState};
+use super::State;
 
+#[derive(Default)]
 pub struct TypingtestState {
-    pub state_screen: Rc<RefCell<ScreenState>>,
     pub focus: TypingTestFocus,
 }
 
-pub enum TypingtestAction<'a> {
-    Click(&'a mut TextBox),
+pub enum TypingtestAction<'a, 'b> {
+    Click(
+        &'a State<TextBoxState, TextBoxAction>,
+        &'b State<AppState, AppAction<'b>>,
+        &'b Data,
+        Rc<RefCell<Color>>,
+    ),
     FocusChange(TypingTestFocus),
+    FocusNext,
 }
 
 #[derive(PartialEq, Default)]
@@ -40,31 +52,33 @@ impl Focus for TypingTestFocus {
 
 pub fn reducer(state: Rc<RefCell<TypingtestState>>, action: TypingtestAction) {
     match action {
-        TypingtestAction::Click(typingbox) => {
+        TypingtestAction::Click(typingbox_state, app_state, data, ghost) => {
             input::clear_input_queue();
-            let focus = state.borrow().focus;
+            let focus = &state.borrow().focus;
             match focus {
                 NextButton => {
-                    let data = state.borrow().state_screen.borrow().data;
-                    state.borrow().state_screen.borrow_mut().mode.next(&data);
+                    let mode = &app_state.get().mode;
+                    app_state.dispatch(AppAction::ModeNext(data));
 
-                    let mode = state.borrow().state_screen.borrow().mode;
-                    typingbox.refresh(mode.get_text());
+                    typingbox_state
+                        .dispatch(TextBoxAction::Refresh(mode.get_text().to_string(), ghost));
 
-                    state.borrow_mut().focus = Noting;
+                    state.borrow_mut().focus = Nothing;
                 }
                 RestartButton => {
-                    let mode = state.borrow().state_screen.borrow().mode;
-                    typingbox.refresh(mode.get_text());
+                    let mode = &app_state.get().mode;
+                    typingbox_state
+                        .dispatch(TextBoxAction::Refresh(mode.get_text().to_string(), ghost));
 
-                    state.borrow_mut().focus = Noting;
+                    state.borrow_mut().focus = Nothing;
                 }
                 ThemeButton => {
-                    *state.borrow().state_screen.borrow_mut().screen = Screen::ThemeSelect;
+                    app_state.dispatch(AppAction::ScreenChange(Screen::ThemeSelect));
                 }
                 _ => (),
             }
         }
         TypingtestAction::FocusChange(focus) => state.borrow_mut().focus = focus,
+        TypingtestAction::FocusNext => state.borrow_mut().focus.next(),
     }
 }

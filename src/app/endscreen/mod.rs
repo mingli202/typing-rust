@@ -15,6 +15,7 @@ use super::focus::{
 };
 use super::{util, Mode, ReturnType, Screen, State};
 
+// TODO: global state management
 pub async fn run<'a>(scr: &'a Screen, wpm: u16, mut mode: Mode<'a>) -> ReturnType<'a> {
     input::show_mouse(true);
 

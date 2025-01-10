@@ -2,7 +2,10 @@ use macroquad::color::Color;
 use macroquad::input::KeyCode;
 use macroquad::{input, shapes, window};
 
-use super::state::{Action, State};
+use crate::Config;
+
+use super::state::screen::{AppAction, AppState};
+use super::state::State;
 use super::Style;
 
 pub fn is_hover(style: &Style) -> bool {
@@ -19,7 +22,7 @@ pub fn is_hover(style: &Style) -> bool {
     false
 }
 
-pub fn handle_resize(state: &State) -> Result<(), ()> {
+pub fn handle_resize(state: &State<AppState, AppAction>, config: &Config) -> Result<(), ()> {
     if let Some(k) = input::get_last_key_pressed() {
         let font_change = match k {
             KeyCode::Equal
@@ -38,13 +41,13 @@ pub fn handle_resize(state: &State) -> Result<(), ()> {
                 if (input::is_key_down(KeyCode::LeftSuper)
                     || input::is_key_down(KeyCode::RightSuper)) =>
             {
-                state.config.font_size
+                config.font_size
             }
             _ => return Err(()),
         };
 
         input::clear_input_queue();
-        state.dispatch(Action::FontChange(font_change));
+        state.dispatch(AppAction::FontChange(font_change));
         Ok(())
     } else {
         Err(())

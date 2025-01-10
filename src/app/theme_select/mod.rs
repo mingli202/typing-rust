@@ -6,15 +6,17 @@ use macroquad::{input, text, window};
 
 use super::style::BorderParams;
 use super::theme::ThemeName::*;
-use super::{util, Screen, State, Value};
+use super::{util, Mode, ReturnType, Screen, State, Value};
 
 mod button;
 mod cancel_button;
 
-pub async fn run(scr: &mut Screen) -> State {
+pub async fn run<'a>(scr: &Screen, wpm: u16, mode: Mode<'a>) -> ReturnType<'a> {
     let current = scr.config.theme.clone();
 
     let mut focus = -1;
+    let mut run = true;
+    let mut state = State::ThemeSelect;
 
     let themes = [Atom, Catppuccin, Gruvbox, Tokyonight];
     let mut buttons = themes.map(|t| button::Button::new(t, &scr.style));
@@ -24,7 +26,7 @@ pub async fn run(scr: &mut Screen) -> State {
     // to deal with holding
     let mut is_mouse_held = true;
 
-    loop {
+    while run {
         if let Some(k) = input::get_last_key_pressed() {
             match k {
                 KeyCode::Equal
@@ -66,7 +68,8 @@ pub async fn run(scr: &mut Screen) -> State {
                 }
                 KeyCode::Escape => {
                     scr.style.theme.set(&current);
-                    return State::TypingTest;
+                    state = State::TypingTest;
+                    run = false;
                 }
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
@@ -76,7 +79,8 @@ pub async fn run(scr: &mut Screen) -> State {
                                 scr.config.theme = buttons[focus as usize].theme_name.clone();
                                 scr.config.update_file();
                             }
-                            return State::TypingTest;
+                            state = State::TypingTest;
+                            run = false;
                         }
                     }
                 }
@@ -146,10 +150,12 @@ pub async fn run(scr: &mut Screen) -> State {
                 if focus >= 0 && util::is_hover(&buttons[focus as usize].style) {
                     scr.config.theme = buttons[focus as usize].theme_name.clone();
                     scr.config.update_file();
-                    return State::TypingTest;
+                    state = State::TypingTest;
+                    run = false;
                 } else if focus != -2 {
                     scr.style.theme.set(&current);
-                    return State::TypingTest;
+                    state = State::TypingTest;
+                    run = false;
                 }
             }
             is_mouse_held = true;
@@ -157,4 +163,6 @@ pub async fn run(scr: &mut Screen) -> State {
             is_mouse_held = false;
         }
     }
+
+    (state, wpm, mode)
 }
