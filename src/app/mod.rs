@@ -54,7 +54,7 @@ pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
     loop {
         (state, wpm, mode) = match state {
             State::TypingTest => typing_test::run(scr, wpm, mode).await,
-            State::EndScreen => endscreen::run(scr, wpm, mode).await,
+            State::EndScreen => endapp::run(scr, wpm, mode).await,
             State::ThemeSelect => theme_select::run(scr).await,
         };
     }

@@ -4,8 +4,8 @@ use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
-use crate::screen::focus::{Focus, TypingTestFocus::*};
-use crate::screen::util;
+use crate::app::focus::{Focus, TypingTestFocus::*};
+use crate::app::util;
 
 mod next_button;
 mod restart_button;
@@ -49,7 +49,7 @@ pub async fn run(state: &State) {
 
                         if typingbox.on_type(c) {
                             state.dispatch(Action::WpmChange(typingbox.get_wpm(None)));
-                            state.dispatch(Action::ScreenChange(super::state::Screen::EndScreen));
+                            state.dispatch(Action::ScreenChange(super::state::app::EndScreen));
                         }
                     }
                 }

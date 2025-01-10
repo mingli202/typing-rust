@@ -1,6 +1,6 @@
 pub mod data_provider;
 pub mod screen;
-use self::screen::ThemeName;
+use self::app::ThemeName;
 use data_provider::Data;
 
 use serde::{Deserialize, Serialize};

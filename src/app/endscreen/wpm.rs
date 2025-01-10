@@ -3,7 +3,7 @@ use std::rc::Rc;
 use macroquad::text::{self, TextDimensions};
 use macroquad::window;
 
-use crate::screen::{theme::Theme, Style, Value};
+use crate::app::{theme::Theme, Style, Value};
 
 pub struct Wpm {
     pub wpm: String,

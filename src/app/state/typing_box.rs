@@ -2,9 +2,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use self::TypingTestFocus::*;
-use crate::screen::typing_test::textbox::TextBox;
+use crate::app::typing_test::textbox::TextBox;
 
-use super::screen::{Screen, ScreenState};
+use super::app::{Screen, ScreenState};
 
 pub struct TypingtestState {
     pub state_screen: Rc<RefCell<ScreenState>>,
@@ -60,7 +60,7 @@ pub fn reducer(state: Rc<RefCell<TypingtestState>>, action: TypingtestAction) {
                     state.borrow_mut().focus = Noting;
                 }
                 ThemeButton => {
-                    *state.borrow().state_screen.borrow_mut().screen = Screen::ThemeSelect;
+                    *state.borrow().state_screen.borrow_mut().screen = app::ThemeSelect;
                 }
                 _ => (),
             }

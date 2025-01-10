@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::app::style::Style;
+use crate::app::theme::Theme;
 use crate::data_provider::{Data, Quote};
-use crate::screen::style::Style;
-use crate::screen::theme::Theme;
 use crate::Config;
 
 pub struct ScreenState {
@@ -27,7 +27,7 @@ impl ScreenState {
             },
             config,
             data,
-            screen: Screen::TypingTest,
+            screen: app::TypingTest,
         }
     }
 }

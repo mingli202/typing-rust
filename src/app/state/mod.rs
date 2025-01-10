@@ -36,7 +36,7 @@ impl<T, A> State<T, A> {
 //            },
 //            config,
 //            data,
-//            screen: Rc::new(RefCell::new(Screen::TypingTest)),
+//            screen: Rc::new(RefCell::new(app::TypingTest)),
 //            typingtest: TypingtestState::default(),
 //        }
 //    }
@@ -61,7 +61,7 @@ impl<T, A> State<T, A> {
 //                        *self.typingtest.focus.borrow_mut() = Nothing;
 //                    }
 //                    ThemeButton => {
-//                        *self.screen.borrow_mut() = Screen::ThemeSelect;
+//                        *self.screen.borrow_mut() = app::ThemeSelect;
 //                    }
 //                    _ => (),
 //                }

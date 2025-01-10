@@ -1,11 +1,11 @@
 use macroquad::window::Conf;
 use std::error::Error;
-use typing_test::screen::{self, Screen};
+use typing_test::app::{self, Screen};
 
 #[macroquad::main(window_conf)]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (data, config) = typing_test::parse_args(std::env::args())?;
-    screen::main_loop(data, config).await?;
+    app::main_loop(data, config).await?;
 
     Ok(())
 }

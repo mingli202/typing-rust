@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use macroquad::window;
 
-use crate::screen::{text, theme::Theme, Style, Value};
+use crate::app::{text, theme::Theme, Style, Value};
 
 pub struct Tracker {
     style: Style,
