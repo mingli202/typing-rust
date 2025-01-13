@@ -58,7 +58,10 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
-                            'n' => return State::TypingTest,
+                            'n' => {
+                                *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+                                return State::TypingTest;
+                            }
                             'r' => return State::TypingTest,
                             'q' => process::exit(0),
                             _ => (),
