@@ -11,6 +11,10 @@ use style::{BorderParams, Style};
 
 use self::theme::Theme;
 pub use self::theme::ThemeName;
+use component::Component;
+
+mod component;
+mod state;
 
 mod text;
 mod util;
@@ -46,8 +50,6 @@ impl Screen {
             },
             config,
         }
-
-        // TODO: animation library use threads to mutate value over time (maybe)
     }
 }
 

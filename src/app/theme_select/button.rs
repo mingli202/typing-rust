@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 use macroquad::text;
 
-use crate::screen::style::{BorderParams, Style};
-use crate::screen::theme::{Theme, ThemeName};
-use crate::screen::{self, Value};
+use crate::app::style::{BorderParams, Style};
+use crate::app::theme::{Theme, ThemeName};
+use crate::app::{self, Value};
 
 pub struct Button {
     pub text: String,
@@ -66,7 +66,7 @@ impl Button {
     pub fn update(&self) {
         self.style.draw_bg();
         self.style.draw_border();
-        screen::text::print_text(
+        app::text::print_text(
             &self.style,
             &self.text,
             self.style.x.get(),

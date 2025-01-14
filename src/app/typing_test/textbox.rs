@@ -4,8 +4,8 @@ use std::time::Instant;
 
 use macroquad::window;
 
+use crate::app::{self, theme::Theme, BorderParams, Letter, Style, Value};
 use crate::data_provider::Data;
-use crate::screen::{self, theme::Theme, BorderParams, Letter, Style, Value};
 
 pub struct TextBoxState<'a> {
     pub letters: Vec<Letter>,
@@ -166,7 +166,7 @@ impl<'a> TextBox<'a> {
         self.style.draw_bg();
 
         let line_breaks =
-            screen::text::print_letters_wrap(&self.style, &self.state.letters, self.state.index);
+            app::text::print_letters_wrap(&self.style, &self.state.letters, self.state.index);
         self.update_position(&line_breaks);
 
         self.style.draw_mask();

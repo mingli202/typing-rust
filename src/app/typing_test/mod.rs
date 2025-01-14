@@ -2,8 +2,8 @@ use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
-use crate::screen::focus::{Focus, TypingTestFocus::*};
-use crate::screen::util;
+use crate::app::focus::{Focus, TypingTestFocus::*};
+use crate::app::util;
 
 mod next_button;
 mod restart_button;
