@@ -11,10 +11,6 @@ use style::{BorderParams, Style};
 
 use self::theme::Theme;
 pub use self::theme::ThemeName;
-use component::Component;
-
-mod component;
-mod state;
 
 mod text;
 mod util;
