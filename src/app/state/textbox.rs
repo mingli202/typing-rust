@@ -5,17 +5,17 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
 
-pub struct TextBoxState {
-    pub letters: Vec<Letter>,
-    pub index: usize,
-    pub time_started: Instant,
-    pub started: bool,
-    pub incremental_wpm: Vec<u16>,
-    pub timer: Instant,
-    pub scroll: f32,
+pub struct TypingState {
+    pub letters: Rc<RefCell<Vec<Letter>>>,
+    pub index: Rc<RefCell<usize>>,
+    pub time_started: Rc<RefCell<Instant>>,
+    pub started: Rc<RefCell<bool>>,
+    pub incremental_wpm: Rc<RefCell<Vec<u16>>>,
+    pub timer: Rc<RefCell<Instant>>,
+    pub scroll: Rc<RefCell<f32>>,
 }
 
-pub enum TextBoxAction {
+pub enum TypingAction {
     Refresh(String, Rc<RefCell<Color>>),
     TypeChar(char, Rc<RefCell<Color>>, Rc<RefCell<Color>>),
     DeleteChar(Rc<RefCell<Color>>),
@@ -24,7 +24,7 @@ pub enum TextBoxAction {
     TimerStart,
 }
 
-impl TextBoxState {
+impl TypingState {
     pub fn new(text: &str, ghost: Rc<RefCell<Color>>) -> Self {
         let letters: Vec<Letter> = text
             .chars()
@@ -36,21 +36,21 @@ impl TextBoxState {
             })
             .collect();
 
-        TextBoxState {
-            scroll: 0.0,
-            letters,
-            index: 0,
-            time_started: Instant::now(),
-            started: false,
-            incremental_wpm: vec![],
-            timer: Instant::now(),
+        TypingState {
+            scroll: Rc::new(RefCell::new(0.0)),
+            letters: Rc::new(RefCell::new(letters)),
+            index: Rc::new(RefCell::new(0)),
+            time_started: Rc::new(RefCell::new(Instant::now())),
+            started: Rc::new(RefCell::new(false)),
+            incremental_wpm: Rc::new(RefCell::new(vec![])),
+            timer: Rc::new(RefCell::new(Instant::now())),
         }
     }
 }
 
-pub fn reducer(state: Rc<RefCell<TextBoxState>>, action: TextBoxAction) {
+pub fn reducer(state: &TypingState, action: TypingAction) {
     match action {
-        TextBoxAction::Refresh(text, ghost) => {
+        TypingAction::Refresh(text, ghost) => {
             let letters: Vec<Letter> = text
                 .chars()
                 .enumerate()
@@ -61,59 +61,37 @@ pub fn reducer(state: Rc<RefCell<TextBoxState>>, action: TextBoxAction) {
                 })
                 .collect();
 
-            let mut state = state.borrow_mut();
-            state.letters = letters;
-            state.index = 0;
-            state.started = false;
-            state.incremental_wpm = vec![];
+            *state.letters.borrow_mut() = letters;
+            *state.index.borrow_mut() = 0;
+            *state.started.borrow_mut() = false;
+            *state.incremental_wpm.borrow_mut() = vec![];
 
-            state.scroll = 0.0;
+            *state.scroll.borrow_mut() = 0.0;
         }
-        TextBoxAction::TypeChar(c, text, error) => {
-            let letters = &state.borrow().letters;
-            let index = state.borrow().index;
+        TypingAction::TypeChar(c, text, error) => {
+            let index = *state.index.borrow();
+            let letter = state.letters.borrow()[index].letter;
 
-            let updated_letter = if c == letters[index].letter {
-                Letter {
-                    color: text,
-                    letter: letters[index].letter,
-                    id: letters[index].id,
-                }
-            } else {
-                Letter {
-                    color: error,
-                    letter: letters[index].letter,
-                    id: letters[index].id,
-                }
-            };
+            state.letters.borrow_mut()[index].color = if c == letter { text } else { error };
 
-            let mut state = state.borrow_mut();
-            state.letters[index] = updated_letter;
-
-            state.index += 1;
+            *state.index.borrow_mut() += 1;
         }
-        TextBoxAction::DeleteChar(ghost) => {
-            let mut state = state.borrow_mut();
-            state.index -= 1;
+        TypingAction::DeleteChar(ghost) => {
+            *state.index.borrow_mut() -= 1;
 
-            let index = state.index;
+            let index = *state.index.borrow();
 
-            state.letters[index] = Letter {
-                color: ghost,
-                ..state.letters[state.index]
-            };
+            state.letters.borrow_mut()[index].color = ghost;
         }
-        TextBoxAction::Scroll(scroll) => state.borrow_mut().scroll = scroll,
-        TextBoxAction::AddWmp(wpm) => {
-            let mut state = state.borrow_mut();
-            state.incremental_wpm.push(wpm);
-            state.timer = Instant::now();
+        TypingAction::Scroll(scroll) => *state.scroll.borrow_mut() = scroll,
+        TypingAction::AddWmp(wpm) => {
+            state.incremental_wpm.borrow_mut().push(wpm);
+            *state.timer.borrow_mut() = Instant::now();
         }
-        TextBoxAction::TimerStart => {
-            let mut state = state.borrow_mut();
-            state.started = true;
-            state.time_started = Instant::now();
-            state.timer = Instant::now();
+        TypingAction::TimerStart => {
+            *state.started.borrow_mut() = true;
+            *state.time_started.borrow_mut() = Instant::now();
+            *state.timer.borrow_mut() = Instant::now();
         }
     }
 }

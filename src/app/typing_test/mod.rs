@@ -13,6 +13,7 @@ mod theme_button;
 mod tracker;
 
 use super::state::screen::{AppAction, Screen};
+use super::state::textbox::TypingAction;
 use super::state::typing_test::*;
 use super::state::State;
 use super::App;
@@ -21,18 +22,44 @@ pub async fn run<'a>(app: &'a App<'a>) {
     input::clear_input_queue();
 
     let state = State::new(TypingtestState::default(), reducer);
-    let typing_test_state = state.sub();
 
     let style = &app.style;
-    let app_state = app.state.sub();
 
-    let typingbox = textbox::TextBox::new(style, app_state.borrow().mode.get_text());
-    let typingbox_state = typingbox.state.sub();
+    let typingbox = textbox::TextBox::new(style, app.state.get().mode.borrow().get_text());
 
     let tracker = tracker::Tracker::new(style);
     let next_button = next_button::NextButton::new(style);
     let restart_button = restart_button::RestartButton::new(style);
     let theme_button = theme_button::ThemeButton::new(style);
+
+    let click = || {
+        input::clear_input_queue();
+
+        let focus = state.get().focus.borrow();
+        match *focus {
+            TypingTestFocus::NextButton => {
+                app.state.dispatch(AppAction::ModeNext(&app.data));
+
+                typingbox.state.dispatch(TypingAction::Refresh(
+                    app.state.get().mode.borrow().get_text().to_string(),
+                    Rc::clone(&app.style.theme.ghost),
+                ));
+            }
+            TypingTestFocus::RestartButton => {
+                let mode = app.state.get().mode.borrow();
+
+                typingbox.state.dispatch(TypingAction::Refresh(
+                    mode.get_text().to_string(),
+                    Rc::clone(&app.style.theme.ghost),
+                ));
+            }
+            TypingTestFocus::ThemeButton => {
+                app.state
+                    .dispatch(AppAction::ScreenChange(Screen::ThemeSelect));
+            }
+            _ => (),
+        }
+    };
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -44,12 +71,7 @@ pub async fn run<'a>(app: &'a App<'a>) {
                     state.dispatch(TypingtestAction::FocusChange(TypingTestFocus::TypingBox));
                     typingbox.delete_char();
                 }
-                KeyCode::Enter => state.dispatch(TypingtestAction::Click(
-                    &typingbox.state,
-                    &app.state,
-                    &app.data,
-                    Rc::clone(&app.style.theme.ghost),
-                )),
+                KeyCode::Enter => click(),
                 KeyCode::Tab => {
                     input::clear_input_queue();
                     state.dispatch(TypingtestAction::FocusNext);
@@ -69,19 +91,14 @@ pub async fn run<'a>(app: &'a App<'a>) {
             }
         }
 
-        if typing_test_state.borrow().focus == TypingTestFocus::TypingBox {
+        if *state.get().focus.borrow() == TypingTestFocus::TypingBox {
             input::show_mouse(false);
         } else {
             input::show_mouse(true);
         }
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
-            state.dispatch(TypingtestAction::Click(
-                &typingbox.state,
-                &app.state,
-                &app.data,
-                Rc::clone(&app.style.theme.ghost),
-            ))
+            click();
         }
 
         match input::mouse_delta_position() {
@@ -100,11 +117,13 @@ pub async fn run<'a>(app: &'a App<'a>) {
             _ => (),
         }
 
-        let index = typingbox_state.borrow().index;
-        let len = typingbox_state.borrow().letters.len();
-        let wpm = *typingbox_state
-            .borrow()
+        let index = *typingbox.state.get().index.borrow();
+        let len = typingbox.state.get().letters.borrow().len();
+        let wpm = *typingbox
+            .state
+            .get()
             .incremental_wpm
+            .borrow()
             .last()
             .unwrap_or(&0);
 
@@ -113,13 +132,13 @@ pub async fn run<'a>(app: &'a App<'a>) {
         typingbox.update();
         tracker.update(index, len, wpm);
 
-        if typing_test_state.borrow().focus != TypingTestFocus::TypingBox {
+        if *state.get().focus.borrow() != TypingTestFocus::TypingBox {
             next_button.update();
             restart_button.update();
             theme_button.update();
         }
 
-        match typing_test_state.borrow().focus {
+        match *state.get().focus.borrow() {
             TypingTestFocus::ThemeButton => theme_button.style.draw_border(),
             TypingTestFocus::RestartButton => restart_button.style.draw_border(),
             TypingTestFocus::NextButton => next_button.style.draw_border(),

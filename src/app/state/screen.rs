@@ -3,19 +3,21 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub struct AppState {
-    pub mode: Mode,
-    pub wpm: u16,
-    pub screen: Screen,
-    pub font_size: f32,
+    pub mode: Rc<RefCell<Mode>>,
+    pub wpm: Rc<RefCell<u16>>,
+    pub screen: Rc<RefCell<Screen>>,
+    pub font_size: Rc<RefCell<f32>>,
 }
 
 impl AppState {
     pub fn new(data: &Data, font_size: f32) -> Self {
         AppState {
-            mode: Mode::from_quote(data.get_random_quote().clone()),
-            wpm: 0,
-            screen: Screen::TypingTest,
-            font_size,
+            mode: Rc::new(RefCell::new(Mode::from_quote(
+                data.get_random_quote().clone(),
+            ))),
+            wpm: Rc::new(RefCell::new(0)),
+            screen: Rc::new(RefCell::new(Screen::TypingTest)),
+            font_size: Rc::new(RefCell::new(font_size)),
         }
     }
 }
@@ -28,22 +30,19 @@ pub enum AppAction<'a> {
     ModeNext(&'a Data),
 }
 
-pub fn reducer(state: Rc<RefCell<AppState>>, action: AppAction) {
+pub fn reducer(state: &AppState, action: AppAction) {
     match action {
         AppAction::WpmChange(n) => {
-            let mut _state = state.borrow_mut();
-            _state.wpm = n;
+            *state.wpm.borrow_mut() = n;
         }
         AppAction::FontChange(f) => {
-            let mut _state = state.borrow_mut();
-            _state.font_size = f;
+            *state.font_size.borrow_mut() = f;
         }
         AppAction::ScreenChange(s) => {
-            let mut _state = state.borrow_mut();
-            _state.screen = s;
+            *state.screen.borrow_mut() = s;
         }
-        AppAction::ModeChange(mode) => state.borrow_mut().mode = mode,
-        AppAction::ModeNext(data) => state.borrow_mut().mode.next(data),
+        AppAction::ModeChange(mode) => *state.mode.borrow_mut() = mode,
+        AppAction::ModeNext(data) => (*state.mode.borrow_mut()).next(data),
     }
 }
 
