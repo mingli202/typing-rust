@@ -44,23 +44,35 @@ impl Default for AppState {
     fn default() -> Self {
         AppState {
             wpm: 0,
-            mode: Mode::Text("".to_string()),
+            mode: Mode::Words("".to_string()),
             screen: Screen::TypingTest,
         }
     }
 }
 
 pub enum Mode {
-    Text(String),
+    Words(String),
     Quote(Quote),
 }
 
 impl Mode {
     pub fn get(&self) -> String {
         match self {
-            Mode::Text(s) => s.to_string(),
+            Mode::Words(s) => s.to_string(),
             Mode::Quote(q) => q.quote.clone(),
         }
+    }
+
+    pub fn next(&mut self, data: Data) {
+        let new_mode = match self {
+            Mode::Words(s) => Mode::Words(
+                data.get_n_random_words(s.split(" ").count())
+                    .iter()
+                    .fold(String::new(), |acc, _s| acc + s),
+            ),
+            Mode::Quote(_) => Mode::Quote(data.get_random_quote().clone()),
+        };
+        *self = new_mode;
     }
 }
 
@@ -81,7 +93,7 @@ impl App {
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
         let text = self.data.get_random_quote().quote.clone();
 
-        self.state.mode = Mode::Text(text.clone());
+        self.state.mode = Mode::Words(text.clone());
 
         loop {
             match self.state.screen {
