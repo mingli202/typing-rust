@@ -47,8 +47,8 @@ impl<'a> App<'a> {
 
     pub async fn run(&'a self) {
         loop {
-            let screen = self.state.get().screen.borrow();
-            match *screen {
+            let screen = *self.state.get().screen.borrow();
+            match screen {
                 Screen::TypingTest => typing_test::run(self).await,
                 Screen::End => (),         //endscreen::run(&state).await,
                 Screen::ThemeSelect => (), // theme_select::run(&state).await,

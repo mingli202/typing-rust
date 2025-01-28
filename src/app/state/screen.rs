@@ -46,7 +46,7 @@ pub fn reducer(state: &AppState, action: AppAction) {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub enum Screen {
     #[default]
     TypingTest,
