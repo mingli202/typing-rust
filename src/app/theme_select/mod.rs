@@ -6,20 +6,20 @@ use macroquad::{input, text, window};
 
 use super::style::BorderParams;
 use super::theme::ThemeName::*;
-use super::{util, Screen, State, Value};
+use super::{util, App, Screen, Value};
 
 mod button;
 mod cancel_button;
 
-pub async fn run(scr: &mut Screen) -> State {
-    let current = scr.config.theme.clone();
+pub async fn run(app: &mut App) {
+    let current = app.config.theme.clone();
 
     let mut focus = -1;
 
     let themes = [Atom, Catppuccin, Gruvbox, Tokyonight];
-    let mut buttons = themes.map(|t| button::Button::new(t, &scr.style));
+    let mut buttons = themes.map(|t| button::Button::new(t, &app.style));
 
-    let cancel_button = cancel_button::CancelButton::new(&scr.style);
+    let cancel_button = cancel_button::CancelButton::new(&app.style);
 
     // to deal with holding
     let mut is_mouse_held = true;
@@ -32,21 +32,21 @@ pub async fn run(scr: &mut Screen) -> State {
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() += 5.0;
+                    *app.style.font_size.borrow_mut() += 5.0;
                 }
                 KeyCode::Minus
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() -= 5.0;
+                    *app.style.font_size.borrow_mut() -= 5.0;
                 }
                 KeyCode::Key0
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                    *app.style.font_size.borrow_mut() = app.config.font_size;
                 }
                 KeyCode::Tab => {
                     if input::is_key_down(KeyCode::LeftShift)
@@ -65,25 +65,27 @@ pub async fn run(scr: &mut Screen) -> State {
                     }
                 }
                 KeyCode::Escape => {
-                    scr.style.theme.set(&current);
-                    return State::TypingTest;
+                    app.style.theme.set(&current);
+                    app.state.screen = Screen::TypingTest;
+                    return;
                 }
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
                         // enter
                         if c == '\u{000d}' {
                             if focus >= 0 {
-                                scr.config.theme = buttons[focus as usize].theme_name.clone();
-                                scr.config.update_file();
+                                app.config.theme = buttons[focus as usize].theme_name.clone();
+                                app.config.update_file();
                             }
-                            return State::TypingTest;
+                            app.state.screen = Screen::TypingTest;
+                            return;
                         }
                     }
                 }
             }
         }
 
-        window::clear_background(*scr.style.theme.bg.borrow());
+        window::clear_background(*app.style.theme.bg.borrow());
 
         let mut x = 0.25 * window::screen_width();
         let mut y = 0.24 * window::screen_height();
@@ -126,7 +128,7 @@ pub async fn run(scr: &mut Screen) -> State {
         if util::is_hover(&cancel_button.style) || focus == -1 {
             focus = -1;
             cancel_button.style.draw_border();
-            scr.style.theme.set(&current);
+            app.style.theme.set(&current);
         }
 
         window::next_frame().await;
@@ -138,18 +140,20 @@ pub async fn run(scr: &mut Screen) -> State {
         }
 
         if focus >= 0 {
-            scr.style.theme.set(&buttons[focus as usize].theme_name);
+            app.style.theme.set(&buttons[focus as usize].theme_name);
         }
 
         if input::is_mouse_button_down(MouseButton::Left) {
             if !is_mouse_held {
                 if focus >= 0 && util::is_hover(&buttons[focus as usize].style) {
-                    scr.config.theme = buttons[focus as usize].theme_name.clone();
-                    scr.config.update_file();
-                    return State::TypingTest;
+                    app.config.theme = buttons[focus as usize].theme_name.clone();
+                    app.config.update_file();
+                    app.state.screen = Screen::TypingTest;
+                    return;
                 } else if focus != -2 {
-                    scr.style.theme.set(&current);
-                    return State::TypingTest;
+                    app.style.theme.set(&current);
+                    app.state.screen = Screen::TypingTest;
+                    return;
                 }
             }
             is_mouse_held = true;
