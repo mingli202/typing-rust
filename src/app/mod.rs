@@ -56,6 +56,14 @@ pub enum Mode {
 }
 
 impl Mode {
+    pub fn new(data: &Data) -> Self {
+        Mode::Words(
+            data.get_n_random_words(50)
+                .iter()
+                .fold(String::new(), |acc, _s| acc + _s),
+        )
+    }
+
     pub fn get(&self) -> String {
         match self {
             Mode::Words(s) => s.to_string(),
@@ -63,12 +71,12 @@ impl Mode {
         }
     }
 
-    pub fn next(&mut self, data: Data) {
+    pub fn next(&mut self, data: &Data) {
         let new_mode = match self {
             Mode::Words(s) => Mode::Words(
                 data.get_n_random_words(s.split(" ").count())
                     .iter()
-                    .fold(String::new(), |acc, _s| acc + s),
+                    .fold(String::new(), |acc, _s| acc + _s),
             ),
             Mode::Quote(_) => Mode::Quote(data.get_random_quote().clone()),
         };
@@ -91,9 +99,7 @@ impl App {
     }
 
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        let text = self.data.get_random_quote().quote.clone();
-
-        self.state.mode = Mode::Words(text.clone());
+        self.state.mode = Mode::new(&self.data);
 
         loop {
             match self.state.screen {
