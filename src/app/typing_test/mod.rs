@@ -13,7 +13,7 @@ mod theme_button;
 mod tracker;
 
 use super::state::screen::{AppAction, Screen};
-use super::state::textbox::TypingAction;
+use super::state::textbox::{TypingboxAction, TypingboxState};
 use super::state::typing_test::*;
 use super::state::State;
 use super::App;
@@ -32,35 +32,6 @@ pub async fn run<'a>(app: &'a App<'a>) {
     let restart_button = restart_button::RestartButton::new(style);
     let theme_button = theme_button::ThemeButton::new(style);
 
-    let click = || {
-        input::clear_input_queue();
-
-        let focus = state.get().focus.borrow();
-        match *focus {
-            TypingTestFocus::NextButton => {
-                app.state.dispatch(AppAction::ModeNext(&app.data));
-
-                typingbox.state.dispatch(TypingAction::Refresh(
-                    app.state.get().mode.borrow().get_text().to_string(),
-                    Rc::clone(&app.style.theme.ghost),
-                ));
-            }
-            TypingTestFocus::RestartButton => {
-                let mode = app.state.get().mode.borrow();
-
-                typingbox.state.dispatch(TypingAction::Refresh(
-                    mode.get_text().to_string(),
-                    Rc::clone(&app.style.theme.ghost),
-                ));
-            }
-            TypingTestFocus::ThemeButton => {
-                app.state
-                    .dispatch(AppAction::ScreenChange(Screen::ThemeSelect));
-            }
-            _ => (),
-        }
-    };
-
     loop {
         if let Some(k) = input::get_last_key_pressed() {
             let _ = util::handle_resize(&app.state, &app.config);
@@ -71,7 +42,7 @@ pub async fn run<'a>(app: &'a App<'a>) {
                     state.dispatch(TypingtestAction::FocusChange(TypingTestFocus::TypingBox));
                     typingbox.delete_char();
                 }
-                KeyCode::Enter => click(),
+                KeyCode::Enter => click(&state, app, &typingbox.state),
                 KeyCode::Tab => {
                     input::clear_input_queue();
                     state.dispatch(TypingtestAction::FocusNext);
@@ -84,6 +55,7 @@ pub async fn run<'a>(app: &'a App<'a>) {
                         if typingbox.on_type(c) {
                             app.state
                                 .dispatch(AppAction::WpmChange(typingbox.get_wpm(None)));
+
                             app.state.dispatch(AppAction::ScreenChange(Screen::End));
                         }
                     }
@@ -98,7 +70,7 @@ pub async fn run<'a>(app: &'a App<'a>) {
         }
 
         if input::is_mouse_button_pressed(MouseButton::Left) {
-            click();
+            click(&state, app, &typingbox.state)
         }
 
         match input::mouse_delta_position() {
@@ -146,5 +118,38 @@ pub async fn run<'a>(app: &'a App<'a>) {
         }
 
         window::next_frame().await;
+    }
+}
+
+fn click<'a>(
+    state: &State<TypingtestState, TypingtestAction>,
+    app: &'a App<'a>,
+    typingbox_state: &State<TypingboxState, TypingboxAction>,
+) {
+    input::clear_input_queue();
+
+    let focus = state.get().focus.borrow();
+    match *focus {
+        TypingTestFocus::NextButton => {
+            app.state.dispatch(AppAction::ModeNext(&app.data));
+
+            typingbox_state.dispatch(TypingboxAction::Refresh(
+                app.state.get().mode.borrow().get_text().to_string(),
+                Rc::clone(&app.style.theme.ghost),
+            ));
+        }
+        TypingTestFocus::RestartButton => {
+            let mode = app.state.get().mode.borrow();
+
+            typingbox_state.dispatch(TypingboxAction::Refresh(
+                mode.get_text().to_string(),
+                Rc::clone(&app.style.theme.ghost),
+            ));
+        }
+        TypingTestFocus::ThemeButton => {
+            app.state
+                .dispatch(AppAction::ScreenChange(Screen::ThemeSelect));
+        }
+        _ => (),
     }
 }
