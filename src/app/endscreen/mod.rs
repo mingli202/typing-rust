@@ -10,7 +10,7 @@ mod restart_button;
 mod wpm;
 
 use super::focus::{EndscreenFocus::*, Focus};
-use super::{util, App, Mode, Screen};
+use super::{util, App, Screen};
 
 pub async fn run(app: &mut App) {
     input::show_mouse(true);
@@ -27,8 +27,7 @@ pub async fn run(app: &mut App) {
                 KeyCode::Tab => focus.next(),
                 KeyCode::Enter => match focus {
                     NextButton => {
-                        let text = app.data.get_random_quote().quote.clone();
-                        app.state.mode = Mode::Text(text);
+                        app.state.mode.next(&app.data);
                         app.state.screen = Screen::TypingTest;
                         return;
                     }
@@ -64,8 +63,7 @@ pub async fn run(app: &mut App) {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
                             'n' => {
-                                let text = app.data.get_random_quote().quote.clone();
-                                app.state.mode = Mode::Text(text);
+                                app.state.mode.next(&app.data);
                                 app.state.screen = Screen::TypingTest;
                                 return;
                             }
@@ -84,8 +82,7 @@ pub async fn run(app: &mut App) {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 NextButton => {
-                    let text = app.data.get_random_quote().quote.clone();
-                    app.state.mode = Mode::Text(text);
+                    app.state.mode.next(&app.data);
                     app.state.screen = Screen::TypingTest;
                     return;
                 }

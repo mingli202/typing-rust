@@ -11,7 +11,7 @@ mod textbox;
 mod theme_button;
 mod tracker;
 
-use super::{App, Mode, Screen};
+use super::{App, Screen};
 
 pub async fn run(app: &mut App) {
     input::clear_input_queue();
@@ -57,9 +57,8 @@ pub async fn run(app: &mut App) {
                     input::clear_input_queue();
                     match focus {
                         NextButton => {
-                            let t = app.data.get_random_quote().quote.clone();
-                            app.state.mode = Mode::Text(t.clone());
-                            typingbox.refresh(t.to_string());
+                            app.state.mode.next(&app.data);
+                            typingbox.refresh(app.state.mode.get());
                         }
                         RestartButton => {
                             typingbox.refresh(app.state.mode.get());
@@ -100,7 +99,7 @@ pub async fn run(app: &mut App) {
                 NextButton => {
                     let t = app.data.get_random_quote().quote.clone();
 
-                    app.state.mode = Mode::Text(t.clone());
+                    app.state.mode.next(&app.data);
                     typingbox.refresh(t.to_string());
                 }
                 RestartButton => {
