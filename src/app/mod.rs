@@ -58,9 +58,11 @@ pub enum Mode {
 impl Mode {
     pub fn new(data: &Data) -> Self {
         Mode::Words(
-            data.get_n_random_words(50)
+            data.get_n_random_words(10)
                 .iter()
-                .fold(String::new(), |acc, _s| acc + _s),
+                .map(|s| &(*s)[..])
+                .collect::<Vec<&str>>()
+                .join(" "),
         )
     }
 
@@ -76,7 +78,9 @@ impl Mode {
             Mode::Words(s) => Mode::Words(
                 data.get_n_random_words(s.split(" ").count())
                     .iter()
-                    .fold(String::new(), |acc, _s| acc + _s),
+                    .map(|s| &(*s)[..])
+                    .collect::<Vec<&str>>()
+                    .join(" "),
             ),
             Mode::Quote(_) => Mode::Quote(data.get_random_quote().clone()),
         };
