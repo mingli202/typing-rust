@@ -18,7 +18,7 @@ pub async fn run(app: &mut App) {
 
     let mut focus = Nothing;
 
-    let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get().clone(), &app.data);
+    let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get().clone());
     let tracker = tracker::Tracker::new(&app.style);
     let next_button = next_button::NextButton::new(&app.style);
     let restart_button = restart_button::RestartButton::new(&app.style);
