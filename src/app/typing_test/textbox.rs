@@ -4,13 +4,13 @@ use std::rc::Rc;
 use macroquad::window;
 
 use crate::app;
-use crate::app::state::textbox::{reducer, TypingAction, TypingState};
+use crate::app::state::textbox::{reducer, TypingboxAction, TypingboxState};
 use crate::app::state::State;
 use crate::app::{theme::Theme, BorderParams, Style, Value};
 
 pub struct TextBox {
     pub style: Style,
-    pub state: State<TypingState, TypingAction>,
+    pub state: State<TypingboxState, TypingboxAction>,
 }
 
 impl TextBox {
@@ -44,7 +44,7 @@ impl TextBox {
                 padding_y: None,
             },
             state: State::new(
-                TypingState::new(text, Rc::clone(&style.theme.ghost)),
+                TypingboxState::new(text, Rc::clone(&style.theme.ghost)),
                 reducer,
             ),
         }
@@ -56,7 +56,7 @@ impl TextBox {
             return true;
         }
 
-        self.state.dispatch(TypingAction::TypeChar(
+        self.state.dispatch(TypingboxAction::TypeChar(
             c,
             Rc::clone(&self.style.theme.text),
             Rc::clone(&self.style.theme.error),
@@ -70,8 +70,9 @@ impl TextBox {
             return;
         }
 
-        self.state
-            .dispatch(TypingAction::DeleteChar(Rc::clone(&self.style.theme.ghost)));
+        self.state.dispatch(TypingboxAction::DeleteChar(Rc::clone(
+            &self.style.theme.ghost,
+        )));
     }
 
     fn update_position(&self, line_breaks: &[usize]) {
@@ -102,7 +103,7 @@ impl TextBox {
         let scroll = -(left as f32 * font_size);
 
         if scroll != *state.scroll.borrow() {
-            self.state.dispatch(TypingAction::Scroll(scroll));
+            self.state.dispatch(TypingboxAction::Scroll(scroll));
         }
     }
 
@@ -139,7 +140,7 @@ impl TextBox {
             return;
         }
 
-        self.state.dispatch(TypingAction::AddWmp(
+        self.state.dispatch(TypingboxAction::AddWmp(
             self.get_wpm(Some(*state.index.borrow())),
         ));
     }
@@ -160,7 +161,7 @@ impl TextBox {
         self.style.draw_mask();
 
         if *state.index.borrow() > 0 && !*state.started.borrow() {
-            self.state.dispatch(TypingAction::TimerStart);
+            self.state.dispatch(TypingboxAction::TimerStart);
         }
         self.get_incremental_wpm();
     }

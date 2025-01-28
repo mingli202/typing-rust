@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
 
-pub struct TypingState {
+pub struct TypingboxState {
     pub letters: Rc<RefCell<Vec<Letter>>>,
     pub index: Rc<RefCell<usize>>,
     pub time_started: Rc<RefCell<Instant>>,
@@ -15,7 +15,7 @@ pub struct TypingState {
     pub scroll: Rc<RefCell<f32>>,
 }
 
-pub enum TypingAction {
+pub enum TypingboxAction {
     Refresh(String, Rc<RefCell<Color>>),
     TypeChar(char, Rc<RefCell<Color>>, Rc<RefCell<Color>>),
     DeleteChar(Rc<RefCell<Color>>),
@@ -24,7 +24,7 @@ pub enum TypingAction {
     TimerStart,
 }
 
-impl TypingState {
+impl TypingboxState {
     pub fn new(text: &str, ghost: Rc<RefCell<Color>>) -> Self {
         let letters: Vec<Letter> = text
             .chars()
@@ -36,7 +36,7 @@ impl TypingState {
             })
             .collect();
 
-        TypingState {
+        TypingboxState {
             scroll: Rc::new(RefCell::new(0.0)),
             letters: Rc::new(RefCell::new(letters)),
             index: Rc::new(RefCell::new(0)),
@@ -48,9 +48,9 @@ impl TypingState {
     }
 }
 
-pub fn reducer(state: &TypingState, action: TypingAction) {
+pub fn reducer(state: &TypingboxState, action: TypingboxAction) {
     match action {
-        TypingAction::Refresh(text, ghost) => {
+        TypingboxAction::Refresh(text, ghost) => {
             let letters: Vec<Letter> = text
                 .chars()
                 .enumerate()
@@ -68,7 +68,7 @@ pub fn reducer(state: &TypingState, action: TypingAction) {
 
             *state.scroll.borrow_mut() = 0.0;
         }
-        TypingAction::TypeChar(c, text, error) => {
+        TypingboxAction::TypeChar(c, text, error) => {
             let index = *state.index.borrow();
             let letter = state.letters.borrow()[index].letter;
 
@@ -76,19 +76,19 @@ pub fn reducer(state: &TypingState, action: TypingAction) {
 
             *state.index.borrow_mut() += 1;
         }
-        TypingAction::DeleteChar(ghost) => {
+        TypingboxAction::DeleteChar(ghost) => {
             *state.index.borrow_mut() -= 1;
 
             let index = *state.index.borrow();
 
             state.letters.borrow_mut()[index].color = ghost;
         }
-        TypingAction::Scroll(scroll) => *state.scroll.borrow_mut() = scroll,
-        TypingAction::AddWmp(wpm) => {
+        TypingboxAction::Scroll(scroll) => *state.scroll.borrow_mut() = scroll,
+        TypingboxAction::AddWmp(wpm) => {
             state.incremental_wpm.borrow_mut().push(wpm);
             *state.timer.borrow_mut() = Instant::now();
         }
-        TypingAction::TimerStart => {
+        TypingboxAction::TimerStart => {
             *state.started.borrow_mut() = true;
             *state.time_started.borrow_mut() = Instant::now();
             *state.timer.borrow_mut() = Instant::now();
