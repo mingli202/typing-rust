@@ -10,16 +10,16 @@ mod restart_button;
 mod wpm;
 
 use super::focus::{EndscreenFocus::*, Focus};
-use super::{util, Screen, State};
+use super::{util, App, Mode, Screen};
 
-pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
+pub async fn run(app: &mut App) {
     input::show_mouse(true);
     let mut focus = Nothing;
 
-    let next_button = next_button::NextButton::new(&scr.style);
-    let quit_button = quit_button::QuitButton::new(&scr.style);
-    let restart_button = restart_button::RestartButton::new(&scr.style);
-    let wpm = wpm::Wpm::new(&scr.style, *wpm);
+    let next_button = next_button::NextButton::new(&app.style);
+    let quit_button = quit_button::QuitButton::new(&app.style);
+    let restart_button = restart_button::RestartButton::new(&app.style);
+    let wpm = wpm::Wpm::new(&app.style, app.state.wpm);
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -27,10 +27,15 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
                 KeyCode::Tab => focus.next(),
                 KeyCode::Enter => match focus {
                     NextButton => {
-                        *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                        return State::TypingTest;
+                        let text = app.data.get_random_quote().quote.clone();
+                        app.state.mode = Mode::Text(text);
+                        app.state.screen = Screen::TypingTest;
+                        return;
                     }
-                    RestartButton => return State::TypingTest,
+                    RestartButton => {
+                        app.state.screen = Screen::TypingTest;
+                        return;
+                    }
                     QuitButton => process::exit(0),
                     _ => (),
                 },
@@ -39,30 +44,35 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() += 5.0;
+                    *app.style.font_size.borrow_mut() += 5.0;
                 }
                 KeyCode::Minus
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() -= 5.0;
+                    *app.style.font_size.borrow_mut() -= 5.0;
                 }
                 KeyCode::Key0
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                    *app.style.font_size.borrow_mut() = app.config.font_size;
                 }
                 _ => {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
                             'n' => {
-                                *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                                return State::TypingTest;
+                                let text = app.data.get_random_quote().quote.clone();
+                                app.state.mode = Mode::Text(text);
+                                app.state.screen = Screen::TypingTest;
+                                return;
                             }
-                            'r' => return State::TypingTest,
+                            'r' => {
+                                app.state.screen = Screen::TypingTest;
+                                return;
+                            }
                             'q' => process::exit(0),
                             _ => (),
                         }
@@ -74,10 +84,15 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 NextButton => {
-                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                    return State::TypingTest;
+                    let text = app.data.get_random_quote().quote.clone();
+                    app.state.mode = Mode::Text(text);
+                    app.state.screen = Screen::TypingTest;
+                    return;
                 }
-                RestartButton => return State::TypingTest,
+                RestartButton => {
+                    app.state.screen = Screen::TypingTest;
+                    return;
+                }
                 QuitButton => process::exit(0),
                 _ => (),
             }
@@ -98,7 +113,7 @@ pub async fn run(scr: &mut Screen, wpm: &u16, text: &mut String) -> State {
             _ => (),
         }
 
-        window::clear_background(*scr.style.theme.bg.borrow());
+        window::clear_background(*app.style.theme.bg.borrow());
 
         next_button.update();
         quit_button.update();
