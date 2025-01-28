@@ -11,19 +11,18 @@ mod textbox;
 mod theme_button;
 mod tracker;
 
-use super::{Screen, State};
+use super::{App, Mode, Screen};
 
-pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
+pub async fn run(app: &mut App) {
     input::clear_input_queue();
 
     let mut focus = Nothing;
 
-    // TODO: remove clone
-    let mut typingbox = textbox::TextBox::new(&scr.style, text.clone(), &scr.data);
-    let tracker = tracker::Tracker::new(&scr.style);
-    let next_button = next_button::NextButton::new(&scr.style);
-    let restart_button = restart_button::RestartButton::new(&scr.style);
-    let theme_button = theme_button::ThemeButton::new(&scr.style);
+    let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get().clone(), &app.data);
+    let tracker = tracker::Tracker::new(&app.style);
+    let next_button = next_button::NextButton::new(&app.style);
+    let restart_button = restart_button::RestartButton::new(&app.style);
+    let theme_button = theme_button::ThemeButton::new(&app.style);
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -38,34 +37,36 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() += 5.0;
+                    *app.style.font_size.borrow_mut() += 5.0;
                 }
                 KeyCode::Minus
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() -= 5.0;
+                    *app.style.font_size.borrow_mut() -= 5.0;
                 }
                 KeyCode::Key0
                     if (input::is_key_down(KeyCode::LeftSuper)
                         || input::is_key_down(KeyCode::RightSuper)) =>
                 {
                     input::clear_input_queue();
-                    *scr.style.font_size.borrow_mut() = scr.config.font_size;
+                    *app.style.font_size.borrow_mut() = app.config.font_size;
                 }
                 KeyCode::Enter => {
                     input::clear_input_queue();
                     match focus {
                         NextButton => {
-                            *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                            typingbox.refresh(text.to_string());
+                            let t = app.data.get_random_quote().quote.clone();
+                            app.state.mode = Mode::Text(t.clone());
+                            typingbox.refresh(t.to_string());
                         }
                         RestartButton => {
-                            typingbox.refresh(text.to_string());
+                            typingbox.refresh(app.state.mode.get());
                         }
                         ThemeButton => {
-                            return State::ThemeSelect;
+                            app.state.screen = Screen::ThemeSelect;
+                            return;
                         }
                         _ => (),
                     }
@@ -79,8 +80,9 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
                     if let Some(c) = input::get_char_pressed() {
                         focus = TypingBox;
                         if typingbox.on_type(c) {
-                            *wpm = typingbox.get_wpm();
-                            return State::EndScreen;
+                            app.state.wpm = typingbox.get_wpm();
+                            app.state.screen = Screen::End;
+                            return;
                         }
                     }
                 }
@@ -96,14 +98,17 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 NextButton => {
-                    *text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
-                    typingbox.refresh(text.to_string());
+                    let t = app.data.get_random_quote().quote.clone();
+
+                    app.state.mode = Mode::Text(t.clone());
+                    typingbox.refresh(t.to_string());
                 }
                 RestartButton => {
-                    typingbox.refresh(text.to_string());
+                    typingbox.refresh(app.state.mode.get());
                 }
                 ThemeButton => {
-                    return State::ThemeSelect;
+                    app.state.screen = Screen::ThemeSelect;
+                    return;
                 }
                 _ => (),
             }
@@ -124,7 +129,7 @@ pub async fn run(scr: &mut Screen, wpm: &mut u16, text: &mut String) -> State {
             _ => (),
         }
 
-        window::clear_background(*scr.style.theme.bg.borrow());
+        window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
         tracker.update(typingbox.state.index, typingbox.state.letters.len());
