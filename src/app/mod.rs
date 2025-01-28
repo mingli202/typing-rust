@@ -1,4 +1,4 @@
-use crate::data_provider::Data;
+use crate::data_provider::{Data, Quote};
 use crate::Config;
 use macroquad::color::Color;
 use std::cell::RefCell;
@@ -21,44 +21,82 @@ mod theme_select;
 mod typing_test;
 
 #[derive(Eq, Hash, PartialEq, Clone, Debug)]
-enum State {
+enum Screen {
     TypingTest,
-    EndScreen,
+    End,
     ThemeSelect,
 }
 
-pub struct Screen {
+pub struct App {
     style: Style,
-    state: State,
+    screen: Screen,
     data: Data,
     config: Config,
+    state: AppState,
 }
 
-impl Screen {
+pub struct AppState {
+    //    wpm: Rc<RefCell<u16>>,
+    //   mode: Rc<RefCell<Mode>>,
+    wpm: u16,
+    mode: Mode,
+    screen: Screen,
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        AppState {
+            //wpm: Rc::new(RefCell::new(0)),
+            //mode: Rc::new(RefCell::new(Mode::Text("".to_string()))),
+            wpm: 0,
+            mode: Mode::Text("".to_string()),
+            screen: Screen::TypingTest,
+        }
+    }
+}
+
+pub enum Mode {
+    Text(String),
+    Quote(Quote),
+}
+
+impl Mode {
+    pub fn get(&self) -> String {
+        match self {
+            Mode::Text(s) => s.to_string(),
+            Mode::Quote(q) => q.quote.clone(),
+        }
+    }
+}
+
+impl App {
     pub fn new(data: Data, config: Config) -> Self {
-        Screen {
+        App {
             data,
-            state: State::TypingTest,
+            screen: Screen::TypingTest,
             style: Style {
                 font_size: Rc::new(RefCell::new(config.font_size)),
                 theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },
             config,
+            state: AppState::default(),
         }
     }
-}
 
-pub async fn main_loop(scr: &mut Screen) -> Result<(), Box<dyn Error>> {
-    let mut wpm = 0;
-    let mut text = scr.data.get_random_quote().quote.clone(); // TODO: remove clone
+    pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
+        let mut wpm = 0;
+        let mut text = self.data.get_random_quote().quote.clone();
 
-    loop {
-        scr.state = match scr.state {
-            State::TypingTest => typing_test::run(scr, &mut wpm, &mut text).await,
-            State::EndScreen => endscreen::run(scr, &wpm, &mut text).await,
-            State::ThemeSelect => theme_select::run(scr).await,
-        };
+        self.state.mode = Mode::Text(text.clone());
+
+        loop {
+            match self.state.screen {
+                Screen::TypingTest => typing_test::run(self).await,
+                Screen::End => endscreen::run(self, &wpm, &mut text).await,
+                Screen::ThemeSelect => theme_select::run(self).await,
+            };
+        }
     }
 }
 
