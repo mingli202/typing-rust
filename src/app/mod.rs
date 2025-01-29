@@ -44,44 +44,51 @@ impl Default for AppState {
     fn default() -> Self {
         AppState {
             wpm: 0,
-            mode: Mode::Words("".to_string()),
+            mode: Mode::Words {
+                n: 0,
+                s: "".to_string(),
+            },
             screen: Screen::TypingTest,
         }
     }
 }
 
 pub enum Mode {
-    Words(String),
+    Words { n: usize, s: String },
     Quote(Quote),
 }
 
 impl Mode {
     pub fn new(data: &Data) -> Self {
-        Mode::Words(
-            data.get_n_random_words(10)
+        Mode::Words {
+            s: data
+                .get_n_random_words(10)
                 .iter()
                 .map(|s| &(*s)[..])
                 .collect::<Vec<&str>>()
                 .join(" "),
-        )
+            n: 10,
+        }
     }
 
     pub fn get(&self) -> String {
         match self {
-            Mode::Words(s) => s.to_string(),
+            Mode::Words { s, .. } => s.to_string(),
             Mode::Quote(q) => q.quote.clone(),
         }
     }
 
     pub fn next(&mut self, data: &Data) {
         let new_mode = match self {
-            Mode::Words(s) => Mode::Words(
-                data.get_n_random_words(s.split(" ").count())
+            Mode::Words { n, .. } => Mode::Words {
+                s: data
+                    .get_n_random_words(*n)
                     .iter()
                     .map(|s| &(*s)[..])
                     .collect::<Vec<&str>>()
                     .join(" "),
-            ),
+                n: *n,
+            },
             Mode::Quote(_) => Mode::Quote(data.get_random_quote().clone()),
         };
         *self = new_mode;
