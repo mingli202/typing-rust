@@ -7,6 +7,7 @@ use macroquad::window;
 mod next_button;
 mod quit_button;
 mod restart_button;
+mod source;
 mod wpm;
 
 use super::focus::{EndscreenFocus::*, Focus};
@@ -20,6 +21,7 @@ pub async fn run(app: &mut App) {
     let quit_button = quit_button::QuitButton::new(&app.style);
     let restart_button = restart_button::RestartButton::new(&app.style);
     let wpm = wpm::Wpm::new(&app.style, app.state.wpm);
+    let source = source::Source::new(app.state.mode.to_string(), &app.style);
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -116,6 +118,7 @@ pub async fn run(app: &mut App) {
         quit_button.update();
         restart_button.update();
         wpm.update();
+        source.update();
 
         match focus {
             QuitButton => quit_button.style.draw_border(),

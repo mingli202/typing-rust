@@ -3,6 +3,7 @@ use crate::Config;
 use macroquad::color::Color;
 use std::cell::RefCell;
 use std::error::Error;
+use std::fmt::Display;
 use std::rc::Rc;
 mod theme;
 
@@ -62,16 +63,16 @@ impl Mode {
     pub fn new(data: &Data) -> Self {
         Mode::Words {
             s: data
-                .get_n_random_words(10)
+                .get_n_random_words(1)
                 .iter()
                 .map(|s| &(*s)[..])
                 .collect::<Vec<&str>>()
                 .join(" "),
-            n: 10,
+            n: 1,
         }
     }
 
-    pub fn get(&self) -> String {
+    pub fn get_inner(&self) -> String {
         match self {
             Mode::Words { s, .. } => s.to_string(),
             Mode::Quote(q) => q.quote.clone(),
@@ -92,6 +93,15 @@ impl Mode {
             Mode::Quote(_) => Mode::Quote(data.get_random_quote().clone()),
         };
         *self = new_mode;
+    }
+}
+
+impl Display for Mode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Mode::Words { n, .. } => write!(f, "{} Words", n),
+            Mode::Quote(Quote { source, .. }) => write!(f, "{}", source),
+        }
     }
 }
 

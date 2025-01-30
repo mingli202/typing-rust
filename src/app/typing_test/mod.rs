@@ -18,7 +18,7 @@ pub async fn run(app: &mut App) {
 
     let mut focus = Nothing;
 
-    let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get().clone());
+    let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get_inner().clone());
     let tracker = tracker::Tracker::new(&app.style);
     let next_button = next_button::NextButton::new(&app.style);
     let restart_button = restart_button::RestartButton::new(&app.style);
@@ -58,10 +58,10 @@ pub async fn run(app: &mut App) {
                     match focus {
                         NextButton => {
                             app.state.mode.next(&app.data);
-                            typingbox.refresh(app.state.mode.get());
+                            typingbox.refresh(app.state.mode.get_inner());
                         }
                         RestartButton => {
-                            typingbox.refresh(app.state.mode.get());
+                            typingbox.refresh(app.state.mode.get_inner());
                         }
                         ThemeButton => {
                             app.state.screen = Screen::ThemeSelect;
@@ -103,7 +103,7 @@ pub async fn run(app: &mut App) {
                     typingbox.refresh(t.to_string());
                 }
                 RestartButton => {
-                    typingbox.refresh(app.state.mode.get());
+                    typingbox.refresh(app.state.mode.get_inner());
                 }
                 ThemeButton => {
                     app.state.screen = Screen::ThemeSelect;
