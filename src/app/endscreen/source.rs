@@ -14,6 +14,9 @@ pub struct Source {
 impl Source {
     pub fn new(text: String, style: &Style) -> Self {
         let f1 = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
+
+        let t = text.clone();
 
         Source {
             text: text.clone(),
@@ -27,10 +30,15 @@ impl Source {
                 font_size: Rc::clone(&style.font_size),
                 x: Value::Relative(Box::new(move || {
                     window::screen_width()
-                        - text::measure_text(&text[..], None, *f1.borrow() as u16, 1.0).width
+                        - text::measure_text(&text.clone()[..], None, *f1.borrow() as u16, 1.0)
+                            .width
                         - 40.0
                 })),
-                y: Value::Relative(Box::new(move || window::screen_height() - 30.0 - 40.0)),
+                y: Value::Relative(Box::new(move || {
+                    window::screen_height()
+                        - text::measure_text(&t[..], None, *f2.borrow() as u16, 1.0).height
+                        - 40.0
+                })),
                 padding_x: Some(Value::Absolute(20.0)),
                 padding_y: Some(Value::Absolute(20.0)),
                 ..Style::default()
