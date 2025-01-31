@@ -99,7 +99,7 @@ impl Mode {
 impl Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Mode::Words { n, .. } => write!(f, "{} Words", n),
+            Mode::Words { n, .. } => write!(f, "{} {}", n, if *n != 1 { "Words" } else { "Word" }),
             Mode::Quote(Quote { source, .. }) => write!(f, "{}", source),
         }
     }

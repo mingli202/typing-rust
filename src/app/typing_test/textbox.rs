@@ -156,8 +156,10 @@ impl TextBox {
             }
         }
 
-        (1000 * 60 * (self.state.letters.len() as f32 / 5.0 - wrongs) as u128 / time_passed) as u16
+        ((1000.0 * 60.0 * (self.state.letters.len() as f32 / 5.0 - wrongs)) as u128 / time_passed)
+            as u16
     }
+
     pub fn update(&mut self) {
         self.style.draw_bg();
 
