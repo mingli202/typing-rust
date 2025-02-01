@@ -32,15 +32,13 @@ impl Source {
                     window::screen_width()
                         - text::measure_text(&text.clone()[..], None, *f1.borrow() as u16, 1.0)
                             .width
-                        - 40.0
+                        - 20.0
                 })),
                 y: Value::Relative(Box::new(move || {
                     window::screen_height()
                         - text::measure_text(&t[..], None, *f2.borrow() as u16, 1.0).height
-                        - 40.0
+                        - 20.0
                 })),
-                padding_x: Some(Value::Absolute(20.0)),
-                padding_y: Some(Value::Absolute(20.0)),
                 ..Style::default()
             },
         }
