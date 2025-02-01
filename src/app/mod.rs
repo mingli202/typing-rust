@@ -54,6 +54,7 @@ impl Default for AppState {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum Mode {
     Words { n: usize, s: String },
     Quote(Quote),

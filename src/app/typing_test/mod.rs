@@ -5,6 +5,7 @@ use macroquad::window;
 use crate::app::focus::{Focus, TypingTestFocus::*};
 use crate::app::util;
 
+mod mode_select;
 mod next_button;
 mod restart_button;
 mod textbox;
@@ -17,6 +18,7 @@ pub async fn run(app: &mut App) {
     input::clear_input_queue();
 
     let mut focus = Nothing;
+    let mut is_mode_hover = false;
 
     let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get_inner().clone());
     let tracker = tracker::Tracker::new(&app.style);
