@@ -99,10 +99,8 @@ pub async fn run(app: &mut App) {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 NextButton => {
-                    let t = app.data.get_random_quote().quote.clone();
-
                     app.state.mode.next(&app.data);
-                    typingbox.refresh(t.to_string());
+                    typingbox.refresh(app.state.mode.get_inner());
                 }
                 RestartButton => {
                     typingbox.refresh(app.state.mode.get_inner());
