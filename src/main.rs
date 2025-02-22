@@ -14,11 +14,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
 fn window_conf() -> Conf {
     let default = Conf::default();
 
+    let height = 700.0;
+
     Conf {
         window_title: "Typing Test".to_string(),
         fullscreen: false,
-        window_width: (600.0 * 1.61) as i32,
-        window_height: 600,
+        window_width: (height * 1.61) as i32,
+        window_height: height as i32,
         window_resizable: false,
         high_dpi: true,
         ..default
