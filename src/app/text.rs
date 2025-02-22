@@ -1,6 +1,5 @@
-use macroquad::color::Color;
+use macroquad::shapes;
 use macroquad::text::{self, TextDimensions, TextParams};
-use macroquad::{shapes, window};
 
 use super::{Letter, Style};
 
@@ -19,22 +18,22 @@ pub fn print_letter(
     );
 
     let p_x = match &style.padding_x {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
     let o_x = match &style.offset_x {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
     let p_y = match &style.padding_y {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
     let o_y = match &style.offset_y {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
@@ -96,7 +95,7 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
     let mut lines = 0.0;
 
     let p_x = match &style.padding_x {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
@@ -126,13 +125,13 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
             1.0,
         )
         .width
-            > style.width.get() - 2.0 * p_x
+            > style.width.get(style) - 2.0 * p_x
         {
             print_letters(
                 style,
                 &line,
-                style.x.get(),
-                style.y.get() + lines * *style.font_size.borrow(),
+                style.x.get(style),
+                style.y.get(style) + lines * *style.font_size.borrow(),
                 cursor_index,
             );
             lines += 1.0;
@@ -151,8 +150,8 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
     print_letters(
         style,
         &line,
-        style.x.get(),
-        style.y.get() + lines * *style.font_size.borrow(),
+        style.x.get(style),
+        style.y.get(style) + lines * *style.font_size.borrow(),
         cursor_index,
     );
 
@@ -161,22 +160,22 @@ pub fn print_letters_wrap(style: &Style, letters: &[Letter], cursor_index: usize
 
 pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
     let p_x = match &style.padding_x {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
     let o_x = match &style.offset_x {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
     let p_y = match &style.padding_y {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
     let o_y = match &style.offset_y {
-        Some(p) => p.get(),
+        Some(p) => p.get(style),
         _ => 0.0,
     };
 
@@ -184,7 +183,7 @@ pub fn print_text(style: &Style, text: &str, x: f32, y: f32) {
     if style.wrap {
         let wt = WrappedText::new(
             text,
-            style.width.get(),
+            style.width.get(style),
             TextParams {
                 font_size: fsize as u16,
                 ..TextParams::default()
@@ -277,29 +276,28 @@ impl<'a> WrappedText<'a> {
 
     pub fn print(&self, style: &Style, x: f32, y: f32) {
         let p_x = match &style.padding_x {
-            Some(p) => p.get(),
+            Some(p) => p.get(style),
             _ => 0.0,
         };
 
         let o_x = match &style.offset_x {
-            Some(p) => p.get(),
+            Some(p) => p.get(style),
             _ => 0.0,
         };
 
         let p_y = match &style.padding_y {
-            Some(p) => p.get(),
+            Some(p) => p.get(style),
             _ => 0.0,
         };
 
         let o_y = match &style.offset_y {
-            Some(p) => p.get(),
+            Some(p) => p.get(style),
             _ => 0.0,
         };
 
         for (i, line) in self.text.iter().enumerate() {
-            let TextDimensions {
-                offset_y, height, ..
-            } = macroquad::text::measure_text(&line[..], None, self.text_params.font_size, 1.0);
+            let TextDimensions { offset_y, .. } =
+                macroquad::text::measure_text(&line[..], None, self.text_params.font_size, 1.0);
 
             text::draw_text(
                 &line[..],

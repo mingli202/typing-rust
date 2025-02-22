@@ -56,8 +56,8 @@ impl Wpm {
     pub fn update(&self) {
         macroquad::text::draw_text(
             &self.wpm,
-            self.style.x.get(),
-            self.style.y.get(),
+            self.style.x.get(&self.style),
+            self.style.y.get(&self.style),
             *self.style.font_size.borrow(),
             *self.style.theme.text.borrow(),
         );

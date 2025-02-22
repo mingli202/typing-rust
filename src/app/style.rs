@@ -33,10 +33,10 @@ impl Style {
     pub fn draw_border(&self) {
         if let Some(border) = &self.border {
             shapes::draw_rectangle_lines(
-                self.x.get(),
-                self.y.get(),
-                self.width.get(),
-                self.height.get(),
+                self.x.get(self),
+                self.y.get(self),
+                self.width.get(self),
+                self.height.get(self),
                 border.size,
                 *border.color.borrow(),
             );
@@ -45,10 +45,10 @@ impl Style {
 
     pub fn draw_bg(&self) {
         shapes::draw_rectangle(
-            self.x.get(),
-            self.y.get(),
-            self.width.get(),
-            self.height.get(),
+            self.x.get(self),
+            self.y.get(self),
+            self.width.get(self),
+            self.height.get(self),
             *self.theme.bg.borrow(),
         );
     }
@@ -66,21 +66,21 @@ impl Style {
             } = self;
 
             let p_y = match padding_y {
-                Some(p) => p.get(),
+                Some(p) => p.get(self),
                 _ => 0.0,
             };
 
             let color = *theme.bg.borrow();
 
             // top
-            shapes::draw_rectangle(x.get(), 0.0, width.get(), y.get() + p_y, color);
+            shapes::draw_rectangle(x.get(self), 0.0, width.get(self), y.get(self) + p_y, color);
 
             // bottom
             shapes::draw_rectangle(
-                x.get(),
-                y.get() + height.get() - p_y,
-                width.get(),
-                window::screen_height() - (y.get() + height.get() - p_y),
+                x.get(self),
+                y.get(self) + height.get(self) - p_y,
+                width.get(self),
+                window::screen_height() - (y.get(self) + height.get(self) - p_y),
                 color,
             );
         }

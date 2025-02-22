@@ -21,18 +21,45 @@ mod focus;
 mod theme_select;
 mod typing_test;
 
-#[derive(Eq, Hash, PartialEq, Clone, Debug)]
-enum Screen {
-    TypingTest,
-    End,
-    ThemeSelect,
-}
-
 pub struct App {
     style: Style,
     data: Data,
     config: Config,
     state: AppState,
+}
+
+impl App {
+    pub fn new(data: Data, config: Config) -> Self {
+        App {
+            data,
+            style: Style {
+                font_size: Rc::new(RefCell::new(config.font_size)),
+                theme: Theme::get_theme(&config.theme),
+                ..Style::default()
+            },
+            config,
+            state: AppState::default(),
+        }
+    }
+
+    pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
+        self.state.mode = Mode::new(&self.data);
+
+        loop {
+            match self.state.screen {
+                Screen::TypingTest => typing_test::run(self).await,
+                Screen::End => endscreen::run(self).await,
+                Screen::ThemeSelect => theme_select::run(self).await,
+            };
+        }
+    }
+}
+
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
+enum Screen {
+    TypingTest,
+    End,
+    ThemeSelect,
 }
 
 pub struct AppState {
@@ -62,15 +89,6 @@ pub enum Mode {
 
 impl Mode {
     pub fn new(data: &Data) -> Self {
-        //Mode::Words {
-        //    s: data
-        //        .get_n_random_words(1)
-        //        .iter()
-        //        .map(|s| &(*s)[..])
-        //        .collect::<Vec<&str>>()
-        //        .join(" "),
-        //    n: 1,
-        //}
         Mode::Quote(data.get_random_quote().clone())
     }
 
@@ -107,33 +125,6 @@ impl Display for Mode {
     }
 }
 
-impl App {
-    pub fn new(data: Data, config: Config) -> Self {
-        App {
-            data,
-            style: Style {
-                font_size: Rc::new(RefCell::new(config.font_size)),
-                theme: Theme::get_theme(&config.theme),
-                ..Style::default()
-            },
-            config,
-            state: AppState::default(),
-        }
-    }
-
-    pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        self.state.mode = Mode::new(&self.data);
-
-        loop {
-            match self.state.screen {
-                Screen::TypingTest => typing_test::run(self).await,
-                Screen::End => endscreen::run(self).await,
-                Screen::ThemeSelect => theme_select::run(self).await,
-            };
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct Letter {
     pub letter: char,
@@ -142,15 +133,15 @@ pub struct Letter {
 }
 
 pub enum Value<T> {
-    Relative(Box<dyn Fn(&Self) -> T>),
+    Relative(Box<dyn Fn(&Style) -> T>),
     Absolute(T),
 }
 
 impl<T: Clone> Value<T> {
-    pub fn get(&self) -> T {
+    pub fn get(&self, style: &Style) -> T {
         match self {
             Self::Absolute(v) => v.clone(),
-            Self::Relative(v) => v(self),
+            Self::Relative(v) => v(style),
         }
     }
 }

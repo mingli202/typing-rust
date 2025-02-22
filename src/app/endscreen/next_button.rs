@@ -57,8 +57,8 @@ impl NextButton {
         crate::app::text::print_text(
             &self.style,
             &self.text,
-            self.style.x.get(),
-            self.style.y.get(),
+            self.style.x.get(&self.style),
+            self.style.y.get(&self.style),
         );
     }
 }

@@ -35,8 +35,8 @@ impl Tracker {
         text::print_text(
             &self.style,
             &format!("{}/{}", index, len),
-            self.style.x.get(),
-            self.style.y.get(),
+            self.style.x.get(&self.style),
+            self.style.y.get(&self.style),
         );
     }
 }
