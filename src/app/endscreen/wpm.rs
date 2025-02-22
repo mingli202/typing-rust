@@ -19,7 +19,7 @@ impl Wpm {
         Wpm {
             wpm: format!("WPM: {}", wmp),
             style: Style {
-                x: Value::Relative(Box::new(move || {
+                x: Value::Relative(Box::new(move |_| {
                     (window::screen_width()
                         - text::measure_text(
                             &format!("WPM: {}", wmp),
@@ -30,7 +30,7 @@ impl Wpm {
                         .width)
                         / 2.0
                 })),
-                y: Value::Relative(Box::new(move || {
+                y: Value::Relative(Box::new(move |_| {
                     let TextDimensions {
                         height, offset_y, ..
                     } = text::measure_text(

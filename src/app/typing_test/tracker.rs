@@ -14,8 +14,8 @@ impl Tracker {
 
         Tracker {
             style: Style {
-                x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
-                y: Value::Relative(Box::new(move || {
+                x: Value::Relative(Box::new(|_| (0.5 * window::screen_width()) / 2.0)),
+                y: Value::Relative(Box::new(move |_| {
                     (window::screen_height() - *font_size.borrow() * 3.0) / 2.0
                         - *font_size.borrow()
                 })),

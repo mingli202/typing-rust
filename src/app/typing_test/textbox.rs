@@ -46,17 +46,14 @@ impl TextBox {
                     text: Rc::clone(&style.theme.text),
                     error: Rc::clone(&style.theme.error),
                 },
-                x: Value::Relative(Box::new(|| (0.5 * window::screen_width()) / 2.0)),
-                y: Value::Relative(Box::new(move || {
+                x: Value::Relative(Box::new(|_| (0.5 * window::screen_width()) / 2.0)),
+                y: Value::Relative(Box::new(move |_| {
                     (window::screen_height() - *f1.borrow() * 3.0) / 2.0
                 })),
-                width: Value::Relative(Box::new(|| window::screen_width() / 2.0)),
-                height: Value::Relative(Box::new(move || *f2.borrow() * 3.0)),
+                width: Value::Relative(Box::new(|_| window::screen_width() / 2.0)),
+                height: Value::Relative(Box::new(move |_| *f2.borrow() * 3.0)),
                 clip: true,
-                offset_y: None,
-                offset_x: None,
-                padding_x: None,
-                padding_y: None,
+                ..Style::default()
             },
             state: TextBoxState {
                 letters,

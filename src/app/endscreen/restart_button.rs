@@ -25,10 +25,10 @@ impl RestartButton {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move || {
+                x: Value::Relative(Box::new(move |_| {
                     (window::screen_width() + *f1.borrow()) / 2.0
                 })),
-                y: Value::Relative(Box::new(move || {
+                y: Value::Relative(Box::new(move |_| {
                     (window::screen_height() + *font_size.borrow()) / 2.0
                 })),
                 font_size: Rc::clone(&style.font_size),
@@ -40,10 +40,10 @@ impl RestartButton {
                 },
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
-                width: Value::Relative(Box::new(move || {
+                width: Value::Relative(Box::new(move |_| {
                     text::measure_text("Restart (r)", None, *f3.borrow() as u16, 1.0).width + 20.0
                 })),
-                height: Value::Relative(Box::new(move || {
+                height: Value::Relative(Box::new(move |_| {
                     text::measure_text("Restart (r)", None, *f4.borrow() as u16, 1.0).height + 20.0
                 })),
                 ..Style::default()

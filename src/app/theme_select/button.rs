@@ -35,7 +35,7 @@ impl Button {
                     color: Rc::clone(&theme.ghost),
                 }),
                 theme,
-                width: Value::Relative(Box::new(move || {
+                width: Value::Relative(Box::new(move |_| {
                     text::measure_text(
                         format!("{:?}", tn).split("::").last().unwrap(),
                         None,
@@ -45,7 +45,7 @@ impl Button {
                     .width
                         + 20.0
                 })),
-                height: Value::Relative(Box::new(move || {
+                height: Value::Relative(Box::new(move |_| {
                     text::measure_text(
                         format!("{:?}", theme_name).split("::").last().unwrap(),
                         None,

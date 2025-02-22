@@ -62,15 +62,16 @@ pub enum Mode {
 
 impl Mode {
     pub fn new(data: &Data) -> Self {
-        Mode::Words {
-            s: data
-                .get_n_random_words(1)
-                .iter()
-                .map(|s| &(*s)[..])
-                .collect::<Vec<&str>>()
-                .join(" "),
-            n: 1,
-        }
+        //Mode::Words {
+        //    s: data
+        //        .get_n_random_words(1)
+        //        .iter()
+        //        .map(|s| &(*s)[..])
+        //        .collect::<Vec<&str>>()
+        //        .join(" "),
+        //    n: 1,
+        //}
+        Mode::Quote(data.get_random_quote().clone())
     }
 
     pub fn get_inner(&self) -> String {
@@ -141,7 +142,7 @@ pub struct Letter {
 }
 
 pub enum Value<T> {
-    Relative(Box<dyn Fn() -> T>),
+    Relative(Box<dyn Fn(&Self) -> T>),
     Absolute(T),
 }
 
@@ -149,7 +150,13 @@ impl<T: Clone> Value<T> {
     pub fn get(&self) -> T {
         match self {
             Self::Absolute(v) => v.clone(),
-            Self::Relative(v) => v(),
+            Self::Relative(v) => v(self),
         }
+    }
+}
+
+impl<T: Default> Default for Value<T> {
+    fn default() -> Self {
+        Value::Absolute(T::default())
     }
 }
