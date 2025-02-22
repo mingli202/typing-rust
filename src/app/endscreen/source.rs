@@ -3,6 +3,7 @@ use std::rc::Rc;
 use macroquad::{text, window};
 
 use crate::app::style::Style;
+use crate::app::text::WrappedText;
 use crate::app::theme::Theme;
 use crate::app::{self, Value};
 
@@ -14,9 +15,7 @@ pub struct Source {
 impl Source {
     pub fn new(text: String, style: &Style) -> Self {
         let f1 = Rc::clone(&style.font_size);
-        let f2 = Rc::clone(&style.font_size);
-
-        let t = text.clone();
+        let text_color = Rc::clone(&style.theme.text);
 
         Source {
             text: text.clone(),
@@ -28,17 +27,24 @@ impl Source {
                     error: Rc::clone(&style.theme.error),
                 },
                 font_size: Rc::clone(&style.font_size),
-                x: Value::Relative(Box::new(move || {
-                    window::screen_width()
-                        - text::measure_text(&text.clone()[..], None, *f1.borrow() as u16, 1.0)
-                            .width
-                        - 20.0
+                width: Value::Relative(Box::new(move |_| window::screen_width() - 40.0)),
+                x: Value::Absolute(0.0),
+                y: Value::Relative(Box::new(move |_| {
+                    let wt = WrappedText::new(
+                        &text[..],
+                        window::screen_width() - 40.0,
+                        text::TextParams {
+                            font_size: *f1.borrow() as u16,
+                            color: *text_color.borrow(),
+                            ..text::TextParams::default()
+                        },
+                    );
+
+                    window::screen_height() - wt.get_height() - 40.0
                 })),
-                y: Value::Relative(Box::new(move || {
-                    window::screen_height()
-                        - text::measure_text(&t[..], None, *f2.borrow() as u16, 1.0).height
-                        - 20.0
-                })),
+                padding_x: Some(Value::Absolute(20.0)),
+                padding_y: Some(Value::Absolute(20.0)),
+                wrap: true,
                 ..Style::default()
             },
         }

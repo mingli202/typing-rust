@@ -11,6 +11,7 @@ pub struct BorderParams {
     pub color: Rc<RefCell<Color>>,
 }
 
+#[derive(Default)]
 pub struct Style {
     pub x: Value<f32>,
     pub y: Value<f32>,
@@ -24,25 +25,8 @@ pub struct Style {
     pub offset_y: Option<Value<f32>>,
     pub padding_x: Option<Value<f32>>,
     pub padding_y: Option<Value<f32>>,
-}
-
-impl Default for Style {
-    fn default() -> Self {
-        Style {
-            x: Value::Absolute(0.0),
-            y: Value::Absolute(0.0),
-            width: Value::Absolute(0.0),
-            height: Value::Absolute(0.0),
-            font_size: Rc::new(RefCell::new(0.0)),
-            theme: Theme::default(),
-            border: None,
-            clip: false,
-            offset_x: None,
-            offset_y: None,
-            padding_x: None,
-            padding_y: None,
-        }
-    }
+    pub wrap: bool,
+    pub parent: Option<Rc<Style>>,
 }
 
 impl Style {
