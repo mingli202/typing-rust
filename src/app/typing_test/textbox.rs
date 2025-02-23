@@ -148,7 +148,6 @@ impl TextBox {
     }
 
     fn submit_word(&mut self) {
-        self.state.char_typed += self.state.words[self.state.word_index].word.len() + 1;
         // check if current word is wrong
         if !self.state.words[self.state.word_index]
             .letters
@@ -163,6 +162,8 @@ impl TextBox {
             self.state.wrongs -= 1;
             self.state.words[self.state.word_index].is_error = false;
         }
+
+        self.state.char_typed += self.state.words[self.state.word_index].word.len() + 1;
 
         // move to the next word
         self.state.word_index += 1;
@@ -179,7 +180,9 @@ impl TextBox {
             // move back to the previous word
             self.state.word_index -= 1;
             self.state.char_index = self.state.words[self.state.word_index].last_typed;
+
             self.state.char_typed -= self.state.words[self.state.word_index].letters.len() + 1;
+
             return;
         }
 

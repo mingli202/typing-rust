@@ -88,7 +88,8 @@ impl WrappedText {
         for word in text.split_whitespace() {
             let l = line.join(" ") + " " + word;
 
-            let TextDimensions { width, .. } = text::measure_text(&l, None, font_size as u16, 1.0);
+            let TextDimensions { width, .. } =
+                text::measure_text(&l, Some(&font), font_size as u16, 1.0);
 
             if width > max_width {
                 let _w =

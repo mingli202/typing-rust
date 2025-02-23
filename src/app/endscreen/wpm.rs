@@ -15,8 +15,10 @@ pub struct Wpm {
 impl Wpm {
     pub fn new(style: &Style, wmp: u16, font: Rc<Font>) -> Wpm {
         let f1 = Rc::clone(&style.font_size);
+        let f2 = Rc::clone(&style.font_size);
 
         let font1 = Rc::clone(&font);
+        let font2 = Rc::clone(&font);
 
         Wpm {
             font,
@@ -33,7 +35,17 @@ impl Wpm {
                         .width)
                         / 2.0
                 })),
-                y: Value::Relative(Box::new(move |_| window::screen_height() / 2.0)),
+                y: Value::Relative(Box::new(move |_| {
+                    (window::screen_height()
+                        - text::measure_text(
+                            &format!("WPM: {}", wmp),
+                            Some(&font2),
+                            *f2.borrow() as u16,
+                            1.0,
+                        )
+                        .height)
+                        / 2.0
+                })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),

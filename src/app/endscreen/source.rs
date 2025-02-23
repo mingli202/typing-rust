@@ -30,7 +30,7 @@ impl Source {
                     error: Rc::clone(&style.theme.error),
                 },
                 font_size: Rc::clone(&style.font_size),
-                width: Value::Relative(Box::new(move |_| window::screen_width() - 40.0)),
+                width: Value::Relative(Box::new(move |_| window::screen_width())),
                 x: Value::Absolute(0.0),
                 y: Value::Relative(Box::new(move |_| {
                     let wt = WrappedText::new(
