@@ -9,10 +9,11 @@ use crate::app::{self, theme::Theme, BorderParams, Style, Value};
 pub struct QuitButton {
     pub style: Style,
     pub text: String,
+    font: Rc<Font>,
 }
 
 impl QuitButton {
-    pub fn new(style: &Style) -> QuitButton {
+    pub fn new(style: &Style, font: Rc<Font>) -> QuitButton {
         let text = "Quit (q)".to_string();
         let t = text.clone();
         let t1 = text.clone();
@@ -23,7 +24,12 @@ impl QuitButton {
         let f3 = Rc::clone(&style.font_size);
         let f4 = Rc::clone(&style.font_size);
 
+        let font1 = Rc::clone(&font);
+        let font2 = Rc::clone(&font);
+        let font3 = Rc::clone(&font);
+
         QuitButton {
+            font,
             text: text.to_string(),
             style: Style {
                 border: Some(BorderParams {
@@ -32,7 +38,7 @@ impl QuitButton {
                 }),
                 x: Value::Relative(Box::new(move |_| {
                     (window::screen_width()
-                        - text::measure_text(&t, None, *f1.borrow() as u16, 1.0).width
+                        - text::measure_text(&t, Some(&font1), *f1.borrow() as u16, 1.0).width
                         - 20.0)
                         / 2.0
                 })),
@@ -49,22 +55,22 @@ impl QuitButton {
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
                 width: Value::Relative(Box::new(move |_| {
-                    text::measure_text(&t1, None, *f3.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text(&t1, Some(&font2), *f3.borrow() as u16, 1.0).width + 20.0
                 })),
                 height: Value::Relative(Box::new(move |_| {
-                    text::measure_text(&t2, None, *f4.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text(&t2, Some(&font3), *f4.borrow() as u16, 1.0).height + 20.0
                 })),
                 ..Style::default()
             },
         }
     }
 
-    pub fn update(&self, font: Rc<Font>) {
+    pub fn update(&self) {
         app::text::print_text(
             &self.style,
             &self.text,
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );

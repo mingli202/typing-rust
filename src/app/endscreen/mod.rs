@@ -19,10 +19,10 @@ pub async fn run(app: &mut App) {
     input::show_mouse(true);
     let mut focus = Nothing;
 
-    let wpm = wpm::Wpm::new(&app.style, app.state.wpm);
-    let next_button = next_button::NextButton::new(&app.style);
-    let quit_button = quit_button::QuitButton::new(&app.style);
-    let restart_button = restart_button::RestartButton::new(&app.style);
+    let wpm = wpm::Wpm::new(&app.style, app.state.wpm, Rc::clone(&app.font));
+    let next_button = next_button::NextButton::new(&app.style, Rc::clone(&app.font));
+    let quit_button = quit_button::QuitButton::new(&app.style, Rc::clone(&app.font));
+    let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
     let source = source::Source::new(app.state.mode.to_string(), &app.style, Rc::clone(&app.font));
 
     loop {
@@ -116,11 +116,11 @@ pub async fn run(app: &mut App) {
 
         window::clear_background(*app.style.theme.bg.borrow());
 
-        next_button.update(Rc::clone(&app.font));
-        quit_button.update(Rc::clone(&app.font));
-        restart_button.update(Rc::clone(&app.font));
-        wpm.update(Rc::clone(&app.font));
-        source.update(Rc::clone(&app.font));
+        next_button.update();
+        quit_button.update();
+        restart_button.update();
+        wpm.update();
+        source.update();
 
         match focus {
             QuitButton => quit_button.style.draw_border(),

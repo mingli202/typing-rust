@@ -103,7 +103,7 @@ impl Default for Config {
                 .iter()
                 .collect(),
             theme: ThemeName::default(),
-            font_size: 30.0,
+            font_size: 24.0,
         }
     }
 }

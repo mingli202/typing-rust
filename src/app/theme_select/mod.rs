@@ -17,9 +17,9 @@ pub async fn run(app: &mut App) {
     let mut focus = -1;
 
     let themes = [Atom, Catppuccin, Gruvbox, Tokyonight];
-    let mut buttons = themes.map(|t| button::Button::new(t, &app.style));
+    let mut buttons = themes.map(|t| button::Button::new(t, &app.style, Rc::clone(&app.font)));
 
-    let cancel_button = cancel_button::CancelButton::new(&app.style);
+    let cancel_button = cancel_button::CancelButton::new(&app.style, Rc::clone(&app.font));
 
     // to deal with holding
     let mut is_mouse_held = true;
@@ -119,11 +119,11 @@ pub async fn run(app: &mut App) {
                 }
             }
 
-            button.update(Rc::clone(&app.font));
+            button.update();
             x += width + 50.0;
         }
 
-        cancel_button.update(Rc::clone(&app.font));
+        cancel_button.update();
 
         if util::is_hover(&cancel_button.style) || focus == -1 {
             focus = -1;

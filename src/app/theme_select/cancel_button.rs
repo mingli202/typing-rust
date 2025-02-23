@@ -11,12 +11,13 @@ use crate::app::{
 };
 
 pub struct CancelButton {
-    pub text: String,
+    text: String,
     pub style: Style,
+    font: Rc<Font>,
 }
 
 impl CancelButton {
-    pub fn new(style: &Style) -> CancelButton {
+    pub fn new(style: &Style, font: Rc<Font>) -> CancelButton {
         let text = "Cancel (ESC)".to_string();
 
         let font_size = Rc::clone(&style.font_size);
@@ -24,7 +25,12 @@ impl CancelButton {
         let f2 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
 
+        let font1 = Rc::clone(&font);
+        let font2 = Rc::clone(&font);
+        let font3 = Rc::clone(&font);
+
         CancelButton {
+            font,
             text: text.to_string(),
             style: Style {
                 border: Some(BorderParams {
@@ -33,7 +39,7 @@ impl CancelButton {
                 }),
                 x: Value::Relative(Box::new(move |_| {
                     (window::screen_width()
-                        - text::measure_text(&text, None, *f3.borrow() as u16, 1.0).width)
+                        - text::measure_text(&text, Some(&font1), *f3.borrow() as u16, 1.0).width)
                         / 2.0
                 })),
                 y: Value::Relative(Box::new(move |_| {
@@ -49,22 +55,25 @@ impl CancelButton {
                 padding_x: Some(Value::Absolute(10.0)),
                 padding_y: Some(Value::Absolute(10.0)),
                 width: Value::Relative(Box::new(move |_| {
-                    text::measure_text("Cancel (ESC)", None, *f1.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text("Cancel (ESC)", Some(&font2), *f1.borrow() as u16, 1.0).width
+                        + 20.0
                 })),
                 height: Value::Relative(Box::new(move |_| {
-                    text::measure_text("Cancel (ESC)", None, *f2.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text("Cancel (ESC)", Some(&font3), *f2.borrow() as u16, 1.0)
+                        .height
+                        + 20.0
                 })),
                 ..Style::default()
             },
         }
     }
 
-    pub fn update(&self, font: Rc<Font>) {
+    pub fn update(&self) {
         crate::app::text::print_text(
             &self.style,
             &self.text,
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );

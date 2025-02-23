@@ -28,10 +28,11 @@ pub async fn run(app: &mut App) {
         app.state.mode.get_inner().clone(),
         Rc::clone(&app.typing_font),
     );
+
     let tracker = tracker::Tracker::new(&app.style, Rc::clone(&app.font));
-    let next_button = next_button::NextButton::new(&app.style);
-    let restart_button = restart_button::RestartButton::new(&app.style);
-    let theme_button = theme_button::ThemeButton::new(&app.style);
+    let next_button = next_button::NextButton::new(&app.style, Rc::clone(&app.font));
+    let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
+    let theme_button = theme_button::ThemeButton::new(&app.style, Rc::clone(&app.font));
 
     let mut time = Instant::now();
     let mut wpm = 0;
@@ -147,17 +148,12 @@ pub async fn run(app: &mut App) {
         window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(
-            Rc::clone(&app.font),
-            typingbox.state.word_index,
-            typingbox.state.words.len(),
-            wpm,
-        );
+        tracker.update(typingbox.state.word_index, typingbox.state.words.len(), wpm);
 
         if focus != TypingBox {
-            next_button.update(Rc::clone(&app.font));
-            restart_button.update(Rc::clone(&app.font));
-            theme_button.update(Rc::clone(&app.font));
+            next_button.update();
+            restart_button.update();
+            theme_button.update();
         }
 
         match focus {

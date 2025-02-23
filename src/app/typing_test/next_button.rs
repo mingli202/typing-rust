@@ -4,24 +4,30 @@ use macroquad::text::Font;
 use macroquad::{text, window};
 
 use crate::app::text::PrintOptions;
-use crate::app::{self, theme::Theme};
+use crate::app::theme::Theme;
 
 use crate::app::{BorderParams, Style, Value};
 
 pub struct NextButton {
     pub style: Style,
-    pub text: String,
+    text: String,
+    font: Rc<Font>,
 }
 
 impl NextButton {
-    pub fn new(style: &Style) -> NextButton {
+    pub fn new(style: &Style, font: Rc<Font>) -> NextButton {
         let font_size = Rc::clone(&style.font_size);
         let f = Rc::clone(&style.font_size);
         let f1 = Rc::clone(&style.font_size);
         let f2 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
 
+        let font1 = Rc::clone(&font);
+        let font2 = Rc::clone(&font);
+        let font3 = Rc::clone(&font);
+
         NextButton {
+            font,
             text: "Next".to_string(),
             style: Style {
                 border: Some(BorderParams {
@@ -30,7 +36,7 @@ impl NextButton {
                 }),
                 x: Value::Relative(Box::new(move |_| {
                     window::screen_width() / 2.0
-                        - text::measure_text("Next", None, *f1.borrow() as u16, 1.0).width
+                        - text::measure_text("Next", Some(&font1), *f1.borrow() as u16, 1.0).width
                         - 20.0
                         - *f.borrow() / 2.0
                 })),
@@ -39,10 +45,10 @@ impl NextButton {
                         + *font_size.borrow()
                 })),
                 width: Value::Relative(Box::new(move |_| {
-                    text::measure_text("Next", None, *f2.borrow() as u16, 1.0).width + 20.0
+                    text::measure_text("Next", Some(&font2), *f2.borrow() as u16, 1.0).width + 20.0
                 })),
                 height: Value::Relative(Box::new(move |_| {
-                    text::measure_text("Next", None, *f3.borrow() as u16, 1.0).height + 20.0
+                    text::measure_text("Next", Some(&font3), *f3.borrow() as u16, 1.0).height + 20.0
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
@@ -58,12 +64,12 @@ impl NextButton {
         }
     }
 
-    pub fn update(&self, font: Rc<Font>) {
+    pub fn update(&self) {
         crate::app::text::print_text(
             &self.style,
             &self.text,
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );

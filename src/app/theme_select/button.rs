@@ -11,10 +11,11 @@ pub struct Button {
     pub text: String,
     pub theme_name: ThemeName,
     pub style: Style,
+    font: Rc<Font>,
 }
 
 impl Button {
-    pub fn new(theme_name: ThemeName, style: &Style) -> Self {
+    pub fn new(theme_name: ThemeName, style: &Style, font: Rc<Font>) -> Self {
         let theme = Theme::get_theme(&theme_name);
 
         let f1 = Rc::clone(&style.font_size);
@@ -23,7 +24,11 @@ impl Button {
 
         let tn = theme_name.clone();
 
+        let font1 = Rc::clone(&font);
+        let font2 = Rc::clone(&font);
+
         Button {
+            font,
             theme_name: theme_name.clone(),
             text: format!("{:?}", theme_name)
                 .split("::")
@@ -39,7 +44,7 @@ impl Button {
                 width: Value::Relative(Box::new(move |_| {
                     text::measure_text(
                         format!("{:?}", tn).split("::").last().unwrap(),
-                        None,
+                        Some(&font1),
                         *f2.borrow() as u16,
                         1.0,
                     )
@@ -49,7 +54,7 @@ impl Button {
                 height: Value::Relative(Box::new(move |_| {
                     text::measure_text(
                         format!("{:?}", theme_name).split("::").last().unwrap(),
-                        None,
+                        Some(&font2),
                         *f3.borrow() as u16,
                         1.0,
                     )
@@ -64,14 +69,14 @@ impl Button {
         }
     }
 
-    pub fn update(&self, font: Rc<Font>) {
+    pub fn update(&self) {
         self.style.draw_bg();
         self.style.draw_border();
         app::text::print_text(
             &self.style,
             &self.text,
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );

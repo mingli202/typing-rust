@@ -9,20 +9,24 @@ use crate::app::{theme::Theme, Style, Value};
 pub struct Wpm {
     pub wpm: String,
     pub style: Style,
+    font: Rc<Font>,
 }
 
 impl Wpm {
-    pub fn new(style: &Style, wmp: u16) -> Wpm {
+    pub fn new(style: &Style, wmp: u16, font: Rc<Font>) -> Wpm {
         let f1 = Rc::clone(&style.font_size);
 
+        let font1 = Rc::clone(&font);
+
         Wpm {
+            font,
             wpm: format!("WPM: {}", wmp),
             style: Style {
                 x: Value::Relative(Box::new(move |_| {
                     (window::screen_width()
                         - text::measure_text(
                             &format!("WPM: {}", wmp),
-                            None,
+                            Some(&font1),
                             *f1.borrow() as u16,
                             1.0,
                         )
@@ -42,12 +46,12 @@ impl Wpm {
         }
     }
 
-    pub fn update(&self, font: Rc<Font>) {
+    pub fn update(&self) {
         crate::app::text::print_text(
             &self.style,
             &self.wpm,
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );

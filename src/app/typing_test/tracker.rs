@@ -35,12 +35,12 @@ impl Tracker {
         }
     }
 
-    pub fn update(&self, font: Rc<Font>, index: usize, len: usize, wpm: u16) {
+    pub fn update(&self, index: usize, len: usize, wpm: u16) {
         text::print_text(
             &self.style,
             &format!("{}/{} {}", index, len, wpm),
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );

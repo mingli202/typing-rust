@@ -11,6 +11,7 @@ use crate::app::{self, Value};
 pub struct Source {
     style: Style,
     text: String,
+    font: Rc<Font>,
 }
 
 impl Source {
@@ -19,6 +20,7 @@ impl Source {
         let font1 = Rc::clone(&font);
 
         Source {
+            font,
             text: text.clone(),
             style: Style {
                 theme: Theme {
@@ -48,12 +50,12 @@ impl Source {
         }
     }
 
-    pub fn update(&self, font: Rc<Font>) {
+    pub fn update(&self) {
         app::text::print_text(
             &self.style,
             &self.text,
             PrintOptions {
-                font: Some(Rc::clone(&font)),
+                font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },
         );
