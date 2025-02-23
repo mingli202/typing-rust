@@ -1,4 +1,4 @@
-use std::cmp::{max, Ordering};
+use std::cmp::Ordering;
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -15,7 +15,7 @@ pub struct TextBoxState {
     pub time_started: Instant,
     pub started: bool,
     pub wrongs: usize,
-    pub char_typed: usize,
+    pub char_typed: i32,
 }
 
 pub struct TextBox {
@@ -163,7 +163,7 @@ impl TextBox {
             self.state.words[self.state.word_index].is_error = false;
         }
 
-        self.state.char_typed += self.state.words[self.state.word_index].word.len() + 1;
+        self.state.char_typed += self.state.words[self.state.word_index].word.len() as i32 + 1;
 
         // move to the next word
         self.state.word_index += 1;
@@ -181,7 +181,8 @@ impl TextBox {
             self.state.word_index -= 1;
             self.state.char_index = self.state.words[self.state.word_index].last_typed;
 
-            self.state.char_typed -= self.state.words[self.state.word_index].letters.len() + 1;
+            self.state.char_typed -=
+                self.state.words[self.state.word_index].letters.len() as i32 + 1;
 
             return;
         }
@@ -227,7 +228,7 @@ impl TextBox {
     pub fn get_wpm(&self) -> u16 {
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
 
-        if time_passed == 0 {
+        if time_passed == 0 || self.state.char_typed < 0 {
             return 0;
         }
 

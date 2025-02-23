@@ -43,7 +43,7 @@ impl QuitButton {
                         / 2.0
                 })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() / 2.0) + 2.0 * *font_size.borrow()
+                    (window::screen_height() / 2.0) + 2.0 * 1.15 * *font_size.borrow()
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {

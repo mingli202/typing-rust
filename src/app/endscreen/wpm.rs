@@ -36,15 +36,14 @@ impl Wpm {
                         / 2.0
                 })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height()
+                    window::screen_height() / 2.0
                         - text::measure_text(
                             &format!("WPM: {}", wmp),
                             Some(&font2),
                             *f2.borrow() as u16,
                             1.0,
                         )
-                        .height)
-                        / 2.0
+                        .height
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
