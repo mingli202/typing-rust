@@ -131,7 +131,40 @@ impl TextBox {
 
         self.state.char_index += 1;
         self.state.words[self.state.word_index].last_typed = self.state.char_index;
+
+        if self.state.word_index == self.state.words.len() - 1
+            && self.state.words[self.state.word_index]
+                .letters
+                .iter()
+                .all(|l| *l.color.borrow() == *self.style.theme.text.borrow())
+        {
+            self.submit_word();
+            return true;
+        }
+
         false
+    }
+
+    fn submit_word(&mut self) {
+        self.state.char_typed += self.state.words[self.state.word_index].word.len() + 1;
+        // check if current word is wrong
+        if !self.state.words[self.state.word_index]
+            .letters
+            .iter()
+            .all(|l| *l.color.borrow() == *self.style.theme.text.borrow())
+        {
+            if !self.state.words[self.state.word_index].is_error {
+                self.state.wrongs += 1;
+                self.state.words[self.state.word_index].is_error = true;
+            }
+        } else if self.state.words[self.state.word_index].is_error {
+            self.state.wrongs -= 1;
+            self.state.words[self.state.word_index].is_error = false;
+        }
+
+        // move to the next word
+        self.state.word_index += 1;
+        self.state.char_index = 0;
     }
 
     pub fn delete_char(&mut self) {
@@ -141,15 +174,13 @@ impl TextBox {
                 return;
             }
 
-            self.state.char_typed -= 1;
-
             // move back to the previous word
             self.state.word_index -= 1;
             self.state.char_index = self.state.words[self.state.word_index].last_typed;
+            self.state.char_typed -= self.state.words[self.state.word_index].letters.len() + 1;
             return;
         }
 
-        self.state.char_typed -= 1;
         self.state.char_index -= 1;
         self.state.words[self.state.word_index].last_typed = self.state.char_index;
 
