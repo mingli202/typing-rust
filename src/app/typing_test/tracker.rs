@@ -31,10 +31,10 @@ impl Tracker {
         }
     }
 
-    pub fn update(&self, index: usize, len: usize) {
+    pub fn update(&self, index: usize, len: usize, wpm: u16) {
         text::print_text(
             &self.style,
-            &format!("{}/{}", index, len),
+            &format!("{}/{} {}", index, len, wpm),
             self.style.x.get(&self.style),
             self.style.y.get(&self.style),
         );

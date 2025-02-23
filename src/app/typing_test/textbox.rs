@@ -9,13 +9,13 @@ use crate::app::Word;
 use crate::app::{theme::Theme, BorderParams, Letter, Style, Value};
 
 pub struct TextBoxState {
-    pub letters: Vec<Letter>,
     pub words: Vec<Word>,
-    pub index: usize,
     pub word_index: usize,
     pub char_index: usize,
     pub time_started: Instant,
     pub started: bool,
+    pub wrongs: usize,
+    pub char_typed: usize,
 }
 
 pub struct TextBox {
@@ -25,17 +25,6 @@ pub struct TextBox {
 
 impl TextBox {
     pub fn new(style: &Style, text: String) -> TextBox {
-        let letters: Vec<Letter> = text
-            .chars()
-            .enumerate()
-            .map(|(id, c)| Letter {
-                letter: c,
-                color: Rc::clone(&style.theme.ghost),
-                char_id: id,
-                word_id: id,
-            })
-            .collect();
-
         let words: Vec<Word> = text
             .split(" ")
             .enumerate()
@@ -73,33 +62,30 @@ impl TextBox {
                 ..Style::default()
             },
             state: TextBoxState {
-                letters,
-                index: 0,
                 word_index: 0,
                 char_index: 0,
                 time_started: Instant::now(),
                 started: false,
                 words,
+                wrongs: 0,
+                char_typed: 0,
             },
         }
     }
 
     pub fn refresh(&mut self, text: String) {
-        let letters: Vec<Letter> = text
-            .chars()
+        let words: Vec<Word> = text
+            .split(" ")
             .enumerate()
-            .map(|(id, c)| Letter {
-                letter: c,
-                color: Rc::clone(&self.style.theme.ghost),
-                char_id: id,
-                word_id: id,
-            })
+            .map(|(id, word)| Word::from_str(&self.style, word, id))
             .collect();
 
-        self.state.letters = letters;
-        self.state.index = 0;
+        self.state.words = words;
+        self.state.word_index = 0;
+        self.state.char_index = 0;
         self.state.started = false;
-
+        self.state.wrongs = 0;
+        self.state.char_typed = 0;
         self.style.offset_y = None;
     }
 
@@ -110,7 +96,24 @@ impl TextBox {
             return true;
         }
 
+        self.state.char_typed += 1;
+
         if c == ' ' {
+            // check if current word is wrong
+            if !self.state.words[self.state.word_index]
+                .letters
+                .iter()
+                .all(|l| *l.color.borrow() == *self.style.theme.text.borrow())
+            {
+                if !self.state.words[self.state.word_index].is_error {
+                    self.state.wrongs += 1;
+                    self.state.words[self.state.word_index].is_error = true;
+                }
+            } else if self.state.words[self.state.word_index].is_error {
+                self.state.wrongs -= 1;
+                self.state.words[self.state.word_index].is_error = false;
+            }
+
             // move to the next word
             self.state.word_index += 1;
             self.state.char_index = 0;
@@ -159,12 +162,15 @@ impl TextBox {
                 return;
             }
 
+            self.state.char_typed -= 1;
+
             // move back to the previous word
             self.state.word_index -= 1;
             self.state.char_index = self.state.words[self.state.word_index].last_typed;
             return;
         }
 
+        self.state.char_typed -= 1;
         self.state.char_index -= 1;
         self.state.words[self.state.word_index].last_typed = self.state.char_index;
 
@@ -205,34 +211,24 @@ impl TextBox {
 
     pub fn get_wpm(&self) -> u16 {
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
-        let mut wrongs = 0.0;
-        let mut is_word_wrong = false;
 
-        for letter in &self.state.letters {
-            if *letter.color.borrow() == *self.style.theme.error.borrow() && !is_word_wrong {
-                wrongs += 1.0;
-                is_word_wrong = true;
-            }
-            if letter.letter == ' ' {
-                is_word_wrong = false;
-            }
+        if time_passed == 0 {
+            return 0;
         }
 
-        ((1000.0 * 60.0 * (self.state.letters.len() as f32 / 5.0 - wrongs)) as u128 / time_passed)
-            as u16
+        ((1000.0 * 60.0 * (self.state.char_typed as f32 / 5.0 - self.state.wrongs as f32)) as u128
+            / time_passed) as u16
     }
 
     pub fn update(&mut self) {
         self.style.draw_bg();
 
-        //let line_breaks =
-        //    app::text::print_letters_wrap(&self.style, &self.state.letters, self.state.index);
         let line_breaks = self.print_words();
         self.update_position(&line_breaks);
 
         self.style.draw_mask();
 
-        if self.state.index > 0 && !self.state.started {
+        if self.state.char_index > 0 && !self.state.started {
             self.state.started = true;
             self.state.time_started = Instant::now();
         }

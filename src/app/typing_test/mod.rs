@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
@@ -25,6 +27,9 @@ pub async fn run(app: &mut App) {
     let next_button = next_button::NextButton::new(&app.style);
     let restart_button = restart_button::RestartButton::new(&app.style);
     let theme_button = theme_button::ThemeButton::new(&app.style);
+
+    let mut time = Instant::now();
+    let mut wpm = 0;
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -128,10 +133,15 @@ pub async fn run(app: &mut App) {
             _ => (),
         }
 
+        if time.elapsed().as_millis() >= 500 {
+            wpm = typingbox.get_wpm();
+            time = Instant::now();
+        }
+
         window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(typingbox.state.index, typingbox.state.letters.len());
+        tracker.update(typingbox.state.word_index, typingbox.state.words.len(), wpm);
 
         if focus != TypingBox {
             next_button.update();
