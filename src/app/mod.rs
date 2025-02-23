@@ -126,10 +126,41 @@ impl Display for Mode {
 }
 
 #[derive(Debug, Clone)]
+pub struct Word {
+    pub letters: Vec<Letter>,
+    pub is_error: bool,
+    pub id: usize,
+    pub word: String,
+    pub last_typed: usize,
+}
+
+impl Word {
+    pub fn from_str(style: &Style, text: &str, id: usize) -> Word {
+        Word {
+            letters: text
+                .chars()
+                .enumerate()
+                .map(|(i, letter)| Letter {
+                    letter,
+                    color: Rc::clone(&style.theme.ghost),
+                    char_id: i,
+                    word_id: id,
+                })
+                .collect(),
+            is_error: false,
+            id,
+            word: text.to_string(),
+            last_typed: 0,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Letter {
     pub letter: char,
     pub color: Rc<RefCell<Color>>,
-    pub id: usize,
+    pub char_id: usize,
+    pub word_id: usize,
 }
 
 pub enum Value<T> {
