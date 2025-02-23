@@ -111,12 +111,14 @@ impl TextBox {
         }
 
         if c == ' ' {
+            // move to the next word
             self.state.word_index += 1;
             self.state.char_index = 0;
             return false;
         }
 
         if self.state.char_index == self.state.words[self.state.word_index].letters.len() {
+            // if its the end of a word allow overflow
             self.state.words[self.state.word_index]
                 .letters
                 .push(Letter {
@@ -125,7 +127,9 @@ impl TextBox {
                     char_id: self.state.char_index,
                     word_id: self.state.word_index,
                 });
+
             self.state.char_index += 1;
+            self.state.words[self.state.word_index].last_typed = self.state.char_index;
             return false;
         }
 
@@ -144,22 +148,27 @@ impl TextBox {
         };
 
         self.state.char_index += 1;
+        self.state.words[self.state.word_index].last_typed = self.state.char_index;
         false
     }
 
     pub fn delete_char(&mut self) {
         if self.state.char_index == 0 {
+            // return if its the first word
             if self.state.word_index == 0 {
                 return;
             }
 
+            // move back to the previous word
             self.state.word_index -= 1;
-            self.state.char_index = self.state.words[self.state.word_index].letters.len();
+            self.state.char_index = self.state.words[self.state.word_index].last_typed;
             return;
         }
 
         self.state.char_index -= 1;
+        self.state.words[self.state.word_index].last_typed = self.state.char_index;
 
+        // check if we are deleting overflow
         if self.state.char_index >= self.state.words[self.state.word_index].word.len() {
             self.state.words[self.state.word_index].letters.pop();
         } else {
