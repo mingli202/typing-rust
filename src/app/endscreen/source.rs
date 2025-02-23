@@ -1,9 +1,10 @@
 use std::rc::Rc;
 
+use macroquad::text::Font;
 use macroquad::{text, window};
 
 use crate::app::style::Style;
-use crate::app::text::WrappedText;
+use crate::app::text::{PrintOptions, WrappedText};
 use crate::app::theme::Theme;
 use crate::app::{self, Value};
 
@@ -13,9 +14,9 @@ pub struct Source {
 }
 
 impl Source {
-    pub fn new(text: String, style: &Style) -> Self {
+    pub fn new(text: String, style: &Style, font: Rc<Font>) -> Self {
         let f1 = Rc::clone(&style.font_size);
-        let text_color = Rc::clone(&style.theme.text);
+        let font1 = Rc::clone(&font);
 
         Source {
             text: text.clone(),
@@ -33,11 +34,8 @@ impl Source {
                     let wt = WrappedText::new(
                         &text[..],
                         window::screen_width() - 40.0,
-                        text::TextParams {
-                            font_size: *f1.borrow() as u16,
-                            color: *text_color.borrow(),
-                            ..text::TextParams::default()
-                        },
+                        *f1.borrow(),
+                        Rc::clone(&font1),
                     );
 
                     window::screen_height() - wt.get_height() - 40.0
@@ -50,12 +48,14 @@ impl Source {
         }
     }
 
-    pub fn update(&self) {
+    pub fn update(&self, font: Rc<Font>) {
         app::text::print_text(
             &self.style,
             &self.text,
-            self.style.x.get(&self.style),
-            self.style.y.get(&self.style),
+            PrintOptions {
+                font: Some(Rc::clone(&font)),
+                ..PrintOptions::default()
+            },
         );
     }
 }

@@ -1,7 +1,9 @@
 use std::rc::Rc;
 
+use macroquad::text::Font;
 use macroquad::{text, window};
 
+use crate::app::text::PrintOptions;
 use crate::app::{self, theme::Theme};
 
 use crate::app::{BorderParams, Style, Value};
@@ -52,12 +54,14 @@ impl RestartButton {
         }
     }
 
-    pub fn update(&self) {
-        app::text::print_text(
+    pub fn update(&self, font: Rc<Font>) {
+        crate::app::text::print_text(
             &self.style,
             &self.text,
-            self.style.x.get(&self.style),
-            self.style.y.get(&self.style),
+            PrintOptions {
+                font: Some(Rc::clone(&font)),
+                ..PrintOptions::default()
+            },
         );
     }
 }

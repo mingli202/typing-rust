@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
-use macroquad::text;
+use macroquad::text::{self, Font};
 
 use crate::app::style::{BorderParams, Style};
+use crate::app::text::PrintOptions;
 use crate::app::theme::{Theme, ThemeName};
 use crate::app::{self, Value};
 
@@ -63,14 +64,16 @@ impl Button {
         }
     }
 
-    pub fn update(&self) {
+    pub fn update(&self, font: Rc<Font>) {
         self.style.draw_bg();
         self.style.draw_border();
         app::text::print_text(
             &self.style,
             &self.text,
-            self.style.x.get(&self.style),
-            self.style.y.get(&self.style),
+            PrintOptions {
+                font: Some(Rc::clone(&font)),
+                ..PrintOptions::default()
+            },
         );
     }
 }

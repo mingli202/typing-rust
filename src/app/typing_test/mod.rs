@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use std::time::Instant;
 
 use macroquad::input::{self, KeyCode, MouseButton};
@@ -22,8 +23,12 @@ pub async fn run(app: &mut App) {
     let mut focus = Nothing;
     let mut is_mode_hover = false;
 
-    let mut typingbox = textbox::TextBox::new(&app.style, app.state.mode.get_inner().clone());
-    let tracker = tracker::Tracker::new(&app.style);
+    let mut typingbox = textbox::TextBox::new(
+        &app.style,
+        app.state.mode.get_inner().clone(),
+        Rc::clone(&app.typing_font),
+    );
+    let tracker = tracker::Tracker::new(&app.style, Rc::clone(&app.font));
     let next_button = next_button::NextButton::new(&app.style);
     let restart_button = restart_button::RestartButton::new(&app.style);
     let theme_button = theme_button::ThemeButton::new(&app.style);
@@ -136,17 +141,23 @@ pub async fn run(app: &mut App) {
         if time.elapsed().as_millis() >= 500 {
             wpm = typingbox.get_wpm();
             time = Instant::now();
+            app.state.incremental_wpm.push(wpm);
         }
 
         window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(typingbox.state.word_index, typingbox.state.words.len(), wpm);
+        tracker.update(
+            Rc::clone(&app.font),
+            typingbox.state.word_index,
+            typingbox.state.words.len(),
+            wpm,
+        );
 
         if focus != TypingBox {
-            next_button.update();
-            restart_button.update();
-            theme_button.update();
+            next_button.update(Rc::clone(&app.font));
+            restart_button.update(Rc::clone(&app.font));
+            theme_button.update(Rc::clone(&app.font));
         }
 
         match focus {

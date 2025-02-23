@@ -1,6 +1,7 @@
 use crate::data_provider::{Data, Quote};
 use crate::Config;
 use macroquad::color::Color;
+use macroquad::text::{load_ttf_font, Font};
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt::Display;
@@ -26,10 +27,21 @@ pub struct App {
     data: Data,
     config: Config,
     state: AppState,
+    pub typing_font: Rc<Font>,
+    pub font: Rc<Font>,
 }
 
 impl App {
-    pub fn new(data: Data, config: Config) -> Self {
+    pub async fn new(data: Data, config: Config) -> Self {
+        let typing_font: Font =
+            load_ttf_font("/Users/vincentliu/Library/Fonts/SauceCodeProNerdFontMono-Regular.ttf")
+                .await
+                .unwrap();
+
+        let font: Font = load_ttf_font("/System/Library/Fonts/Helvetica.ttc")
+            .await
+            .unwrap();
+
         App {
             data,
             style: Style {
@@ -39,6 +51,8 @@ impl App {
             },
             config,
             state: AppState::default(),
+            typing_font: Rc::new(typing_font),
+            font: Rc::new(font),
         }
     }
 
@@ -55,17 +69,11 @@ impl App {
     }
 }
 
-#[derive(Eq, Hash, PartialEq, Clone, Debug)]
-enum Screen {
-    TypingTest,
-    End,
-    ThemeSelect,
-}
-
 pub struct AppState {
     wpm: u16,
     mode: Mode,
     screen: Screen,
+    incremental_wpm: Vec<u16>,
 }
 
 impl Default for AppState {
@@ -77,8 +85,16 @@ impl Default for AppState {
                 s: "".to_string(),
             },
             screen: Screen::TypingTest,
+            incremental_wpm: vec![],
         }
     }
+}
+
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
+enum Screen {
+    TypingTest,
+    End,
+    ThemeSelect,
 }
 
 #[derive(Clone, Debug)]

@@ -1,7 +1,9 @@
 use std::rc::Rc;
 
+use macroquad::text::Font;
 use macroquad::{text, window};
 
+use crate::app::text::PrintOptions;
 use crate::app::Value;
 use crate::app::{
     style::{BorderParams, Style},
@@ -57,12 +59,14 @@ impl CancelButton {
         }
     }
 
-    pub fn update(&self) {
+    pub fn update(&self, font: Rc<Font>) {
         crate::app::text::print_text(
             &self.style,
             &self.text,
-            self.style.x.get(&self.style),
-            self.style.y.get(&self.style),
+            PrintOptions {
+                font: Some(Rc::clone(&font)),
+                ..PrintOptions::default()
+            },
         );
     }
 }

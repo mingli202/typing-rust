@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
+use macroquad::text::Font;
+
 use crate::app::style::Style;
+use crate::app::text::PrintOptions;
 use crate::app::theme::Theme;
 use crate::app::{self, Mode};
 
@@ -26,13 +29,15 @@ impl ModeSelect {
         }
     }
 
-    pub fn update(&self, mode: &Mode, is_hover: &bool) {
+    pub fn update(&self, font: Rc<Font>, mode: &Mode, is_hover: &bool) {
         let text = mode.to_string();
         app::text::print_text(
             &self.style,
             &text[..],
-            self.style.x.get(&self.style),
-            self.style.y.get(&self.style),
+            PrintOptions {
+                font: Some(Rc::clone(&font)),
+                ..PrintOptions::default()
+            },
         );
     }
 }

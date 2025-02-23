@@ -1,15 +1,18 @@
 use std::rc::Rc;
 
+use macroquad::text::Font;
 use macroquad::window;
 
+use crate::app::text::PrintOptions;
 use crate::app::{text, theme::Theme, Style, Value};
 
 pub struct Tracker {
     style: Style,
+    font: Rc<Font>,
 }
 
 impl Tracker {
-    pub fn new(style: &Style) -> Tracker {
+    pub fn new(style: &Style, font: Rc<Font>) -> Tracker {
         let font_size = Rc::clone(&style.font_size);
 
         Tracker {
@@ -28,15 +31,18 @@ impl Tracker {
                 font_size: Rc::clone(&style.font_size),
                 ..Style::default()
             },
+            font,
         }
     }
 
-    pub fn update(&self, index: usize, len: usize, wpm: u16) {
+    pub fn update(&self, font: Rc<Font>, index: usize, len: usize, wpm: u16) {
         text::print_text(
             &self.style,
             &format!("{}/{} {}", index, len, wpm),
-            self.style.x.get(&self.style),
-            self.style.y.get(&self.style),
+            PrintOptions {
+                font: Some(Rc::clone(&font)),
+                ..PrintOptions::default()
+            },
         );
     }
 }

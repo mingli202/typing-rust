@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::rc::Rc;
 use std::time::Instant;
 
-use macroquad::text::TextDimensions;
+use macroquad::text::{Font, TextDimensions, TextParams};
 use macroquad::{shapes, text, window};
 
 use crate::app::Word;
@@ -21,10 +21,11 @@ pub struct TextBoxState {
 pub struct TextBox {
     pub style: Style,
     pub state: TextBoxState,
+    pub font: Rc<Font>,
 }
 
 impl TextBox {
-    pub fn new(style: &Style, text: String) -> TextBox {
+    pub fn new(style: &Style, text: String, font: Rc<Font>) -> TextBox {
         let words: Vec<Word> = text
             .split(" ")
             .enumerate()
@@ -40,6 +41,7 @@ impl TextBox {
         let f2 = Rc::clone(&style.font_size);
 
         TextBox {
+            font,
             style: Style {
                 font_size: Rc::clone(&style.font_size),
                 border: Some(BorderParams {
@@ -272,8 +274,12 @@ impl TextBox {
                     .iter()
                     .fold(String::new(), |acc, l| acc + &l.letter.to_string());
 
-            let TextDimensions { width, .. } =
-                text::measure_text(&l, None, *self.style.font_size.borrow() as u16, 1.0);
+            let TextDimensions { width, .. } = text::measure_text(
+                &l,
+                Some(&self.font),
+                *self.style.font_size.borrow() as u16,
+                1.0,
+            );
 
             if width > self.style.width.get(&self.style) - 2.0 * p_x {
                 self.print_letters(
@@ -325,7 +331,7 @@ impl TextBox {
             &letters
                 .iter()
                 .fold(String::new(), |acc, l| acc + &l.letter.to_string()),
-            None,
+            Some(&self.font),
             *self.style.font_size.borrow() as u16,
             1.0,
         )
@@ -350,7 +356,7 @@ impl TextBox {
 
         let dimensions = text::measure_text(
             &letter.letter.to_string(),
-            None,
+            Some(&self.font),
             *style.font_size.borrow() as u16,
             1.0,
         );
@@ -378,12 +384,16 @@ impl TextBox {
         let x = x + p_x + o_x;
         let y = y + p_y + o_y;
 
-        text::draw_text(
+        text::draw_text_ex(
             &letter.letter.to_string(),
             x,
             y,
-            *style.font_size.borrow(),
-            *letter.color.borrow(),
+            TextParams {
+                font: Some(&self.font),
+                font_size: *style.font_size.borrow() as u16,
+                color: *letter.color.borrow(),
+                ..TextParams::default()
+            },
         );
 
         if *letter.color.borrow() == *style.theme.error.borrow() {
@@ -398,12 +408,16 @@ impl TextBox {
         }
 
         if letter.char_id == char_index && letter.word_id == word_index {
-            text::draw_text(
+            text::draw_text_ex(
                 "|",
                 x - dimensions.width / 2.0,
                 y,
-                *style.font_size.borrow(),
-                *style.theme.text.borrow(),
+                TextParams {
+                    font: Some(&self.font),
+                    font_size: *style.font_size.borrow() as u16,
+                    color: *style.theme.text.borrow(),
+                    ..TextParams::default()
+                },
             );
         }
 

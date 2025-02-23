@@ -119,11 +119,11 @@ pub async fn run(app: &mut App) {
                 }
             }
 
-            button.update();
+            button.update(Rc::clone(&app.font));
             x += width + 50.0;
         }
 
-        cancel_button.update();
+        cancel_button.update(Rc::clone(&app.font));
 
         if util::is_hover(&cancel_button.style) || focus == -1 {
             focus = -1;

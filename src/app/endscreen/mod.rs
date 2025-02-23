@@ -1,9 +1,11 @@
 use std::process;
+use std::rc::Rc;
 
 use macroquad::input::{self, KeyCode, MouseButton};
 use macroquad::math::Vec2;
 use macroquad::window;
 
+mod graph;
 mod next_button;
 mod quit_button;
 mod restart_button;
@@ -17,11 +19,11 @@ pub async fn run(app: &mut App) {
     input::show_mouse(true);
     let mut focus = Nothing;
 
+    let wpm = wpm::Wpm::new(&app.style, app.state.wpm);
     let next_button = next_button::NextButton::new(&app.style);
     let quit_button = quit_button::QuitButton::new(&app.style);
     let restart_button = restart_button::RestartButton::new(&app.style);
-    let wpm = wpm::Wpm::new(&app.style, app.state.wpm);
-    let source = source::Source::new(app.state.mode.to_string(), &app.style);
+    let source = source::Source::new(app.state.mode.to_string(), &app.style, Rc::clone(&app.font));
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -114,11 +116,11 @@ pub async fn run(app: &mut App) {
 
         window::clear_background(*app.style.theme.bg.borrow());
 
-        next_button.update();
-        quit_button.update();
-        restart_button.update();
-        wpm.update();
-        source.update();
+        next_button.update(Rc::clone(&app.font));
+        quit_button.update(Rc::clone(&app.font));
+        restart_button.update(Rc::clone(&app.font));
+        wpm.update(Rc::clone(&app.font));
+        source.update(Rc::clone(&app.font));
 
         match focus {
             QuitButton => quit_button.style.draw_border(),
@@ -126,6 +128,8 @@ pub async fn run(app: &mut App) {
             RestartButton => restart_button.style.draw_border(),
             _ => (),
         }
+
+        util::draw_midpoint();
 
         window::next_frame().await;
     }
