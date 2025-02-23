@@ -14,4 +14,4 @@ Tech Stack:
 - macroquad for graphics library and keyboard input
 
 
-[![Handwritten numbers](https://img.youtube.com/vi/b2UXfyey8tA/0.jpg)](https://youtu.be/b2UXfyey8tA)
+[![Handwritten numbers](https://img.youtube.com/vi/9dQt7AX20_4/0.jpg)](https://youtu.be/9dQt7AX20_4 )
