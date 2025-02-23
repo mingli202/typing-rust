@@ -261,7 +261,10 @@ impl TextBox {
                 .collect::<Vec<String>>()
                 .join(" ")
                 + " "
-                + &word.word;
+                + &word
+                    .letters
+                    .iter()
+                    .fold(String::new(), |acc, l| acc + &l.letter.to_string());
 
             let TextDimensions { width, .. } =
                 text::measure_text(&l, None, *self.style.font_size.borrow() as u16, 1.0);
