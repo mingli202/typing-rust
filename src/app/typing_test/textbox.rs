@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::cmp::{max, Ordering};
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -56,10 +56,10 @@ impl TextBox {
                 },
                 x: Value::Relative(Box::new(|_| (0.5 * window::screen_width()) / 2.0)),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() - *f1.borrow() * 3.0) / 2.0
+                    (window::screen_height() - *f1.borrow() * (3.0 + 2.0 * 0.15)) / 2.0
                 })),
                 width: Value::Relative(Box::new(|_| window::screen_width() / 2.0)),
-                height: Value::Relative(Box::new(move |_| *f2.borrow() * 3.0)),
+                height: Value::Relative(Box::new(move |_| *f2.borrow() * (3.0 + 2.0 * 0.15))),
                 clip: true,
                 ..Style::default()
             },
@@ -217,7 +217,7 @@ impl TextBox {
             left -= 1;
         }
         self.style.offset_y = Some(Value::Absolute(
-            -(left as f32 * *self.style.font_size.borrow()),
+            -(left as f32 * *self.style.font_size.borrow() * 1.15),
         ));
     }
 
@@ -282,10 +282,12 @@ impl TextBox {
             );
 
             if width > self.style.width.get(&self.style) - 2.0 * p_x {
+                let y = *self.style.font_size.borrow() * lines as f32 * 1.15;
+
                 self.print_letters(
                     &line,
                     self.style.x.get(&self.style),
-                    self.style.y.get(&self.style) + lines as f32 * *self.style.font_size.borrow(),
+                    self.style.y.get(&self.style) + y,
                     self.state.word_index,
                     self.state.char_index,
                 );
@@ -298,10 +300,11 @@ impl TextBox {
             }
         }
 
+        let y = *self.style.font_size.borrow() * lines as f32 * 1.15;
         self.print_letters(
             &line,
             self.style.x.get(&self.style),
-            self.style.y.get(&self.style) + lines as f32 * *self.style.font_size.borrow(),
+            self.style.y.get(&self.style) + y,
             self.state.word_index,
             self.state.char_index,
         );
