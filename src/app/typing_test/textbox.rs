@@ -90,33 +90,12 @@ impl TextBox {
     }
 
     pub fn on_type(&mut self, c: char) -> bool {
-        if self.state.word_index == self.state.words.len() - 1
-            && self.state.char_index == self.state.words.last().unwrap().letters.len() - 1
-        {
+        if self.state.word_index == self.state.words.len() - 1 && c == ' ' {
             return true;
         }
 
-        self.state.char_typed += 1;
-
         if c == ' ' {
-            // check if current word is wrong
-            if !self.state.words[self.state.word_index]
-                .letters
-                .iter()
-                .all(|l| *l.color.borrow() == *self.style.theme.text.borrow())
-            {
-                if !self.state.words[self.state.word_index].is_error {
-                    self.state.wrongs += 1;
-                    self.state.words[self.state.word_index].is_error = true;
-                }
-            } else if self.state.words[self.state.word_index].is_error {
-                self.state.wrongs -= 1;
-                self.state.words[self.state.word_index].is_error = false;
-            }
-
-            // move to the next word
-            self.state.word_index += 1;
-            self.state.char_index = 0;
+            self.submit_word();
             return false;
         }
 
