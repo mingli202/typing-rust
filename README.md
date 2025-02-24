@@ -13,5 +13,6 @@ Fast and minimal typing test binary crate written in rust
 Tech Stack:
 - macroquad for graphics library and keyboard input
 
+Special thanks to Monkeytype for inspiring me to build this and providing the default words.
 
-[![Handwritten numbers](https://img.youtube.com/vi/9dQt7AX20_4/0.jpg)](https://youtu.be/9dQt7AX20_4 )
+[![Typing demo](https://img.youtube.com/vi/9dQt7AX20_4/0.jpg)](https://youtu.be/9dQt7AX20_4 )

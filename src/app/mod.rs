@@ -105,7 +105,23 @@ pub enum Mode {
 
 impl Mode {
     pub fn new(data: &Data) -> Self {
+        Self::with_quote(data)
+    }
+
+    pub fn with_quote(data: &Data) -> Self {
         Mode::Quote(data.get_random_quote().clone())
+    }
+
+    pub fn with_words(data: &Data, n: usize) -> Self {
+        let words = data.get_n_random_words(n);
+        Mode::Words {
+            n,
+            s: words
+                .iter()
+                .map(|w| w.to_string())
+                .collect::<Vec<String>>()
+                .join(" "),
+        }
     }
 
     pub fn get_inner(&self) -> String {
