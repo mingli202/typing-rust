@@ -1,4 +1,5 @@
 use rand::prelude::*;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 
@@ -27,30 +28,30 @@ impl Data {
         words_path: Option<String>,
         quotes_path: Option<String>,
     ) -> Result<Self, Box<dyn Error>> {
-        let words = if let Some(p) = words_path {
-            fs::read_to_string(p)?
-        } else {
-            include_str!("../data/words.txt").to_string()
-        }
-        .split('\n')
-        .map(|w| w.to_string())
-        .collect();
+        let words = serde_json::from_str::<Vec<String>>(
+            &(if let Some(p) = words_path {
+                fs::read_to_string(p)?
+            } else {
+                include_str!("../data/words.json").to_string()
+            }),
+        )?;
 
-        let quotes = if let Some(p) = quotes_path {
-            fs::read_to_string(p)?
-        } else {
-            include_str!("../data/quotes.txt").to_string()
-        }
-        .split("\n\n")
-        .flat_map(|entry| {
-            let mut entry: Vec<String> = entry.split('\n').map(|s| s.to_string()).collect();
-            let source = entry[0].clone();
+        let quotes = serde_json::from_str::<HashMap<String, Vec<String>>>(
+            &(if let Some(p) = quotes_path {
+                fs::read_to_string(p)?
+            } else {
+                include_str!("../data/quotes.json").to_string()
+            }),
+        )?
+        .into_iter()
+        .flat_map(|(src, qs)| {
+            let mut qs = qs;
             let mut v = vec![];
 
-            while let Some(quote) = entry.pop() {
-                if quote != source {
+            while let Some(quote) = qs.pop() {
+                if quote != src {
                     v.push(Quote {
-                        source: source.clone(),
+                        source: src.clone(),
                         quote,
                     });
                 }
