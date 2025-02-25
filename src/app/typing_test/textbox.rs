@@ -403,14 +403,18 @@ impl TextBox {
             },
         );
 
-        if *letter.color.borrow() == *style.theme.error.borrow() {
+        if (self.state.word_index > letter.word_id
+            || self.state.word_index == letter.word_id && self.state.char_index > letter.char_id)
+            && letter.letter != ' '
+            && *letter.color.borrow() != *style.theme.text.borrow()
+        {
             shapes::draw_line(
                 x,
                 y + 0.2 * *style.font_size.borrow(),
                 x + dimensions.width,
                 y + 0.2 * *style.font_size.borrow(),
                 0.05 * *style.font_size.borrow(),
-                *letter.color.borrow(),
+                *style.theme.error.borrow(),
             );
         }
 
