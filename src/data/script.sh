@@ -11,9 +11,6 @@ for name in "" "_1k" "_5k" "_10k" "_25k" "_450k" "_commonly_misspelled" "_double
 	mv tmps.json tmp.json
 done
 
-curl 'https://raw.githubusercontent.com/monkeytypegame/monkeytype/refs/heads/master/frontend/static/quotes/english.json' | jq '.quotes | map(.text|split(" ")) | flatten' | jq -s -c '.[0] + .[1]' tmp.json - >tmps.json
-mv tmps.json tmp.json
-
 jq -c "map(ascii_downcase) | unique" tmp.json >tmps.json
 mv tmps.json tmp.json
 
