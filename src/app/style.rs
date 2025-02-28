@@ -82,6 +82,47 @@ impl Style {
             );
         }
     }
+
+    pub fn x(&self) -> f32 {
+        self.x.get(self)
+    }
+    pub fn y(&self) -> f32 {
+        self.y.get(self)
+    }
+    pub fn width(&self) -> f32 {
+        self.width.get(self)
+    }
+    pub fn height(&self) -> f32 {
+        self.height.get(self)
+    }
+    pub fn padding_x(&self) -> f32 {
+        if let Some(v) = &self.padding_x {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+    pub fn padding_y(&self) -> f32 {
+        if let Some(v) = &self.padding_y {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+    pub fn offset_x(&self) -> f32 {
+        if let Some(v) = &self.offset_x {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+    pub fn offset_y(&self) -> f32 {
+        if let Some(v) = &self.offset_y {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
 }
 
 pub enum Value<T> {
