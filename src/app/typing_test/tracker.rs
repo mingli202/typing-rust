@@ -17,11 +17,7 @@ impl Tracker {
 
         Tracker {
             style: Style {
-                x: Value::Relative(Box::new(|_| (0.5 * window::screen_width()) / 2.0)),
-                y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() - *font_size.borrow() * 3.0) / 2.0
-                        - *font_size.borrow() * 1.5
-                })),
+                y: Value::Relative(Box::new(move |_| -*font_size.borrow() * 1.5)),
                 theme: Theme {
                     bg: Rc::clone(&style.theme.bg),
                     ghost: Rc::clone(&style.theme.ghost),
@@ -35,11 +31,13 @@ impl Tracker {
         }
     }
 
-    pub fn update(&self, index: usize, len: usize, wpm: u16) {
+    pub fn update(&self, typingbox_style: &Style, index: usize, len: usize, wpm: u16) {
         text::print_text(
             &self.style,
             &format!("{}/{} {}", index, len, wpm),
             PrintOptions {
+                x: Some(typingbox_style.x()),
+                y: Some(typingbox_style.y() + self.style.y()),
                 font: Some(Rc::clone(&self.font)),
                 ..PrintOptions::default()
             },

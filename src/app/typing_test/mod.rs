@@ -151,7 +151,12 @@ pub async fn run(app: &mut App) {
         window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(typingbox.state.word_index, typingbox.state.words.len(), wpm);
+        tracker.update(
+            &typingbox.style,
+            typingbox.state.word_index,
+            typingbox.state.words.len(),
+            wpm,
+        );
 
         if focus != TypingBox {
             next_button.update();

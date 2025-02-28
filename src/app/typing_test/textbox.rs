@@ -5,8 +5,8 @@ use std::time::Instant;
 use macroquad::text::{Font, TextDimensions, TextParams};
 use macroquad::{shapes, text, window};
 
-use crate::app::Word;
 use crate::app::{theme::Theme, BorderParams, Letter, Style, Value};
+use crate::app::{util, Word};
 
 pub struct TextBoxState {
     pub words: Vec<Word>,
@@ -39,6 +39,9 @@ impl TextBox {
 
         let f1 = Rc::clone(&style.font_size);
         let f2 = Rc::clone(&style.font_size);
+        let f3 = Rc::clone(&style.font_size);
+
+        let font1 = Rc::clone(&font);
 
         TextBox {
             font,
@@ -54,11 +57,20 @@ impl TextBox {
                     text: Rc::clone(&style.theme.text),
                     error: Rc::clone(&style.theme.error),
                 },
-                x: Value::Relative(Box::new(|_| (0.5 * window::screen_width()) / 2.0)),
+                x: Value::Relative(Box::new(move |this| {
+                    (window::screen_width() - this.width()) / 2.0
+                })),
                 y: Value::Relative(Box::new(move |_| {
                     (window::screen_height() - *f1.borrow() * (3.0 + 2.0 * 0.15)) / 2.0
                 })),
-                width: Value::Relative(Box::new(|_| window::screen_width() / 2.0)),
+                width: Value::Relative(Box::new(move |_| {
+                    util::clamp(
+                        0.0,
+                        window::screen_width() * 0.8,
+                        text::measure_text("o", Some(&font1), *f3.borrow() as u16, 1.0).width
+                            * 80.0,
+                    )
+                })),
                 height: Value::Relative(Box::new(move |_| *f2.borrow() * (3.0 + 2.0 * 0.15))),
                 clip: true,
                 ..Style::default()
