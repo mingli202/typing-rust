@@ -16,7 +16,7 @@ pub struct PrintOptions {
     pub font_size: Option<f32>,
 }
 
-pub fn print_text(style: &Style, text: &str, opts: PrintOptions) {
+pub fn print_text(style: &Style, text: &str, opts: PrintOptions) -> TextDimensions {
     let p_x = match &style.padding_x {
         Some(p) => p.get(style),
         _ => 0.0,
@@ -40,7 +40,8 @@ pub fn print_text(style: &Style, text: &str, opts: PrintOptions) {
     let x = opts.x.unwrap_or(style.x.get(style));
     let y = opts.y.unwrap_or(style.y.get(style));
 
-    let fsize = *style.font_size.borrow();
+    let fsize = opts.font_size.unwrap_or(*style.font_size.borrow());
+
     if style.wrap {
         let wt = WrappedText::new(
             text,
@@ -50,6 +51,12 @@ pub fn print_text(style: &Style, text: &str, opts: PrintOptions) {
         );
 
         wt.print(x + p_x + o_x, y + p_y + o_y, *style.theme.text.borrow());
+
+        TextDimensions {
+            width: wt.width,
+            height: wt.height,
+            offset_y: 0.0,
+        }
     } else {
         let TextDimensions { offset_y, .. } =
             macroquad::text::measure_text(text, opts.font.as_deref(), fsize as u16, 1.0);
@@ -64,7 +71,7 @@ pub fn print_text(style: &Style, text: &str, opts: PrintOptions) {
                 color: *style.theme.text.borrow(),
                 ..TextParams::default()
             },
-        );
+        )
     }
 }
 
