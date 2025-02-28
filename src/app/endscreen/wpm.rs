@@ -17,12 +17,6 @@ pub struct Wpm {
 
 impl Wpm {
     pub fn new(style: &Style, wpm: u16, accuracy: i32, time: Duration, font: Rc<Font>) -> Wpm {
-        let f1 = Rc::clone(&style.font_size);
-        let f2 = Rc::clone(&style.font_size);
-
-        let font1 = Rc::clone(&font);
-        let font2 = Rc::clone(&font);
-
         Wpm {
             font,
             wpm,
@@ -45,8 +39,11 @@ impl Wpm {
     pub fn update(&self) {
         let stats = [
             ("WPM", format!("{}", self.wpm)),
-            ("ACCURACY", format!("{}", self.accuracy)),
-            ("TIME", format!("{}", self.time.as_secs())),
+            ("ACC", format!("{}%", self.accuracy)),
+            (
+                "TIME",
+                format!("{:.1}s", self.time.as_millis() as f32 / 1000.0),
+            ),
         ];
 
         let (xs, width) = self.measure_text(&stats);

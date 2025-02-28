@@ -236,6 +236,10 @@ impl TextBox {
             / time_passed) as u16
     }
 
+    pub fn get_accuracey(&self) -> i32 {
+        100 - 100 * 5 * self.state.wrongs as i32 / self.state.char_typed
+    }
+
     pub fn update(&mut self) {
         self.style.draw_bg();
 

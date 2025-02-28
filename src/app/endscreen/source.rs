@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use macroquad::text::Font;
-use macroquad::{text, window};
+use macroquad::window;
 
 use crate::app::style::Style;
 use crate::app::text::{PrintOptions, WrappedText};
@@ -15,7 +15,7 @@ pub struct Source {
 }
 
 impl Source {
-    pub fn new(text: String, style: &Style, font: Rc<Font>) -> Self {
+    pub fn new(style: &Style, text: String, font: Rc<Font>) -> Self {
         let f1 = Rc::clone(&style.font_size);
         let font1 = Rc::clone(&font);
 
@@ -37,10 +37,11 @@ impl Source {
                         &text[..],
                         window::screen_width() - 40.0,
                         *f1.borrow(),
+                        1.0,
                         Rc::clone(&font1),
                     );
 
-                    window::screen_height() - wt.get_height() - 40.0
+                    window::screen_height() - wt.height() - 40.0
                 })),
                 padding_x: Some(Value::Absolute(20.0)),
                 padding_y: Some(Value::Absolute(20.0)),

@@ -19,11 +19,24 @@ pub async fn run(app: &mut App) {
     input::show_mouse(true);
     let mut focus = Nothing;
 
-    let wpm = wpm::Wpm::new(&app.style, app.state.wpm, Rc::clone(&app.font));
+    let wpm = wpm::Wpm::new(
+        &app.style,
+        app.state.wpm,
+        app.state.accuracy,
+        app.state.time,
+        Rc::clone(&app.font),
+    );
     let next_button = next_button::NextButton::new(&app.style, Rc::clone(&app.font));
     let quit_button = quit_button::QuitButton::new(&app.style, Rc::clone(&app.font));
     let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
-    let source = source::Source::new(app.state.mode.to_string(), &app.style, Rc::clone(&app.font));
+    let source = source::Source::new(&app.style, app.state.mode.to_string(), Rc::clone(&app.font));
+    let graph = graph::Graph::new(
+        &app.style,
+        app.state.incremental_wpm.clone(),
+        app.state.time,
+        app.state.accuracy,
+        Rc::clone(&app.font),
+    );
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -121,6 +134,7 @@ pub async fn run(app: &mut App) {
         restart_button.update();
         wpm.update();
         source.update();
+        graph.update(&app.style);
 
         match focus {
             QuitButton => quit_button.style.draw_border(),
@@ -128,6 +142,8 @@ pub async fn run(app: &mut App) {
             RestartButton => restart_button.style.draw_border(),
             _ => (),
         }
+
+        util::draw_midpoint();
 
         window::next_frame().await;
     }

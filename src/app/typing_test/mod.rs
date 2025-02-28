@@ -93,6 +93,9 @@ pub async fn run(app: &mut App) {
                         focus = TypingBox;
                         if typingbox.on_type(c) {
                             app.state.wpm = typingbox.get_wpm();
+                            app.state.accuracy = typingbox.get_accuracey();
+                            app.state.time = typingbox.state.time_started.elapsed();
+
                             app.state.screen = Screen::End;
                             return;
                         }
