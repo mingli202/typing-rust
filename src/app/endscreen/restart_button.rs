@@ -32,11 +32,8 @@ impl RestartButton {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move |_| {
-                    (window::screen_width() + *f1.borrow()) / 2.0
-                })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() + *font_size.borrow()) / 2.0
+                    window::screen_height() / 2.0 + 3.0 * *f1.borrow()
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {

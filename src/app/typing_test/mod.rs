@@ -171,6 +171,8 @@ pub async fn run(app: &mut App) {
             _ => (),
         }
 
+        util::draw_midpoint();
+
         window::next_frame().await;
     }
 }

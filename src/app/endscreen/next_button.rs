@@ -33,13 +33,8 @@ impl NextButton {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move |_| {
-                    (window::screen_width() - *f1.borrow()) / 2.0
-                        - text::measure_text(&text, Some(&font1), *f1.borrow() as u16, 1.0).width
-                        - 20.0
-                })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() + *f2.borrow()) / 2.0
+                    window::screen_height() / 2.0 + 3.0 * *f1.borrow()
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {
