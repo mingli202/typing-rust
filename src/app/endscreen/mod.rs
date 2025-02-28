@@ -35,6 +35,7 @@ pub async fn run(app: &mut App) {
     let graph = graph::Graph::new(
         &app.style,
         app.state.incremental_wpm.clone(),
+        app.state.max_wpm,
         app.state.time,
         app.state.accuracy,
         Rc::clone(&app.font),
@@ -144,7 +145,7 @@ pub async fn run(app: &mut App) {
         quit_button.update();
         wpm.update();
         source.update();
-        graph.update(&app.style);
+        graph.update();
 
         match focus {
             QuitButton => quit_button.style.draw_border(),
@@ -152,8 +153,6 @@ pub async fn run(app: &mut App) {
             RestartButton => restart_button.style.draw_border(),
             _ => (),
         }
-
-        util::draw_midpoint();
 
         window::next_frame().await;
     }

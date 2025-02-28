@@ -19,6 +19,7 @@ pub use self::theme::ThemeName;
 mod text;
 mod util;
 
+mod component;
 mod endscreen;
 mod focus;
 mod theme_select;
@@ -77,9 +78,19 @@ pub struct AppState {
     wpm: u16,
     mode: Mode,
     screen: Screen,
-    incremental_wpm: Vec<u16>,
+    incremental_wpm: Vec<(Duration, u16)>,
+    max_wpm: u16,
     time: Duration,
     accuracy: i32,
+}
+
+impl AppState {
+    pub fn add_wpm(&mut self, time: Duration, wpm: u16) {
+        if wpm > self.max_wpm {
+            self.max_wpm = wpm;
+        }
+        self.incremental_wpm.push((time, wpm));
+    }
 }
 
 impl Default for AppState {
@@ -90,8 +101,9 @@ impl Default for AppState {
                 n: 0,
                 s: "".to_string(),
             },
-            screen: Screen::End,
+            screen: Screen::TypingTest,
             incremental_wpm: vec![],
+            max_wpm: 0,
             time: Duration::from_secs(0),
             accuracy: 0,
         }

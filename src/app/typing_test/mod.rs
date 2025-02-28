@@ -19,6 +19,8 @@ use super::{App, Screen};
 
 pub async fn run(app: &mut App) {
     input::clear_input_queue();
+    app.state.max_wpm = 0;
+    app.state.incremental_wpm.clear();
 
     let mut focus = Nothing;
     let mut is_mode_hover = false;
@@ -34,7 +36,7 @@ pub async fn run(app: &mut App) {
     let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
     let theme_button = theme_button::ThemeButton::new(&app.style, Rc::clone(&app.font));
 
-    let mut time = Instant::now();
+    let mut interval = Instant::now();
     let mut wpm = 0;
 
     loop {
@@ -72,9 +74,11 @@ pub async fn run(app: &mut App) {
                         NextButton => {
                             app.state.mode.next(&app.data);
                             typingbox.refresh(app.state.mode.get_inner());
+                            app.state.incremental_wpm.clear();
                         }
                         RestartButton => {
                             typingbox.refresh(app.state.mode.get_inner());
+                            app.state.incremental_wpm.clear();
                         }
                         ThemeButton => {
                             app.state.screen = Screen::ThemeSelect;
@@ -96,6 +100,10 @@ pub async fn run(app: &mut App) {
                             app.state.accuracy = typingbox.get_accuracey();
                             app.state.time = typingbox.state.time_started.elapsed();
 
+                            wpm = typingbox.get_wpm();
+                            app.state
+                                .add_wpm(typingbox.state.time_started.elapsed(), wpm);
+
                             app.state.screen = Screen::End;
                             return;
                         }
@@ -115,9 +123,11 @@ pub async fn run(app: &mut App) {
                 NextButton => {
                     app.state.mode.next(&app.data);
                     typingbox.refresh(app.state.mode.get_inner());
+                    app.state.incremental_wpm.clear();
                 }
                 RestartButton => {
                     typingbox.refresh(app.state.mode.get_inner());
+                    app.state.incremental_wpm.clear();
                 }
                 ThemeButton => {
                     app.state.screen = Screen::ThemeSelect;
@@ -142,10 +152,14 @@ pub async fn run(app: &mut App) {
             _ => (),
         }
 
-        if time.elapsed().as_millis() >= 500 {
+        if typingbox.state.started
+            && typingbox.state.time_started.elapsed().as_millis() >= 500
+            && interval.elapsed().as_millis() >= 500
+        {
             wpm = typingbox.get_wpm();
-            time = Instant::now();
-            app.state.incremental_wpm.push(wpm);
+            interval = Instant::now();
+            app.state
+                .add_wpm(typingbox.state.time_started.elapsed(), wpm);
         }
 
         window::clear_background(*app.style.theme.bg.borrow());
@@ -170,8 +184,6 @@ pub async fn run(app: &mut App) {
             NextButton => next_button.style.draw_border(),
             _ => (),
         }
-
-        util::draw_midpoint();
 
         window::next_frame().await;
     }
