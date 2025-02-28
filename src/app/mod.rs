@@ -79,7 +79,7 @@ pub struct AppState {
     screen: Screen,
     incremental_wpm: Vec<u16>,
     time: Duration,
-    wrongs: i32,
+    accuracy: i32,
 }
 
 impl Default for AppState {
@@ -93,7 +93,7 @@ impl Default for AppState {
             screen: Screen::End,
             incremental_wpm: vec![],
             time: Duration::from_secs(0),
-            wrongs: 0,
+            accuracy: 0,
         }
     }
 }
