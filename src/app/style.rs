@@ -24,17 +24,16 @@ pub struct Style {
     pub padding_x: Option<Value<f32>>,
     pub padding_y: Option<Value<f32>>,
     pub wrap: bool,
-    pub parent: Option<Rc<Style>>,
 }
 
 impl Style {
     pub fn draw_border(&self) {
         if let Some(border) = &self.border {
             shapes::draw_rectangle_lines(
-                self.x.get(None),
-                self.y.get(None),
-                self.width.get(None),
-                self.height.get(None),
+                self.x.get(self),
+                self.y.get(self),
+                self.width.get(self),
+                self.height.get(self),
                 border.size,
                 *border.color.borrow(),
             );
@@ -43,10 +42,10 @@ impl Style {
 
     pub fn draw_bg(&self) {
         shapes::draw_rectangle(
-            self.x.get(None),
-            self.y.get(None),
-            self.width.get(None),
-            self.height.get(None),
+            self.x.get(self),
+            self.y.get(self),
+            self.width.get(self),
+            self.height.get(self),
             *self.theme.bg.borrow(),
         );
     }
@@ -64,21 +63,21 @@ impl Style {
             } = self;
 
             let p_y = match padding_y {
-                Some(p) => p.get(None),
+                Some(p) => p.get(self),
                 _ => 0.0,
             };
 
             let color = *theme.bg.borrow();
 
             // top
-            shapes::draw_rectangle(x.get(None), 0.0, width.get(None), y.get(None) + p_y, color);
+            shapes::draw_rectangle(x.get(self), 0.0, width.get(self), y.get(self) + p_y, color);
 
             // bottom
             shapes::draw_rectangle(
-                x.get(None),
-                y.get(None) + height.get(None) - p_y,
-                width.get(None),
-                window::screen_height() - (y.get(None) + height.get(None) - p_y),
+                x.get(self),
+                y.get(self) + height.get(self) - p_y,
+                width.get(self),
+                window::screen_height() - (y.get(self) + height.get(self) - p_y),
                 color,
             );
         }
@@ -86,12 +85,12 @@ impl Style {
 }
 
 pub enum Value<T> {
-    Relative(Box<dyn Fn(Option<&Style>) -> T>),
+    Relative(Box<dyn Fn(&Style) -> T>),
     Absolute(T),
 }
 
 impl<T: Clone> Value<T> {
-    pub fn get(&self, style: Option<&Style>) -> T {
+    pub fn get(&self, style: &Style) -> T {
         match self {
             Self::Absolute(v) => v.clone(),
             Self::Relative(v) => v(style),

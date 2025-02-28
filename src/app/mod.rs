@@ -2,14 +2,16 @@ use crate::data_provider::{Data, Quote};
 use crate::Config;
 use macroquad::color::Color;
 use macroquad::text::{load_ttf_font, Font};
+use macroquad::window;
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt::Display;
 use std::rc::Rc;
+use std::time::Duration;
 mod theme;
 
 mod style;
-use style::{BorderParams, Style};
+pub use style::{BorderParams, Style, Value};
 
 use self::theme::Theme;
 pub use self::theme::ThemeName;
@@ -46,6 +48,8 @@ impl App {
             data,
             style: Style {
                 font_size: Rc::new(RefCell::new(config.font_size)),
+                width: Value::Relative(Box::new(|_| window::screen_width())),
+                height: Value::Relative(Box::new(|_| window::screen_height())),
                 theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },
@@ -74,6 +78,8 @@ pub struct AppState {
     mode: Mode,
     screen: Screen,
     incremental_wpm: Vec<u16>,
+    time: Duration,
+    wrongs: i32,
 }
 
 impl Default for AppState {
@@ -84,8 +90,10 @@ impl Default for AppState {
                 n: 0,
                 s: "".to_string(),
             },
-            screen: Screen::TypingTest,
+            screen: Screen::End,
             incremental_wpm: vec![],
+            time: Duration::from_secs(0),
+            wrongs: 0,
         }
     }
 }
@@ -193,24 +201,4 @@ pub struct Letter {
     pub color: Rc<RefCell<Color>>,
     pub char_id: usize,
     pub word_id: usize,
-}
-
-pub enum Value<T> {
-    Relative(Box<dyn Fn(&Style) -> T>),
-    Absolute(T),
-}
-
-impl<T: Clone> Value<T> {
-    pub fn get(&self, style: &Style) -> T {
-        match self {
-            Self::Absolute(v) => v.clone(),
-            Self::Relative(v) => v(style),
-        }
-    }
-}
-
-impl<T: Default> Default for Value<T> {
-    fn default() -> Self {
-        Value::Absolute(T::default())
-    }
 }
