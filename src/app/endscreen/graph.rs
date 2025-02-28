@@ -111,7 +111,7 @@ impl Graph {
                 wpm_y_range[i],
                 x + width - width_of_space - w,
                 wpm_y_range[i],
-                1.0,
+                2.0,
                 *self.style.theme.ghost.borrow(),
             );
         }
@@ -149,7 +149,7 @@ impl Graph {
                 y,
                 _x,
                 y + height - fsize - width_of_space,
-                1.0,
+                2.0,
                 *self.style.theme.ghost.borrow(),
             );
         }
@@ -174,7 +174,7 @@ impl Graph {
                 last_y,
                 x_p,
                 y_p,
-                1.0,
+                2.0,
                 *self.style.theme.text.borrow(),
             );
 
