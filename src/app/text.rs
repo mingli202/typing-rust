@@ -14,43 +14,33 @@ pub struct PrintOptions {
     pub y: Option<f32>,
     pub font: Option<Rc<Font>>,
     pub font_size: Option<f32>,
+    pub font_scale: Option<f32>,
+    pub color: Option<Color>,
 }
 
 pub fn print_text(style: &Style, text: &str, opts: PrintOptions) -> TextDimensions {
-    let p_x = match &style.padding_x {
-        Some(p) => p.get(style),
-        _ => 0.0,
-    };
-
-    let o_x = match &style.offset_x {
-        Some(p) => p.get(style),
-        _ => 0.0,
-    };
-
-    let p_y = match &style.padding_y {
-        Some(p) => p.get(style),
-        _ => 0.0,
-    };
-
-    let o_y = match &style.offset_y {
-        Some(p) => p.get(style),
-        _ => 0.0,
-    };
+    let p_x = style.padding_x();
+    let o_x = style.offset_x();
+    let p_y = style.padding_y();
+    let o_y = style.offset_y();
 
     let x = opts.x.unwrap_or(style.x.get(style));
     let y = opts.y.unwrap_or(style.y.get(style));
 
     let fsize = opts.font_size.unwrap_or(*style.font_size.borrow());
+    let fscale = opts.font_scale.unwrap_or(1.0);
+    let color = opts.color.unwrap_or(*style.theme.text.borrow());
 
     if style.wrap {
         let wt = WrappedText::new(
             text,
             style.width.get(style) - 2.0 * p_x,
             *style.font_size.borrow(),
+            fscale,
             Rc::clone(&opts.font.unwrap()),
         );
 
-        wt.print(x + p_x + o_x, y + p_y + o_y, *style.theme.text.borrow());
+        wt.print(x + p_x + o_x, y + p_y + o_y, color);
 
         TextDimensions {
             width: wt.width,
@@ -59,7 +49,7 @@ pub fn print_text(style: &Style, text: &str, opts: PrintOptions) -> TextDimensio
         }
     } else {
         let TextDimensions { offset_y, .. } =
-            macroquad::text::measure_text(text, opts.font.as_deref(), fsize as u16, 1.0);
+            macroquad::text::measure_text(text, opts.font.as_deref(), fsize as u16, fscale);
 
         text::draw_text_ex(
             text,
@@ -68,7 +58,8 @@ pub fn print_text(style: &Style, text: &str, opts: PrintOptions) -> TextDimensio
             TextParams {
                 font: opts.font.as_deref(),
                 font_size: fsize as u16,
-                color: *style.theme.text.borrow(),
+                font_scale: fscale,
+                color,
                 ..TextParams::default()
             },
         )
@@ -81,11 +72,18 @@ pub struct WrappedText {
     width: f32,
     max_width: f32,
     font_size: f32,
+    font_scale: f32,
     font: Rc<Font>,
 }
 
 impl WrappedText {
-    pub fn new(text: &str, max_width: f32, font_size: f32, font: Rc<Font>) -> Self {
+    pub fn new(
+        text: &str,
+        max_width: f32,
+        font_size: f32,
+        font_scale: f32,
+        font: Rc<Font>,
+    ) -> Self {
         let mut lines: Vec<Vec<String>> = vec![];
 
         let mut line: Vec<String> = vec![];
@@ -96,12 +94,16 @@ impl WrappedText {
             let l = line.join(" ") + " " + word;
 
             let TextDimensions { width, .. } =
-                text::measure_text(&l, Some(&font), font_size as u16, 1.0);
+                text::measure_text(&l, Some(&font), font_size as u16, font_scale);
 
             if width > max_width {
-                let _w =
-                    text::measure_text(&line.join(" ")[..], Some(&font), font_size as u16, 1.0)
-                        .width;
+                let _w = text::measure_text(
+                    &line.join(" ")[..],
+                    Some(&font),
+                    font_size as u16,
+                    font_scale,
+                )
+                .width;
 
                 if _w > w {
                     w = _w;
@@ -129,16 +131,17 @@ impl WrappedText {
             width: w,
             font_size,
             font,
+            font_scale,
         }
     }
 
-    pub fn get_height(&self) -> f32 {
+    pub fn height(&self) -> f32 {
         self.height
     }
-    pub fn get_width(&self) -> f32 {
+    pub fn width(&self) -> f32 {
         self.width
     }
-    pub fn get_max_width(&self) -> f32 {
+    pub fn max_width(&self) -> f32 {
         self.max_width
     }
 
@@ -148,7 +151,7 @@ impl WrappedText {
                 &line[..],
                 Some(&self.font),
                 self.font_size as u16,
-                1.0,
+                self.font_scale,
             );
 
             text::draw_text_ex(
@@ -158,6 +161,7 @@ impl WrappedText {
                 TextParams {
                     font: Some(&self.font),
                     font_size: self.font_size as u16,
+                    font_scale: self.font_scale,
                     color,
                     ..TextParams::default()
                 },
