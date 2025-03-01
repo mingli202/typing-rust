@@ -75,17 +75,17 @@ impl App {
 }
 
 pub struct AppState {
-    wpm: u16,
+    wpm: f32,
     mode: Mode,
     screen: Screen,
-    incremental_wpm: Vec<(Duration, u16)>,
-    max_wpm: u16,
+    incremental_wpm: Vec<(Duration, f32)>,
+    max_wpm: f32,
     time: Duration,
     accuracy: i32,
 }
 
 impl AppState {
-    pub fn add_wpm(&mut self, time: Duration, wpm: u16) {
+    pub fn add_wpm(&mut self, time: Duration, wpm: f32) {
         if wpm > self.max_wpm {
             self.max_wpm = wpm;
         }
@@ -96,14 +96,14 @@ impl AppState {
 impl Default for AppState {
     fn default() -> Self {
         AppState {
-            wpm: 0,
+            wpm: 0.0,
             mode: Mode::Words {
                 n: 0,
                 s: "".to_string(),
             },
             screen: Screen::TypingTest,
             incremental_wpm: vec![],
-            max_wpm: 0,
+            max_wpm: 0.0,
             time: Duration::from_secs(0),
             accuracy: 0,
         }

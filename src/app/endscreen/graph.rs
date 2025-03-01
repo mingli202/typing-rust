@@ -1,8 +1,6 @@
-use std::process;
 use std::rc::Rc;
 use std::time::Duration;
 
-use macroquad::color::Color;
 use macroquad::text::{self, Font};
 use macroquad::{shapes, window};
 
@@ -12,8 +10,8 @@ use crate::app::theme::Theme;
 use crate::app::{self, util, Value};
 
 pub struct Graph {
-    incremental_wpm: Vec<(Duration, u16)>,
-    max_wpm: u16,
+    incremental_wpm: Vec<(Duration, f32)>,
+    max_wpm: f32,
     time: Duration,
     wrongs: i32,
     pub style: Style,
@@ -23,8 +21,8 @@ pub struct Graph {
 impl Graph {
     pub fn new(
         style: &Style,
-        incremental_wpm: Vec<(Duration, u16)>,
-        max_wpm: u16,
+        incremental_wpm: Vec<(Duration, f32)>,
+        max_wpm: f32,
         time: Duration,
         wrongs: i32,
         font: Rc<Font>,
@@ -69,7 +67,7 @@ impl Graph {
 
         let width_of_space = text::measure_text(" ", Some(&self.font), fsize as u16, 1.0).width;
 
-        let wpm_range = Self::range(0.0, self.max_wpm as f32, 5);
+        let wpm_range = Self::range(0.0, self.max_wpm, 5);
         let wpm_y_range = Self::range(y, y + height - fsize - width_of_space, 5);
 
         /*
@@ -80,7 +78,8 @@ impl Graph {
 
         for _wpm in &wpm_range {
             let _w =
-                text::measure_text(&format!("{}", _wpm), Some(&self.font), fsize as u16, 0.8).width;
+                text::measure_text(&format!("{:.0}", _wpm), Some(&self.font), fsize as u16, 0.8)
+                    .width;
 
             offset_xs.push(_w);
 
@@ -90,7 +89,7 @@ impl Graph {
         }
 
         for i in 0..wpm_range.len() {
-            let text = format!("{}", wpm_range[wpm_range.len() - 1 - i]);
+            let text = format!("{:.0}", wpm_range[wpm_range.len() - 1 - i]);
             let text_height = text::measure_text(&text, Some(&self.font), fsize as u16, 0.8).height;
 
             app::text::print_text(
@@ -121,11 +120,12 @@ impl Graph {
          * */
         w += width_of_space;
 
-        let time_x_range: Vec<f32> = (0..=self.time.as_secs())
+        let time_x_range: Vec<f32> = (self.incremental_wpm[0].0.as_secs()..=self.time.as_secs())
             .map(|s| (1000.0 * s as f32 / self.time.as_millis() as f32) * (width - 2.0 * w) + x + w)
             .collect();
 
-        let time_range: Vec<u64> = (0..=self.time.as_secs()).collect();
+        let time_range: Vec<u64> =
+            (self.incremental_wpm[0].0.as_secs()..=self.time.as_secs()).collect();
 
         for (_t, _x) in time_range.iter().zip(time_x_range) {
             let text = format!("{}", _t);
@@ -164,7 +164,7 @@ impl Graph {
                 t.as_millis() as f32 * (width - 2.0 * w) / self.time.as_millis() as f32 + x + w;
 
             let y_p = (height - fsize - width_of_space)
-                - *wpm as f32 * (height - fsize - width_of_space) / self.max_wpm as f32
+                - *wpm * (height - fsize - width_of_space) / self.max_wpm
                 + y;
 
             shapes::draw_circle(x_p, y_p, 4.0, *self.style.theme.text.borrow());

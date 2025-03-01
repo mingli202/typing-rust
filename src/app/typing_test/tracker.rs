@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use macroquad::text::Font;
-use macroquad::window;
 
 use crate::app::text::PrintOptions;
 use crate::app::{text, theme::Theme, Style, Value};
@@ -31,10 +30,10 @@ impl Tracker {
         }
     }
 
-    pub fn update(&self, typingbox_style: &Style, index: usize, len: usize, wpm: u16) {
+    pub fn update(&self, typingbox_style: &Style, index: usize, len: usize, wpm: f32) {
         text::print_text(
             &self.style,
-            &format!("{}/{} {}", index, len, wpm),
+            &format!("{}/{} {:.0}", index, len, wpm),
             PrintOptions {
                 x: Some(typingbox_style.x()),
                 y: Some(typingbox_style.y() + self.style.y()),

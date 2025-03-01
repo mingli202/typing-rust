@@ -10,13 +10,13 @@ use crate::app::{theme::Theme, Style, Value};
 pub struct Wpm {
     pub style: Style,
     font: Rc<Font>,
-    wpm: u16,
+    wpm: f32,
     accuracy: i32,
     time: Duration,
 }
 
 impl Wpm {
-    pub fn new(style: &Style, wpm: u16, accuracy: i32, time: Duration, font: Rc<Font>) -> Wpm {
+    pub fn new(style: &Style, wpm: f32, accuracy: i32, time: Duration, font: Rc<Font>) -> Wpm {
         Wpm {
             font,
             wpm,
@@ -38,7 +38,7 @@ impl Wpm {
 
     pub fn update(&self) {
         let stats = [
-            ("WPM", format!("{}", self.wpm)),
+            ("WPM", format!("{:.1}", self.wpm)),
             ("ACC", format!("{}%", self.accuracy)),
             (
                 "TIME",

@@ -19,7 +19,7 @@ use super::{App, Screen};
 
 pub async fn run(app: &mut App) {
     input::clear_input_queue();
-    app.state.max_wpm = 0;
+    app.state.max_wpm = 0.0;
     app.state.incremental_wpm.clear();
 
     let mut focus = Nothing;
@@ -37,7 +37,7 @@ pub async fn run(app: &mut App) {
     let theme_button = theme_button::ThemeButton::new(&app.style, Rc::clone(&app.font));
 
     let mut interval = Instant::now();
-    let mut wpm = 0;
+    let mut wpm = 0.0;
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -74,10 +74,12 @@ pub async fn run(app: &mut App) {
                         NextButton => {
                             app.state.mode.next(&app.data);
                             typingbox.refresh(app.state.mode.get_inner());
+                            wpm = 0.0;
                             app.state.incremental_wpm.clear();
                         }
                         RestartButton => {
                             typingbox.refresh(app.state.mode.get_inner());
+                            wpm = 0.0;
                             app.state.incremental_wpm.clear();
                         }
                         ThemeButton => {
@@ -123,10 +125,12 @@ pub async fn run(app: &mut App) {
                 NextButton => {
                     app.state.mode.next(&app.data);
                     typingbox.refresh(app.state.mode.get_inner());
+                    wpm = 0.0;
                     app.state.incremental_wpm.clear();
                 }
                 RestartButton => {
                     typingbox.refresh(app.state.mode.get_inner());
+                    wpm = 0.0;
                     app.state.incremental_wpm.clear();
                 }
                 ThemeButton => {

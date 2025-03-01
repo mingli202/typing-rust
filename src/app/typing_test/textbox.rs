@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::cmp::{max, Ordering};
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -129,6 +129,8 @@ impl TextBox {
             return false;
         }
 
+        self.state.char_typed += 1;
+
         let correct = self.state.words[self.state.word_index].letters[self.state.char_index].letter;
 
         self.state.words[self.state.word_index].letters[self.state.char_index] = if c == correct {
@@ -175,7 +177,11 @@ impl TextBox {
             self.state.words[self.state.word_index].is_error = false;
         }
 
-        self.state.char_typed += self.state.words[self.state.word_index].word.len() as i32 + 1;
+        self.state.char_typed += max(
+            0,
+            self.state.words[self.state.word_index].word.len() as i32 + 1
+                - self.state.char_index as i32,
+        );
 
         // move to the next word
         self.state.word_index += 1;
@@ -193,8 +199,11 @@ impl TextBox {
             self.state.word_index -= 1;
             self.state.char_index = self.state.words[self.state.word_index].last_typed;
 
-            self.state.char_typed -=
-                self.state.words[self.state.word_index].letters.len() as i32 + 1;
+            self.state.char_typed -= max(
+                0,
+                self.state.words[self.state.word_index].word.len() as i32 + 1
+                    - self.state.char_index as i32,
+            );
 
             return;
         }
@@ -206,6 +215,7 @@ impl TextBox {
         if self.state.char_index >= self.state.words[self.state.word_index].word.len() {
             self.state.words[self.state.word_index].letters.pop();
         } else {
+            self.state.char_typed -= 1;
             self.state.words[self.state.word_index].letters[self.state.char_index] = Letter {
                 color: Rc::clone(&self.style.theme.ghost),
                 ..(self.state.words[self.state.word_index].letters[self.state.char_index]).clone()
@@ -237,15 +247,15 @@ impl TextBox {
         ));
     }
 
-    pub fn get_wpm(&self) -> u16 {
+    pub fn get_wpm(&self) -> f32 {
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
 
         if time_passed == 0 || self.state.char_typed < 0 {
-            return 0;
+            return 0.0;
         }
 
-        ((1000.0 * 60.0 * (self.state.char_typed as f32 / 5.0 - self.state.wrongs as f32)) as u128
-            / time_passed) as u16
+        (1000.0 * 60.0 * (self.state.char_typed as f32 / 5.0 - self.state.wrongs as f32))
+            / time_passed as f32
     }
 
     pub fn get_accuracey(&self) -> i32 {
