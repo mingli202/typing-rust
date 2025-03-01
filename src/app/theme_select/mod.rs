@@ -93,7 +93,7 @@ pub async fn run(app: &mut App) {
         for (i, button) in buttons.iter_mut().enumerate() {
             let TextDimensions { width, .. } = text::measure_text(
                 &button.text,
-                None,
+                Some(&app.font),
                 *button.style.font_size.borrow() as u16,
                 1.0,
             );
@@ -120,7 +120,7 @@ pub async fn run(app: &mut App) {
             }
 
             button.update();
-            x += width + 50.0;
+            x += width + *app.style.font_size.borrow();
         }
 
         cancel_button.update();
