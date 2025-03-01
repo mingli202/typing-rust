@@ -13,7 +13,6 @@ pub struct Graph {
     incremental_wpm: Vec<(Duration, f32)>,
     max_wpm: f32,
     time: Duration,
-    wrongs: i32,
     pub style: Style,
     font: Rc<Font>,
 }
@@ -24,7 +23,6 @@ impl Graph {
         incremental_wpm: Vec<(Duration, f32)>,
         max_wpm: f32,
         time: Duration,
-        wrongs: i32,
         font: Rc<Font>,
     ) -> Self {
         Graph {
@@ -32,7 +30,6 @@ impl Graph {
             font,
             incremental_wpm,
             time,
-            wrongs,
             style: Style {
                 theme: Theme {
                     text: Rc::clone(&style.theme.text),
@@ -127,7 +124,14 @@ impl Graph {
         let time_range: Vec<u64> =
             (self.incremental_wpm[0].0.as_secs()..=self.time.as_secs()).collect();
 
-        for (_t, _x) in time_range.iter().zip(time_x_range) {
+        let mut step_by = 1;
+        while step_by < time_x_range.len()
+            && time_x_range[step_by] - time_x_range[0] <= width_of_space * 20.0
+        {
+            step_by += 1;
+        }
+
+        for (_t, _x) in time_range.iter().zip(time_x_range).step_by(step_by) {
             let text = format!("{}", _t);
             let text_dim = text::measure_text(&text, Some(&self.font), fsize as u16, 0.8);
 

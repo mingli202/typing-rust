@@ -23,7 +23,6 @@ pub async fn run(app: &mut App) {
     app.state.incremental_wpm.clear();
 
     let mut focus = Nothing;
-    let mut is_mode_hover = false;
 
     let mut typingbox = textbox::TextBox::new(
         &app.style,
@@ -76,11 +75,13 @@ pub async fn run(app: &mut App) {
                             typingbox.refresh(app.state.mode.get_inner());
                             wpm = 0.0;
                             app.state.incremental_wpm.clear();
+                            app.state.max_wpm = 0.0;
                         }
                         RestartButton => {
                             typingbox.refresh(app.state.mode.get_inner());
                             wpm = 0.0;
                             app.state.incremental_wpm.clear();
+                            app.state.max_wpm = 0.0;
                         }
                         ThemeButton => {
                             app.state.screen = Screen::ThemeSelect;
@@ -127,11 +128,13 @@ pub async fn run(app: &mut App) {
                     typingbox.refresh(app.state.mode.get_inner());
                     wpm = 0.0;
                     app.state.incremental_wpm.clear();
+                    app.state.max_wpm = 0.0;
                 }
                 RestartButton => {
                     typingbox.refresh(app.state.mode.get_inner());
                     wpm = 0.0;
                     app.state.incremental_wpm.clear();
+                    app.state.max_wpm = 0.0;
                 }
                 ThemeButton => {
                     app.state.screen = Screen::ThemeSelect;

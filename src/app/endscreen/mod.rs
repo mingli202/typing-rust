@@ -37,7 +37,6 @@ pub async fn run(app: &mut App) {
         app.state.incremental_wpm.clone(),
         app.state.max_wpm,
         app.state.time,
-        app.state.accuracy,
         Rc::clone(&app.font),
     );
 

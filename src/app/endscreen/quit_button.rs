@@ -15,16 +15,14 @@ pub struct QuitButton {
 impl QuitButton {
     pub fn new(style: &Style, font: Rc<Font>) -> QuitButton {
         let text = "Quit (q)".to_string();
-        let t = text.clone();
+
         let t1 = text.clone();
         let t2 = text.clone();
 
-        let font_size = Rc::clone(&style.font_size);
         let f1 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
         let f4 = Rc::clone(&style.font_size);
 
-        let font1 = Rc::clone(&font);
         let font2 = Rc::clone(&font);
         let font3 = Rc::clone(&font);
 

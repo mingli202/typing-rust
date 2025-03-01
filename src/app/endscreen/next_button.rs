@@ -17,11 +17,9 @@ impl NextButton {
         let text = "Next (n)".to_string();
 
         let f1 = Rc::clone(&style.font_size);
-        let f2 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
         let f4 = Rc::clone(&style.font_size);
 
-        let font1 = Rc::clone(&font);
         let font2 = Rc::clone(&font);
         let font3 = Rc::clone(&font);
 

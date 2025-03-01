@@ -4,7 +4,7 @@ use macroquad::text::Font;
 use macroquad::{text, window};
 
 use crate::app::text::PrintOptions;
-use crate::app::{self, theme::Theme, BorderParams, Style, Value};
+use crate::app::{theme::Theme, BorderParams, Style, Value};
 
 pub struct RestartButton {
     pub style: Style,
@@ -16,7 +16,6 @@ impl RestartButton {
     pub fn new(style: &Style, font: Rc<Font>) -> RestartButton {
         let text = "Restart (r)".to_string();
 
-        let font_size = Rc::clone(&style.font_size);
         let f1 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
         let f4 = Rc::clone(&style.font_size);
