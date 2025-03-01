@@ -36,8 +36,7 @@ impl RestartButton {
                     window::screen_width() / 2.0 + *f1.borrow() / 2.0
                 })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() + *font_size.borrow() * 3.0) / 2.0
-                        + *font_size.borrow()
+                    window::screen_height() / 2.0 + 3.0 * *font_size.borrow()
                 })),
                 width: Value::Relative(Box::new(move |_| {
                     text::measure_text("Restart", Some(&font1), *f2.borrow() as u16, 1.0).width

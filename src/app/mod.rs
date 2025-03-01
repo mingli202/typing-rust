@@ -2,14 +2,16 @@ use crate::data_provider::{Data, Quote};
 use crate::Config;
 use macroquad::color::Color;
 use macroquad::text::{load_ttf_font, Font};
+use macroquad::window;
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt::Display;
 use std::rc::Rc;
+use std::time::Duration;
 mod theme;
 
 mod style;
-use style::{BorderParams, Style};
+pub use style::{BorderParams, Style, Value};
 
 use self::theme::Theme;
 pub use self::theme::ThemeName;
@@ -46,6 +48,8 @@ impl App {
             data,
             style: Style {
                 font_size: Rc::new(RefCell::new(config.font_size)),
+                width: Value::Relative(Box::new(|_| window::screen_width())),
+                height: Value::Relative(Box::new(|_| window::screen_height())),
                 theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },
@@ -70,22 +74,37 @@ impl App {
 }
 
 pub struct AppState {
-    wpm: u16,
+    wpm: f32,
     mode: Mode,
     screen: Screen,
-    incremental_wpm: Vec<u16>,
+    incremental_wpm: Vec<(Duration, f32)>,
+    max_wpm: f32,
+    time: Duration,
+    accuracy: i32,
+}
+
+impl AppState {
+    pub fn add_wpm(&mut self, time: Duration, wpm: f32) {
+        if wpm > self.max_wpm {
+            self.max_wpm = wpm;
+        }
+        self.incremental_wpm.push((time, wpm));
+    }
 }
 
 impl Default for AppState {
     fn default() -> Self {
         AppState {
-            wpm: 0,
+            wpm: 0.0,
             mode: Mode::Words {
                 n: 0,
                 s: "".to_string(),
             },
             screen: Screen::TypingTest,
             incremental_wpm: vec![],
+            max_wpm: 0.0,
+            time: Duration::from_secs(0),
+            accuracy: 0,
         }
     }
 }
@@ -193,24 +212,4 @@ pub struct Letter {
     pub color: Rc<RefCell<Color>>,
     pub char_id: usize,
     pub word_id: usize,
-}
-
-pub enum Value<T> {
-    Relative(Box<dyn Fn(&Style) -> T>),
-    Absolute(T),
-}
-
-impl<T: Clone> Value<T> {
-    pub fn get(&self, style: &Style) -> T {
-        match self {
-            Self::Absolute(v) => v.clone(),
-            Self::Relative(v) => v(style),
-        }
-    }
-}
-
-impl<T: Default> Default for Value<T> {
-    fn default() -> Self {
-        Value::Absolute(T::default())
-    }
 }

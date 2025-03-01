@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use macroquad::color::Color;
 use macroquad::{input, shapes, window};
 
@@ -17,7 +19,16 @@ pub fn is_hover(style: &Style) -> bool {
     false
 }
 
-#[allow(unused)]
+pub fn clamp<T: PartialOrd>(min: T, val: T, max: T) -> T {
+    if val < min {
+        min
+    } else if val > max {
+        max
+    } else {
+        val
+    }
+}
+
 pub fn draw_midpoint() {
     shapes::draw_line(
         window::screen_width() / 2.0,

@@ -15,16 +15,14 @@ pub struct QuitButton {
 impl QuitButton {
     pub fn new(style: &Style, font: Rc<Font>) -> QuitButton {
         let text = "Quit (q)".to_string();
-        let t = text.clone();
+
         let t1 = text.clone();
         let t2 = text.clone();
 
-        let font_size = Rc::clone(&style.font_size);
         let f1 = Rc::clone(&style.font_size);
         let f3 = Rc::clone(&style.font_size);
         let f4 = Rc::clone(&style.font_size);
 
-        let font1 = Rc::clone(&font);
         let font2 = Rc::clone(&font);
         let font3 = Rc::clone(&font);
 
@@ -36,14 +34,8 @@ impl QuitButton {
                     size: 2.0,
                     color: Rc::clone(&style.theme.text),
                 }),
-                x: Value::Relative(Box::new(move |_| {
-                    (window::screen_width()
-                        - text::measure_text(&t, Some(&font1), *f1.borrow() as u16, 1.0).width
-                        - 20.0)
-                        / 2.0
-                })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() / 2.0) + 2.0 * 1.15 * *font_size.borrow()
+                    window::screen_height() / 2.0 + 3.0 * *f1.borrow()
                 })),
                 font_size: Rc::clone(&style.font_size),
                 theme: Theme {

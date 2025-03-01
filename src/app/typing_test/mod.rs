@@ -19,9 +19,10 @@ use super::{App, Screen};
 
 pub async fn run(app: &mut App) {
     input::clear_input_queue();
+    app.state.max_wpm = 0.0;
+    app.state.incremental_wpm.clear();
 
     let mut focus = Nothing;
-    let mut is_mode_hover = false;
 
     let mut typingbox = textbox::TextBox::new(
         &app.style,
@@ -34,8 +35,8 @@ pub async fn run(app: &mut App) {
     let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
     let theme_button = theme_button::ThemeButton::new(&app.style, Rc::clone(&app.font));
 
-    let mut time = Instant::now();
-    let mut wpm = 0;
+    let mut interval = Instant::now();
+    let mut wpm = 0.0;
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -72,9 +73,15 @@ pub async fn run(app: &mut App) {
                         NextButton => {
                             app.state.mode.next(&app.data);
                             typingbox.refresh(app.state.mode.get_inner());
+                            wpm = 0.0;
+                            app.state.incremental_wpm.clear();
+                            app.state.max_wpm = 0.0;
                         }
                         RestartButton => {
                             typingbox.refresh(app.state.mode.get_inner());
+                            wpm = 0.0;
+                            app.state.incremental_wpm.clear();
+                            app.state.max_wpm = 0.0;
                         }
                         ThemeButton => {
                             app.state.screen = Screen::ThemeSelect;
@@ -93,6 +100,13 @@ pub async fn run(app: &mut App) {
                         focus = TypingBox;
                         if typingbox.on_type(c) {
                             app.state.wpm = typingbox.get_wpm();
+                            app.state.accuracy = typingbox.get_accuracey();
+                            app.state.time = typingbox.state.time_started.elapsed();
+
+                            wpm = typingbox.get_wpm();
+                            app.state
+                                .add_wpm(typingbox.state.time_started.elapsed(), wpm);
+
                             app.state.screen = Screen::End;
                             return;
                         }
@@ -112,9 +126,15 @@ pub async fn run(app: &mut App) {
                 NextButton => {
                     app.state.mode.next(&app.data);
                     typingbox.refresh(app.state.mode.get_inner());
+                    wpm = 0.0;
+                    app.state.incremental_wpm.clear();
+                    app.state.max_wpm = 0.0;
                 }
                 RestartButton => {
                     typingbox.refresh(app.state.mode.get_inner());
+                    wpm = 0.0;
+                    app.state.incremental_wpm.clear();
+                    app.state.max_wpm = 0.0;
                 }
                 ThemeButton => {
                     app.state.screen = Screen::ThemeSelect;
@@ -139,16 +159,25 @@ pub async fn run(app: &mut App) {
             _ => (),
         }
 
-        if time.elapsed().as_millis() >= 500 {
+        if typingbox.state.started
+            && typingbox.state.time_started.elapsed().as_millis() >= 500
+            && interval.elapsed().as_millis() >= 500
+        {
             wpm = typingbox.get_wpm();
-            time = Instant::now();
-            app.state.incremental_wpm.push(wpm);
+            interval = Instant::now();
+            app.state
+                .add_wpm(typingbox.state.time_started.elapsed(), wpm);
         }
 
         window::clear_background(*app.style.theme.bg.borrow());
 
         typingbox.update();
-        tracker.update(typingbox.state.word_index, typingbox.state.words.len(), wpm);
+        tracker.update(
+            &typingbox.style,
+            typingbox.state.word_index,
+            typingbox.state.words.len(),
+            wpm,
+        );
 
         if focus != TypingBox {
             next_button.update();

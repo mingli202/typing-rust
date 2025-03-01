@@ -40,9 +40,7 @@ impl ThemeButton {
                         / 2.0
                 })),
                 y: Value::Relative(Box::new(move |_| {
-                    (window::screen_height() - *font_size.borrow() * 3.0) / 2.0
-                        - 10.0
-                        - 3.0 * *font_size.borrow()
+                    window::screen_height() / 2.0 - 5.0 * *font_size.borrow()
                 })),
                 width: Value::Relative(Box::new(move |_| {
                     text::measure_text("Theme", Some(&font2), *f2.borrow() as u16, 1.0).width + 20.0

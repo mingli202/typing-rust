@@ -4,8 +4,6 @@ use std::rc::Rc;
 
 use crate::app::theme::Theme;
 
-use super::Value;
-
 pub struct BorderParams {
     pub size: f32,
     pub color: Rc<RefCell<Color>>,
@@ -26,7 +24,6 @@ pub struct Style {
     pub padding_x: Option<Value<f32>>,
     pub padding_y: Option<Value<f32>>,
     pub wrap: bool,
-    pub parent: Option<Rc<Style>>,
 }
 
 impl Style {
@@ -84,5 +81,66 @@ impl Style {
                 color,
             );
         }
+    }
+
+    pub fn x(&self) -> f32 {
+        self.x.get(self)
+    }
+    pub fn y(&self) -> f32 {
+        self.y.get(self)
+    }
+    pub fn width(&self) -> f32 {
+        self.width.get(self)
+    }
+    pub fn height(&self) -> f32 {
+        self.height.get(self)
+    }
+    pub fn padding_x(&self) -> f32 {
+        if let Some(v) = &self.padding_x {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+    pub fn padding_y(&self) -> f32 {
+        if let Some(v) = &self.padding_y {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+    pub fn offset_x(&self) -> f32 {
+        if let Some(v) = &self.offset_x {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+    pub fn offset_y(&self) -> f32 {
+        if let Some(v) = &self.offset_y {
+            v.get(self)
+        } else {
+            0.0
+        }
+    }
+}
+
+pub enum Value<T> {
+    Relative(Box<dyn Fn(&Style) -> T>),
+    Absolute(T),
+}
+
+impl<T: Clone> Value<T> {
+    pub fn get(&self, style: &Style) -> T {
+        match self {
+            Self::Absolute(v) => v.clone(),
+            Self::Relative(v) => v(style),
+        }
+    }
+}
+
+impl<T: Default> Default for Value<T> {
+    fn default() -> Self {
+        Value::Absolute(T::default())
     }
 }

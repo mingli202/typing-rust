@@ -13,17 +13,32 @@ mod source;
 mod wpm;
 
 use super::focus::{EndscreenFocus::*, Focus};
-use super::{util, App, Screen};
+use super::{util, App, Screen, Value};
 
 pub async fn run(app: &mut App) {
     input::show_mouse(true);
     let mut focus = Nothing;
 
-    let wpm = wpm::Wpm::new(&app.style, app.state.wpm, Rc::clone(&app.font));
-    let next_button = next_button::NextButton::new(&app.style, Rc::clone(&app.font));
-    let quit_button = quit_button::QuitButton::new(&app.style, Rc::clone(&app.font));
-    let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
-    let source = source::Source::new(app.state.mode.to_string(), &app.style, Rc::clone(&app.font));
+    let wpm = wpm::Wpm::new(
+        &app.style,
+        app.state.wpm,
+        app.state.accuracy,
+        app.state.time,
+        Rc::clone(&app.font),
+    );
+
+    let mut next_button = next_button::NextButton::new(&app.style, Rc::clone(&app.font));
+    let mut quit_button = quit_button::QuitButton::new(&app.style, Rc::clone(&app.font));
+    let mut restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
+
+    let source = source::Source::new(&app.style, app.state.mode.to_string(), Rc::clone(&app.font));
+    let graph = graph::Graph::new(
+        &app.style,
+        app.state.incremental_wpm.clone(),
+        app.state.max_wpm,
+        app.state.time,
+        Rc::clone(&app.font),
+    );
 
     loop {
         if let Some(k) = input::get_last_key_pressed() {
@@ -113,14 +128,23 @@ pub async fn run(app: &mut App) {
             }
             _ => (),
         }
+        let width =
+            next_button.style.width() + quit_button.style.width() + restart_button.style.width();
+        let x_start = (window::screen_width() - width) / 2.0;
+
+        next_button.style.x = Value::Absolute(x_start);
+        restart_button.style.x = Value::Absolute(x_start + next_button.style.width());
+        quit_button.style.x =
+            Value::Absolute(x_start + next_button.style.width() + restart_button.style.width());
 
         window::clear_background(*app.style.theme.bg.borrow());
 
         next_button.update();
-        quit_button.update();
         restart_button.update();
+        quit_button.update();
         wpm.update();
         source.update();
+        graph.update();
 
         match focus {
             QuitButton => quit_button.style.draw_border(),
