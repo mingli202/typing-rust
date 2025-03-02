@@ -250,12 +250,18 @@ impl TextBox {
     pub fn get_wpm(&self) -> f32 {
         let time_passed: u128 = self.state.time_started.elapsed().as_millis();
 
-        if time_passed == 0 || self.state.char_typed < 0 {
+        if time_passed == 0 {
             return 0.0;
         }
 
-        (1000.0 * 60.0 * (self.state.char_typed as f32 / 5.0 - self.state.wrongs as f32))
-            / time_passed as f32
+        let wpm = (1000.0 * 60.0 * (self.state.char_typed as f32 / 5.0 - self.state.wrongs as f32))
+            / time_passed as f32;
+
+        if wpm > 0.0 {
+            wpm
+        } else {
+            0.0
+        }
     }
 
     pub fn get_accuracey(&self) -> i32 {
