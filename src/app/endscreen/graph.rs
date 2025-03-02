@@ -118,7 +118,12 @@ impl Graph {
         w += width_of_space;
 
         let time_x_range: Vec<f32> = (self.incremental_wpm[0].0.as_secs()..=self.time.as_secs())
-            .map(|s| (1000.0 * s as f32 / self.time.as_millis() as f32) * (width - 2.0 * w) + x + w)
+            .map(|s| {
+                (1000.0 * (s - 1) as f32 / (self.time.as_millis() - 1000) as f32)
+                    * (width - 2.0 * w)
+                    + x
+                    + w
+            })
             .collect();
 
         let time_range: Vec<u64> =
@@ -126,7 +131,7 @@ impl Graph {
 
         let mut step_by = 1;
         while step_by < time_x_range.len()
-            && time_x_range[step_by] - time_x_range[0] <= width_of_space * 20.0
+            && time_x_range[step_by] - time_x_range[0] <= width_of_space * 13.0
         {
             step_by += 1;
         }
@@ -161,11 +166,13 @@ impl Graph {
         /*
          * draw the graph
          * */
-        let mut last_x = x + w;
-        let mut last_y = height - fsize - width_of_space + y;
-        for (t, wpm) in self.incremental_wpm.iter() {
-            let x_p =
-                t.as_millis() as f32 * (width - 2.0 * w) / self.time.as_millis() as f32 + x + w;
+        let mut last_x = -1.0;
+        let mut last_y = -1.0;
+        for (i, (t, wpm)) in self.incremental_wpm.iter().enumerate() {
+            let x_p = (t.as_millis() - 1000) as f32 * (width - 2.0 * w)
+                / (self.time.as_millis() - 1000) as f32
+                + x
+                + w;
 
             let y_p = (height - fsize - width_of_space)
                 - *wpm * (height - fsize - width_of_space) / self.max_wpm
@@ -173,14 +180,16 @@ impl Graph {
 
             shapes::draw_circle(x_p, y_p, 4.0, *self.style.theme.text.borrow());
 
-            shapes::draw_line(
-                last_x,
-                last_y,
-                x_p,
-                y_p,
-                2.0,
-                *self.style.theme.text.borrow(),
-            );
+            if i != 0 {
+                shapes::draw_line(
+                    last_x,
+                    last_y,
+                    x_p,
+                    y_p,
+                    2.0,
+                    *self.style.theme.text.borrow(),
+                );
+            }
 
             last_x = x_p;
             last_y = y_p;

@@ -160,7 +160,7 @@ pub async fn run(app: &mut App) {
         }
 
         if typingbox.state.started
-            && typingbox.state.time_started.elapsed().as_millis() >= 500
+            && typingbox.state.time_started.elapsed().as_millis() >= 1000
             && interval.elapsed().as_millis() >= 500
         {
             wpm = typingbox.get_wpm();
