@@ -89,10 +89,19 @@ pub struct Config {
     #[serde(skip)]
     pub config_file: PathBuf,
 
+    #[serde(default)]
     pub theme: ThemeName,
+
+    #[serde(default = "default_font_size")]
     pub font_size: f32,
+
+    #[serde(default)]
     pub mode: Mode,
     // extra_themes: HashMap<String, ThemeParams>,
+}
+
+fn default_font_size() -> f32 {
+    24.0
 }
 
 impl Default for Config {

@@ -184,6 +184,15 @@ impl Mode {
     }
 }
 
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Quote(Quote {
+            source: "".to_string(),
+            quote: "".to_string(),
+        })
+    }
+}
+
 impl Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
