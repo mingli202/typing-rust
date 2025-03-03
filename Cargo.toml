@@ -1,6 +1,6 @@
 [package]
 name = "typing_test"
-version = "0.2.15"
+version = "0.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Typing speed test in rust"
