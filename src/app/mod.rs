@@ -191,10 +191,7 @@ impl PartialEq for Mode {
                 Mode::Words { n: m, .. } => n == m,
                 _ => false,
             },
-            Mode::Quote(_) => match other {
-                Mode::Quote(_) => true,
-                _ => false,
-            },
+            Mode::Quote(_) => matches!(other, Mode::Quote(_)),
         }
     }
 }

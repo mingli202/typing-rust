@@ -196,7 +196,7 @@ pub async fn run(app: &mut App) {
             restart_button.update();
             theme_button.update();
 
-            mode_select.update(&app.state.mode, &app.data);
+            mode_select.update(&app.state.mode);
         }
 
         match focus {

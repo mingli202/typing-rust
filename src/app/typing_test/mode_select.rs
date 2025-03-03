@@ -81,7 +81,7 @@ impl ModeSelect {
         }
     }
 
-    pub fn update(&mut self, mode: &Mode, data: &Data) {
+    pub fn update(&mut self, mode: &Mode) {
         let text = mode.get_name();
 
         let mut hover_mode = None;
