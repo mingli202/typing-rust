@@ -34,6 +34,7 @@ pub async fn run(app: &mut App) {
     let next_button = next_button::NextButton::new(&app.style, Rc::clone(&app.font));
     let restart_button = restart_button::RestartButton::new(&app.style, Rc::clone(&app.font));
     let theme_button = theme_button::ThemeButton::new(&app.style, Rc::clone(&app.font));
+    let mut mode_select = mode_select::ModeSelect::new(&app.style, Rc::clone(&app.font));
 
     let mut interval = Instant::now();
     let mut wpm = 0.0;
@@ -142,6 +143,17 @@ pub async fn run(app: &mut App) {
                 }
                 _ => (),
             }
+
+            if let Some(mode) = &mode_select.next_mode_selected {
+                if *mode != app.state.mode {
+                    app.state.mode = mode.clone();
+                    app.state.mode.next(&app.data);
+                    typingbox.refresh(app.state.mode.get_inner());
+                    wpm = 0.0;
+                    app.state.incremental_wpm.clear();
+                    app.state.max_wpm = 0.0;
+                }
+            }
         }
 
         match input::mouse_delta_position() {
@@ -183,6 +195,8 @@ pub async fn run(app: &mut App) {
             next_button.update();
             restart_button.update();
             theme_button.update();
+
+            mode_select.update(&app.state.mode, &app.data);
         }
 
         match focus {

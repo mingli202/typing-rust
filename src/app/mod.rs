@@ -124,7 +124,8 @@ pub enum Mode {
 
 impl Mode {
     pub fn new(data: &Data) -> Self {
-        Self::with_quote(data)
+        // Self::with_quote(data)
+        Self::with_words(data, 10)
     }
 
     pub fn with_quote(data: &Data) -> Self {
@@ -165,6 +166,13 @@ impl Mode {
         };
         *self = new_mode;
     }
+
+    pub fn get_name(&self) -> String {
+        match self {
+            Mode::Quote(_) => "Quote".to_string(),
+            Mode::Words { .. } => "Words".to_string(),
+        }
+    }
 }
 
 impl Display for Mode {
@@ -172,6 +180,21 @@ impl Display for Mode {
         match self {
             Mode::Words { n, .. } => write!(f, "{} {}", n, if *n != 1 { "Words" } else { "Word" }),
             Mode::Quote(Quote { source, .. }) => write!(f, "{}", source),
+        }
+    }
+}
+
+impl PartialEq for Mode {
+    fn eq(&self, other: &Self) -> bool {
+        match self {
+            Mode::Words { n, .. } => match other {
+                Mode::Words { n: m, .. } => n == m,
+                _ => false,
+            },
+            Mode::Quote(_) => match other {
+                Mode::Quote(_) => true,
+                _ => false,
+            },
         }
     }
 }

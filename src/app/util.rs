@@ -8,10 +8,10 @@ use super::Style;
 pub fn is_hover(style: &Style) -> bool {
     let (x, y) = input::mouse_position();
 
-    if style.x.get(style) <= x
-        && x <= style.x.get(style) + style.width.get(style)
-        && style.y.get(style) <= y
-        && y <= style.y.get(style) + style.height.get(style)
+    if style.x() <= x
+        && x <= style.x() + style.width()
+        && style.y() <= y
+        && y <= style.y() + style.height()
     {
         return true;
     }
