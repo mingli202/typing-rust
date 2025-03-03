@@ -152,6 +152,9 @@ pub async fn run(app: &mut App) {
                     wpm = 0.0;
                     app.state.incremental_wpm.clear();
                     app.state.max_wpm = 0.0;
+
+                    app.config.mode = app.state.mode.clone();
+                    app.config.update_file();
                 }
             }
         }

@@ -7,7 +7,7 @@ use crate::app::style::Style;
 use crate::app::text::PrintOptions;
 use crate::app::theme::Theme;
 use crate::app::{self, util, BorderParams, Mode, Value};
-use crate::data_provider::{Data, Quote};
+use crate::data_provider::Quote;
 
 pub struct ModeSelect {
     style: Style,

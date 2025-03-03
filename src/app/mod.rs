@@ -3,6 +3,7 @@ use crate::Config;
 use macroquad::color::Color;
 use macroquad::text::{load_ttf_font, Font};
 use macroquad::window;
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt::Display;
@@ -53,15 +54,18 @@ impl App {
                 theme: Theme::get_theme(&config.theme),
                 ..Style::default()
             },
+            state: AppState {
+                mode: config.mode.clone(),
+                ..AppState::default()
+            },
             config,
-            state: AppState::default(),
             typing_font: Rc::new(typing_font),
             font: Rc::new(font),
         }
     }
 
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        self.state.mode = Mode::new(&self.data);
+        self.state.mode.next(&self.data);
 
         loop {
             match self.state.screen {
@@ -116,9 +120,14 @@ enum Screen {
     ThemeSelect,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Mode {
-    Words { n: usize, s: String },
+    Words {
+        n: usize,
+
+        #[serde(skip)]
+        s: String,
+    },
     Quote(Quote),
 }
 

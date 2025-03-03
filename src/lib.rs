@@ -1,6 +1,7 @@
 pub mod app;
 pub mod data_provider;
-use self::app::ThemeName;
+use self::app::{Mode, ThemeName};
+use self::data_provider::Quote;
 use data_provider::Data;
 
 use serde::{Deserialize, Serialize};
@@ -90,6 +91,7 @@ pub struct Config {
 
     pub theme: ThemeName,
     pub font_size: f32,
+    pub mode: Mode,
     // extra_themes: HashMap<String, ThemeParams>,
 }
 
@@ -101,6 +103,10 @@ impl Default for Config {
                 .collect(),
             theme: ThemeName::default(),
             font_size: 24.0,
+            mode: Mode::Quote(Quote {
+                source: "".to_string(),
+                quote: "".to_string(),
+            }),
         }
     }
 }
