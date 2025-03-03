@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use macroquad::color::Color;
 use macroquad::text::{self, Font};
+use macroquad::window;
 
 use crate::app::style::Style;
 use crate::app::text::PrintOptions;
@@ -22,7 +23,6 @@ impl ModeSelect {
             next_mode_selected: None,
             style: Style {
                 y: Value::Absolute(10.0),
-                x: Value::Absolute(10.0),
                 font_size: Rc::clone(&style.font_size),
                 ..Style::default()
             },
@@ -86,6 +86,8 @@ impl ModeSelect {
 
         let mut hover_mode = None;
 
+        let total_button_width: f32 = self.buttons.iter().map(|b| b.style.width()).sum();
+
         let mut x = 0.0;
         for btn in &mut self.buttons {
             let color = if text == btn.text {
@@ -94,7 +96,11 @@ impl ModeSelect {
                 *self.style.theme.ghost.borrow()
             };
 
-            btn.update(x + self.style.x(), self.style.y(), color);
+            btn.update(
+                x + (window::screen_width() - total_button_width) / 2.0,
+                self.style.y(),
+                color,
+            );
 
             x += btn.style.width();
 
@@ -109,6 +115,9 @@ impl ModeSelect {
 
         if let Mode::Words { n, .. } = mode.clone() {
             let mut x = 0.0;
+
+            let total_button_width: f32 = self.word_buttons.iter().map(|b| b.style.width()).sum();
+
             for btn in &mut self.word_buttons {
                 let color = if n == btn.text.parse::<usize>().unwrap() {
                     *self.style.theme.text.borrow()
@@ -116,7 +125,11 @@ impl ModeSelect {
                     *self.style.theme.ghost.borrow()
                 };
 
-                btn.update(x + self.style.x(), y, color);
+                btn.update(
+                    x + (window::screen_width() - total_button_width) / 2.0,
+                    y,
+                    color,
+                );
 
                 x += btn.style.width();
 
