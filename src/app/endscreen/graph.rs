@@ -105,7 +105,7 @@ impl Graph {
             shapes::draw_line(
                 x + w + width_of_space,
                 wpm_y_range[i],
-                x + width - width_of_space - w,
+                x + width,
                 wpm_y_range[i],
                 2.0,
                 *self.style.theme.ghost.borrow(),
@@ -119,8 +119,7 @@ impl Graph {
 
         let time_x_range: Vec<f32> = (self.incremental_wpm[0].0.as_secs()..=self.time.as_secs())
             .map(|s| {
-                (1000.0 * (s - 1) as f32 / (self.time.as_millis() - 1000) as f32)
-                    * (width - 2.0 * w)
+                (1000.0 * (s - 1) as f32 / (self.time.as_millis() - 1000) as f32) * (width - w)
                     + x
                     + w
             })
@@ -169,7 +168,7 @@ impl Graph {
         let mut last_x = -1.0;
         let mut last_y = -1.0;
         for (i, (t, wpm)) in self.incremental_wpm.iter().enumerate() {
-            let x_p = (t.as_millis() - 1000) as f32 * (width - 2.0 * w)
+            let x_p = (t.as_millis() - 1000) as f32 * (width - w)
                 / (self.time.as_millis() - 1000) as f32
                 + x
                 + w;
