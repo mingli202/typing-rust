@@ -105,6 +105,7 @@ impl TextBox {
 
     pub fn on_type(&mut self, c: char) -> bool {
         if self.state.word_index == self.state.words.len() - 1 && c == ' ' {
+            self.state.wrongs += 1;
             return true;
         }
 
