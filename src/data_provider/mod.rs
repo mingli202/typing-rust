@@ -35,7 +35,7 @@ impl Data {
             &(if let Some(p) = words_path {
                 fs::read_to_string(p)?
             } else {
-                include_str!("../data/words.json").to_string()
+                include_str!("../data/english.json").to_string()
             }),
         )?;
 
