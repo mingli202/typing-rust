@@ -20,6 +20,7 @@ pub use self::theme::ThemeName;
 mod text;
 mod util;
 
+mod bombparty;
 mod endscreen;
 mod focus;
 mod theme_select;
@@ -72,6 +73,7 @@ impl App {
                 Screen::TypingTest => typing_test::run(self).await,
                 Screen::End => endscreen::run(self).await,
                 Screen::ThemeSelect => theme_select::run(self).await,
+                Screen::Bombparty => bombparty::main(self).await,
             };
         }
     }
@@ -104,7 +106,7 @@ impl Default for AppState {
                 n: 0,
                 s: "".to_string(),
             },
-            screen: Screen::TypingTest,
+            screen: Screen::Bombparty,
             incremental_wpm: vec![],
             max_wpm: 0.0,
             time: Duration::from_secs(0),
@@ -118,6 +120,7 @@ enum Screen {
     TypingTest,
     End,
     ThemeSelect,
+    Bombparty,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
