@@ -91,9 +91,9 @@ impl ModeSelect {
         let mut x = 0.0;
         for btn in &mut self.buttons {
             let color = if text == btn.text {
-                *self.style.theme.text.borrow()
+                *btn.style.theme.text.borrow()
             } else {
-                *self.style.theme.ghost.borrow()
+                *btn.style.theme.ghost.borrow()
             };
 
             btn.update(
@@ -120,9 +120,9 @@ impl ModeSelect {
 
             for btn in &mut self.word_buttons {
                 let color = if n == btn.text.parse::<usize>().unwrap() {
-                    *self.style.theme.text.borrow()
+                    *btn.style.theme.text.borrow()
                 } else {
-                    *self.style.theme.ghost.borrow()
+                    *btn.style.theme.ghost.borrow()
                 };
 
                 btn.update(

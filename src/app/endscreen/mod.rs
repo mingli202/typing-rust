@@ -17,6 +17,8 @@ use super::{util, App, Screen, Value};
 
 pub async fn run(app: &mut App) {
     input::show_mouse(true);
+    input::clear_input_queue();
+
     let mut focus = Nothing;
 
     let wpm = wpm::Wpm::new(
