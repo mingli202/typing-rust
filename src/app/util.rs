@@ -8,15 +8,10 @@ use super::Style;
 pub fn is_hover(style: &Style) -> bool {
     let (x, y) = input::mouse_position();
 
-    if style.x() <= x
+    style.x() <= x
         && x <= style.x() + style.width()
         && style.y() <= y
         && y <= style.y() + style.height()
-    {
-        return true;
-    }
-
-    false
 }
 
 pub fn clamp<T: PartialOrd>(min: T, val: T, max: T) -> T {
