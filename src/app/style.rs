@@ -1,3 +1,4 @@
+use macroquad::text::Font;
 use macroquad::{color::Color, shapes, window};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -24,6 +25,7 @@ pub struct Style {
     pub padding_x: Option<Value<f32>>,
     pub padding_y: Option<Value<f32>>,
     pub wrap: bool,
+    pub font: Option<Rc<Font>>,
 }
 
 impl Style {
@@ -122,6 +124,10 @@ impl Style {
         } else {
             0.0
         }
+    }
+
+    pub fn copy(&self) -> Style {
+        todo!();
     }
 }
 

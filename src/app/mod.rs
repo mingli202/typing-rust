@@ -73,7 +73,7 @@ impl App {
                 Screen::TypingTest => typing_test::run(self).await,
                 Screen::End => endscreen::run(self).await,
                 Screen::ThemeSelect => theme_select::run(self).await,
-                Screen::Bombparty => bombparty::main(self).await,
+                Screen::Bombparty => bombparty::run(self).await,
             };
         }
     }
