@@ -38,6 +38,18 @@ impl Input {
             focused: false,
         }
     }
+    fn add_letter(&mut self, c: char) {
+        let Location {
+            line_index,
+            word_index,
+            ..
+        } = self.location;
+
+        let word = &mut self.value[line_index].line[word_index].word;
+        word.push(Letter::new(c));
+
+        self.location.letter_index += 1;
+    }
 }
 
 impl Component for Input {
