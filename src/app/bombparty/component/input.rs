@@ -100,3 +100,66 @@ impl Component for Input {
         &mut self.style
     }
 }
+impl Display for Input {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value.iter().map(|l| l.to_string()).join("\n"))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Line {
+    pub line: Vec<Word>,
+}
+
+impl Line {
+    pub fn new() -> Self {
+        Line { line: vec![] }
+    }
+}
+
+impl Display for Line {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.line.iter().map(|w| w.to_string()).join(" "))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Word {
+    pub word: Vec<Letter>,
+}
+
+impl Word {
+    pub fn new() -> Self {
+        Word { word: vec![] }
+    }
+}
+
+impl Display for Word {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.word.iter().map(|l| l.to_string()).join(""))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Letter {
+    pub letter: char,
+}
+
+impl Letter {
+    pub fn new(c: char) -> Self {
+        Letter { letter: c }
+    }
+}
+
+impl Display for Letter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.letter)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Location {
+    pub line_index: usize,
+    pub word_index: usize,
+    pub letter_index: usize,
+}
