@@ -1,3 +1,4 @@
+use macroquad::input::KeyCode;
 use macroquad::text::{TextDimensions, TextParams};
 use macroquad::{input, shapes, text};
 
@@ -6,9 +7,9 @@ use crate::app::bombparty::style::Style;
 use super::Component;
 
 pub struct Input {
-    style: Style,
-    value: String,
-    focused: bool,
+    pub style: Style,
+    pub value: String,
+    pub focused: bool,
 }
 
 impl Input {
@@ -36,10 +37,6 @@ impl Input {
             focused: false,
         }
     }
-
-    pub fn get_value(&self) -> &String {
-        &self.value
-    }
 }
 
 impl Component for Input {
@@ -52,8 +49,23 @@ impl Component for Input {
 
     fn refresh(&mut self) {
         if self.focused {
-            if let Some(c) = input::get_char_pressed() {
-                self.value += &c.to_string();
+            if let Some(key) = input::get_last_key_pressed() {
+                match key {
+                    KeyCode::Backspace => {
+                        self.value.pop();
+                    }
+                    _ => {
+                        if let Some(c) = input::get_char_pressed() {
+                            match c {
+                                '\u{0008}' => {
+                                    self.value.pop();
+                                }
+                                _ => self.value += &c.to_string(),
+                            };
+                        }
+                    }
+                }
+                input::clear_input_queue();
             }
         }
 
