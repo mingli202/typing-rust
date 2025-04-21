@@ -4,6 +4,7 @@ use macroquad::{input, shapes, text};
 
 use crate::app::bombparty::style::Style;
 
+use super::text::Text;
 use super::Component;
 
 pub struct Input {
@@ -54,6 +55,9 @@ impl Component for Input {
                     KeyCode::Backspace => {
                         self.value.pop();
                     }
+                    KeyCode::Tab => self.value += "\t",
+
+                    KeyCode::Enter => self.value += "\n",
                     _ => {
                         if let Some(c) = input::get_char_pressed() {
                             match c {
@@ -69,31 +73,11 @@ impl Component for Input {
             }
         }
 
-        let TextDimensions {
-            width,
-            height,
-            offset_y,
-        } = text::measure_text(
-            &self.value[..],
-            self.style.font.as_deref(),
-            *self.style.font_size.borrow() as u16,
-            1.0,
-        );
+        let mut text = Text::new(self.style.clone(), self.value.clone());
+        text.refresh();
 
-        self.style.width = width;
-        self.style.height = height;
-
-        text::draw_text_ex(
-            &self.value[..],
-            self.style.x,
-            self.style.y + offset_y,
-            TextParams {
-                color: *self.style.theme.text.borrow(),
-                font: self.style.font.as_deref(),
-                font_size: *self.style.font_size.borrow() as u16,
-                ..TextParams::default()
-            },
-        );
+        self.style.width = text.style.width;
+        self.style.height = text.style.height;
 
         shapes::draw_rectangle_lines(
             self.style.x,
