@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use std::fmt::Display;
-use std::rc::Rc;
 
 use macroquad::input::KeyCode;
 use macroquad::{input, shapes};
@@ -23,11 +22,7 @@ impl Input {
             style,
             value: vec![],
             focused: true,
-            location: Location {
-                line_index: 0,
-                word_index: 0,
-                letter_index: 0,
-            },
+            location: Location::new(0, 0, 0),
         }
     }
 
@@ -40,6 +35,9 @@ impl Input {
                 self.location.letter_index = 0;
             }
             ' ' => {
+                if self.location.line_index >= self.value.len() {
+                    self.value.push(Line::new());
+                }
                 let line = &mut self.value[self.location.line_index].words;
                 line.push(Word::new());
                 self.location.word_index += 1;
@@ -227,14 +225,32 @@ impl Display for Letter {
 
 #[derive(Clone, Debug)]
 pub struct Location {
-    pub line_index: usize,
-    pub word_index: usize,
-    pub letter_index: usize,
+    pub line_index: usize,   // current line
+    pub word_index: usize,   // current work in line
+    pub letter_index: usize, // current letter in word + 1
+}
+
+impl Location {
+    pub fn new(line_index: usize, word_index: usize, letter_index: usize) -> Self {
+        Location {
+            line_index,
+            word_index,
+            letter_index,
+        }
+    }
+}
+
+impl PartialEq for Location {
+    fn eq(&self, other: &Self) -> bool {
+        self.line_index == other.line_index
+            && self.word_index == other.word_index
+            && self.letter_index == other.letter_index
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Input, Style};
+    use super::*;
 
     fn input() -> Input {
         Input::new(Style::default())
@@ -253,6 +269,102 @@ mod tests {
     fn input_add_characters() {
         let mut input = input();
         input.add_letter('a');
-        assert_eq!(input.to_string(), "a");
+        input.add_letter('b');
+        input.add_letter('c');
+        assert_eq!(input.to_string(), "abc");
+        assert_eq!(input.location.line_index, 0);
+        assert_eq!(input.location.word_index, 0);
+        assert_eq!(input.location.letter_index, 3);
+    }
+
+    #[test]
+    fn input_add_characters_2() {
+        let mut input = input();
+        input.add_letter('a');
+        input.add_letter('b');
+        input.add_letter(' ');
+        assert_eq!(input.to_string(), "ab ");
+        assert_eq!(input.location.line_index, 0);
+        assert_eq!(input.location.word_index, 1);
+        assert_eq!(input.location.letter_index, 0);
+
+        input.add_letter('c');
+        input.add_letter('d');
+        input.add_letter('e');
+        assert_eq!(input.to_string(), "ab cde");
+        assert_eq!(input.location.line_index, 0);
+        assert_eq!(input.location.word_index, 1);
+        assert_eq!(input.location.letter_index, 3);
+    }
+
+    #[test]
+    fn input_add_line() {
+        let mut input = input();
+
+        input.add_letter('a');
+        input.add_letter('b');
+        input.add_letter('c');
+        assert_eq!(input.to_string(), "abc");
+
+        input.add_letter('\u{000d}');
+        assert_eq!(input.to_string(), "abc\n");
+
+        input.add_letter('a');
+        input.add_letter('b');
+        input.add_letter('c');
+        assert_eq!(input.to_string(), "abc\nabc");
+        assert_eq!(Location::new(1, 0, 3), input.location);
+
+        input.add_letter(' ');
+        input.add_letter('d');
+        input.add_letter('e');
+        assert_eq!(input.to_string(), "abc\nabc de");
+        assert_eq!(Location::new(1, 1, 2), input.location);
+    }
+
+    #[test]
+    fn input_add_empty_word() {
+        let mut input = input();
+
+        input.add_letter(' ');
+        input.add_letter('a');
+        input.add_letter('b');
+
+        assert_eq!(input.to_string(), " ab");
+        assert_eq!(Location::new(0, 1, 2), input.location);
+
+        input.add_letter(' ');
+        input.add_letter(' ');
+        input.add_letter(' ');
+        assert_eq!(input.to_string(), " ab   ");
+        assert_eq!(Location::new(0, 4, 0), input.location);
+
+        input.add_letter('c');
+        assert_eq!(input.to_string(), " ab   c");
+        assert_eq!(Location::new(0, 4, 1), input.location);
+    }
+
+    #[test]
+    fn input_add_empty_line() {
+        let mut input = input();
+
+        input.add_letter('\u{000d}');
+        input.add_letter('a');
+        input.add_letter('b');
+        assert_eq!(input.to_string(), "\nab");
+        assert_eq!(Location::new(1, 0, 2), input.location);
+
+        input.add_letter('\u{000d}');
+        input.add_letter('\u{000d}');
+        input.add_letter('\u{000d}');
+        assert_eq!(input.to_string(), "\nab\n\n\n");
+        assert_eq!(Location::new(4, 0, 0), input.location);
+
+        input.add_letter('a');
+        input.add_letter('b');
+        input.add_letter(' ');
+        input.add_letter('a');
+        assert_eq!(input.to_string(), "\nab\n\n\nab a");
+        assert_eq!(Location::new(4, 1, 1), input.location);
     }
 }
