@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[derive(Clone, Debug)]
 pub struct Theme {
     pub bg: Rc<RefCell<Color>>,
     pub text: Rc<RefCell<Color>>,

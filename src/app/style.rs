@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use crate::app::theme::Theme;
 
+#[derive(Debug, Clone)]
 pub struct BorderParams {
     pub size: f32,
     pub color: Rc<RefCell<Color>>,
@@ -126,8 +127,28 @@ impl Style {
         }
     }
 
-    pub fn copy(&self) -> Style {
-        todo!();
+    /// Helper function that copies the theme, font_size and font
+    pub fn from(style: &Style) -> Style {
+        Style {
+            theme: Theme {
+                bg: Rc::clone(&style.theme.bg),
+                error: Rc::clone(&style.theme.error),
+                text: Rc::clone(&style.theme.text),
+                ghost: Rc::clone(&style.theme.ghost),
+            },
+            font_size: Rc::clone(&style.font_size),
+            font: style.font.as_ref().map(Rc::clone),
+            ..Style::default()
+        }
+    }
+
+    pub fn copy_theme(&self) -> Theme {
+        Theme {
+            bg: Rc::clone(&self.theme.bg),
+            error: Rc::clone(&self.theme.error),
+            text: Rc::clone(&self.theme.text),
+            ghost: Rc::clone(&self.theme.ghost),
+        }
     }
 }
 

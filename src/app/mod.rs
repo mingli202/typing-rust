@@ -42,9 +42,11 @@ impl App {
                 .await
                 .unwrap();
 
-        let font: Font = load_ttf_font("/System/Library/Fonts/Helvetica.ttc")
-            .await
-            .unwrap();
+        let font: Rc<Font> = Rc::new(
+            load_ttf_font("/System/Library/Fonts/Helvetica.ttc")
+                .await
+                .unwrap(),
+        );
 
         App {
             data,
@@ -53,6 +55,7 @@ impl App {
                 width: Value::Relative(Box::new(|_| window::screen_width())),
                 height: Value::Relative(Box::new(|_| window::screen_height())),
                 theme: Theme::get_theme(&config.theme),
+                font: Some(Rc::clone(&font)),
                 ..Style::default()
             },
             state: AppState {
@@ -61,7 +64,7 @@ impl App {
             },
             config,
             typing_font: Rc::new(typing_font),
-            font: Rc::new(font),
+            font,
         }
     }
 
