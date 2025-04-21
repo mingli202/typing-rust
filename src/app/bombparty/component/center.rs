@@ -7,12 +7,6 @@ pub struct Center {
     pub style: Style,
 }
 
-impl Center {
-    pub fn new(style: Style, child: Box<dyn Component>) -> Self {
-        Center { child, style }
-    }
-}
-
 impl Component for Center {
     fn get_style(&self) -> &Style {
         &self.style
