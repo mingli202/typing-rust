@@ -1,6 +1,9 @@
+use itertools::Itertools;
+use std::fmt::Display;
+use std::rc::Rc;
+
 use macroquad::input::KeyCode;
-use macroquad::text::{TextDimensions, TextParams};
-use macroquad::{input, shapes, text};
+use macroquad::{input, shapes};
 
 use crate::app::bombparty::style::Style;
 
@@ -9,47 +12,101 @@ use super::Component;
 
 pub struct Input {
     pub style: Style,
-    pub value: String,
+    pub value: Vec<Line>,
     pub focused: bool,
+    pub location: Location,
 }
 
 impl Input {
     pub fn new(style: Style) -> Self {
-        let initial_value = "asdf".to_string();
-
-        let TextDimensions {
-            width,
-            height,
-            offset_y,
-        } = text::measure_text(
-            &initial_value[..],
-            style.font.as_deref(),
-            *style.font_size.borrow() as u16,
-            1.0,
-        );
-
         Input {
-            style: Style {
-                width,
-                height: height + offset_y,
-                ..style
+            style,
+            value: vec![],
+            focused: true,
+            location: Location {
+                line_index: 0,
+                word_index: 0,
+                letter_index: 0,
             },
-            value: initial_value,
-            focused: false,
         }
     }
+
     fn add_letter(&mut self, c: char) {
+        match c {
+            '\u{000d}' => {
+                self.value.push(Line::new());
+                self.location.line_index += 1;
+                self.location.word_index = 0;
+                self.location.letter_index = 0;
+            }
+            ' ' => {
+                let line = &mut self.value[self.location.line_index].words;
+                line.push(Word::new());
+                self.location.word_index += 1;
+                self.location.letter_index = 0;
+            }
+            _ => {
+                let Location {
+                    line_index,
+                    word_index,
+                    ..
+                } = self.location;
+
+                if line_index >= self.value.len() {
+                    self.value.push(Line::new());
+                }
+
+                if word_index >= self.value[line_index].words.len() {
+                    self.value[line_index].words.push(Word::new());
+                }
+
+                let word = &mut self.value[line_index].words[word_index].letters;
+                word.push(Letter::new(c));
+
+                self.location.letter_index += 1;
+            }
+        };
+    }
+
+    fn remove_letter(&mut self) {
         let Location {
             line_index,
             word_index,
-            ..
-        } = self.location;
+            letter_index,
+        } = &mut self.location;
 
-        let word = &mut self.value[line_index].line[word_index].word;
-        word.push(Letter::new(c));
+        if *line_index >= self.value.len() {
+            return;
+        }
 
-        self.location.letter_index += 1;
+        if self.value[*line_index].words[*word_index]
+            .letters
+            .pop()
+            .is_none()
+        {
+            if self.value[*line_index].words.pop().is_none() {
+                if self.value.pop().is_some() {
+                    *line_index -= 1;
+
+                    *word_index = self.value[*line_index].words.len();
+                    if *word_index > 0 {
+                        *word_index -= 1;
+                    }
+                }
+            } else {
+                *word_index -= 1;
+            }
+
+            *letter_index = self.value[*line_index].words[*word_index].letters.len();
+            if *letter_index > 0 {
+                *letter_index -= 1;
+            }
+        } else {
+            *letter_index -= 1;
+        }
     }
+
+    fn remove_word(&mut self) {}
 }
 
 impl Component for Input {
@@ -62,22 +119,20 @@ impl Component for Input {
 
     fn refresh(&mut self) {
         if self.focused {
+            let keys = input::get_keys_down();
+
             if let Some(key) = input::get_last_key_pressed() {
                 match key {
                     KeyCode::Backspace => {
-                        self.value.pop();
+                        if keys.contains(&KeyCode::LeftAlt) || keys.contains(&KeyCode::RightAlt) {
+                            self.remove_word();
+                        } else {
+                            self.remove_letter();
+                        }
                     }
-                    KeyCode::Tab => self.value += "\t",
-
-                    KeyCode::Enter => self.value += "\n",
                     _ => {
                         if let Some(c) = input::get_char_pressed() {
-                            match c {
-                                '\u{0008}' => {
-                                    self.value.pop();
-                                }
-                                _ => self.value += &c.to_string(),
-                            };
+                            self.add_letter(c);
                         }
                     }
                 }
@@ -85,7 +140,7 @@ impl Component for Input {
             }
         }
 
-        let mut text = Text::new(self.style.clone(), self.value.clone());
+        let mut text = Text::new(self.style.clone(), self.to_string());
         text.refresh();
 
         self.style.width = text.style.width;
@@ -112,6 +167,7 @@ impl Component for Input {
         &mut self.style
     }
 }
+
 impl Display for Input {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value.iter().map(|l| l.to_string()).join("\n"))
@@ -120,52 +176,52 @@ impl Display for Input {
 
 #[derive(Clone, Debug)]
 pub struct Line {
-    pub line: Vec<Word>,
+    pub words: Vec<Word>,
 }
 
 impl Line {
     pub fn new() -> Self {
-        Line { line: vec![] }
+        Line { words: vec![] }
     }
 }
 
 impl Display for Line {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.line.iter().map(|w| w.to_string()).join(" "))
+        write!(f, "{}", self.words.iter().map(|w| w.to_string()).join(" "))
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct Word {
-    pub word: Vec<Letter>,
+    pub letters: Vec<Letter>,
 }
 
 impl Word {
     pub fn new() -> Self {
-        Word { word: vec![] }
+        Word { letters: vec![] }
     }
 }
 
 impl Display for Word {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.word.iter().map(|l| l.to_string()).join(""))
+        write!(f, "{}", self.letters.iter().map(|l| l.to_string()).join(""))
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct Letter {
-    pub letter: char,
+    pub c: char,
 }
 
 impl Letter {
     pub fn new(c: char) -> Self {
-        Letter { letter: c }
+        Letter { c }
     }
 }
 
 impl Display for Letter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.letter)
+        write!(f, "{}", self.c)
     }
 }
 
@@ -174,4 +230,29 @@ pub struct Location {
     pub line_index: usize,
     pub word_index: usize,
     pub letter_index: usize,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Input, Style};
+
+    fn input() -> Input {
+        Input::new(Style::default())
+    }
+
+    #[test]
+    fn input_constructor() {
+        let input = input();
+        assert!(input.value.is_empty(), "empty vector");
+        assert_eq!(input.location.line_index, 0);
+        assert_eq!(input.location.word_index, 0);
+        assert_eq!(input.location.letter_index, 0);
+    }
+
+    #[test]
+    fn input_add_characters() {
+        let mut input = input();
+        input.add_letter('a');
+        assert_eq!(input.to_string(), "a");
+    }
 }
