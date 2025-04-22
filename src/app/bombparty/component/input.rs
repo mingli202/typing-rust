@@ -3,7 +3,7 @@ use std::fmt::Display;
 use tokio::time::Instant;
 
 use macroquad::input::KeyCode;
-use macroquad::{input, shapes};
+use macroquad::{input, shapes, text};
 
 use crate::app::bombparty::style::Style;
 
@@ -20,21 +20,25 @@ pub struct Input {
     pub last_key_pressed: Option<KeyCode>,
     pub last_char_pressed: Option<char>,
     container: Container,
+    cursor_timer: Instant,
 }
 
 impl Input {
     pub fn new(style: Style) -> Self {
+        let fsize = *style.font_size.borrow();
+
         Input {
             value: vec![Line::default()],
             focused: true,
             location: Location::new(0, 0, 0),
             hold_time: Instant::now(),
+            cursor_timer: Instant::now(),
             last_key_pressed: None,
             last_char_pressed: None,
             container: Container {
                 style: style.clone(),
                 child: Box::new(Text::new(style.clone(), "".to_string())),
-                padding: Padding::new(10.0),
+                padding: Padding::new(fsize / 3.0),
             },
             style,
         }
@@ -96,6 +100,30 @@ impl Input {
 
     fn remove_line(&mut self) {
         self.value.pop();
+    }
+
+    fn draw_cursor(&self) {
+        let Style {
+            mut x,
+            mut y,
+            font_size,
+            theme,
+            font,
+            ..
+        } = &self.style;
+
+        let font_size = *font_size.borrow();
+        x += font_size / 3.0;
+        y += font_size / 3.0;
+
+        if let Some(line) = self.value.last() {
+            let width =
+                text::measure_text(&line.to_string(), font.as_deref(), font_size as u16, 1.0).width;
+
+            x += width;
+            y += (self.value.len() - 1) as f32 * font_size;
+        }
+        shapes::draw_line(x, y, x, y + font_size, 2.0, *theme.text.borrow());
     }
 }
 
@@ -175,12 +203,18 @@ impl Component for Input {
                 input::clear_input_queue();
                 self.container.child = Box::new(Text::new(self.style.clone(), self.to_string()));
                 self.build();
+                self.draw_cursor();
+                self.cursor_timer = Instant::now();
+            } else {
+                let t = self.cursor_timer.elapsed().as_millis();
+                if t < 500 {
+                    self.draw_cursor();
+                }
+                if t > 1000 {
+                    self.cursor_timer = Instant::now();
+                }
             }
         }
-
-        self.container.style.x = self.style.x;
-        self.container.style.y = self.style.y;
-        self.container.refresh();
 
         shapes::draw_rectangle_lines(
             self.style.x,
@@ -194,6 +228,10 @@ impl Component for Input {
                 *self.style.theme.ghost.borrow()
             },
         );
+
+        self.container.style.x = self.style.x;
+        self.container.style.y = self.style.y;
+        self.container.refresh();
     }
 
     fn get_style(&self) -> &Style {
