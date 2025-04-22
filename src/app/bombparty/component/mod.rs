@@ -3,9 +3,10 @@ pub mod container;
 pub mod input;
 pub mod text;
 
-// pub use center::Center;
+pub use center::Center;
+pub use container::*;
 pub use input::Input;
-// pub use text::Text;
+pub use text::Text;
 
 use super::style::Style;
 

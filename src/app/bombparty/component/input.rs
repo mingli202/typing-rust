@@ -7,9 +7,8 @@ use macroquad::{input, shapes, text};
 
 use crate::app::bombparty::style::Style;
 
-use super::container::{Container, Padding};
-use super::text::Text;
 use super::Component;
+use super::{Container, Padding, Text};
 
 pub struct Input {
     pub style: Style,

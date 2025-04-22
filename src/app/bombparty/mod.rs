@@ -1,8 +1,7 @@
 use macroquad::{input, window};
 use tokio::time::Instant;
 
-use self::component::center::Center;
-use self::component::{Axis, Component, Input};
+use self::component::{Axis, Center, Component, Input};
 
 use super::App;
 
