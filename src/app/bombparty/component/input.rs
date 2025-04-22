@@ -31,7 +31,7 @@ impl Input {
 
         Input {
             value: vec![],
-            placeholder: "...".to_string(),
+            placeholder: "".to_string(),
             focused: false,
             // location: Location::new(0, 0, 0),
             hold_time: Instant::now(),
