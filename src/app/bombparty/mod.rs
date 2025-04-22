@@ -13,6 +13,10 @@ pub use style::Style;
 pub async fn run(app: &mut App) {
     let mut components: Vec<Box<dyn Component>> = bombparty(&app.style);
 
+    for component in components.iter_mut() {
+        component.build();
+    }
+
     loop {
         window::clear_background(*app.style.theme.bg.borrow());
 
