@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::fmt::Display;
+use tokio::time::Instant;
 
 use macroquad::input::KeyCode;
 use macroquad::{input, shapes};
@@ -14,6 +15,9 @@ pub struct Input {
     pub value: Vec<Line>,
     pub focused: bool,
     pub location: Location,
+    pub hold_time: Instant,
+    pub last_key_pressed: Option<KeyCode>,
+    pub last_char_pressed: Option<char>,
 }
 
 impl Input {
@@ -23,6 +27,9 @@ impl Input {
             value: vec![Line::default()],
             focused: true,
             location: Location::new(0, 0, 0),
+            hold_time: Instant::now(),
+            last_key_pressed: None,
+            last_char_pressed: None,
         }
     }
 
@@ -97,7 +104,33 @@ impl Component for Input {
         if self.focused {
             let keys = input::get_keys_down();
 
-            if let Some(key) = input::get_last_key_pressed() {
+            let key = match input::get_last_key_pressed() {
+                Some(k) => Some(k),
+                None => {
+                    if let Some(k) = self.last_key_pressed {
+                        if keys.contains(&k) {
+                            if self.hold_time.elapsed().as_millis() > 500 {
+                                Some(k)
+                            } else {
+                                None
+                            }
+                        } else {
+                            self.last_key_pressed = None;
+                            self.last_char_pressed = None;
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                }
+            };
+
+            if let Some(key) = key {
+                if self.last_key_pressed.is_none() {
+                    self.last_key_pressed = Some(key);
+                    self.hold_time = Instant::now();
+                }
+
                 match key {
                     KeyCode::Backspace => {
                         if keys.contains(&KeyCode::LeftAlt) || keys.contains(&KeyCode::RightAlt) {
@@ -111,7 +144,14 @@ impl Component for Input {
                         }
                     }
                     _ => {
-                        if let Some(c) = input::get_char_pressed() {
+                        let c = match input::get_char_pressed() {
+                            Some(_c) => Some(_c),
+                            None => self.last_char_pressed,
+                        };
+
+                        if let Some(c) = c {
+                            self.last_char_pressed = Some(c);
+
                             self.add_last(c);
                         }
                     }
