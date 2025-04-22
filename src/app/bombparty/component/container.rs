@@ -10,15 +10,25 @@ pub struct Container {
 
 impl Container {
     pub fn new(style: Style, child: Box<dyn Component>) -> Self {
-        Container {
+        let mut c = Container {
             child,
             style,
             padding: Padding::new(0.0),
-        }
+        };
+        c.build();
+
+        c
     }
 }
 
 impl Component for Container {
+    fn build(&mut self) {
+        self.child.build();
+        let child = self.child.get_style_mut();
+
+        self.style.width = child.width + self.padding.l + self.padding.r;
+        self.style.height = child.height + self.padding.t + self.padding.b;
+    }
     fn get_style(&self) -> &Style {
         &self.style
     }
@@ -31,18 +41,7 @@ impl Component for Container {
         let child = self.child.get_style_mut();
 
         child.x = self.style.x + self.padding.l;
-        if self.style.fill_width {
-            child.width = self.style.width - self.padding.l - self.padding.r;
-        } else {
-            self.style.width = child.width + self.padding.l + self.padding.r;
-        }
-
         child.y = self.style.y + self.padding.t;
-        if self.style.fill_height {
-            child.height = self.style.height - self.padding.t - self.padding.b;
-        } else {
-            self.style.height = child.height + self.padding.t + self.padding.b;
-        }
 
         self.child.refresh();
     }
