@@ -72,34 +72,34 @@ impl Component for Container {
             } = &self.style;
 
             shapes::draw_line(
-                x - border.l,
-                *y,
-                x - border.l,
-                y + height,
+                x - border.l / 2.0,
+                *y - border.t,
+                x - border.l / 2.0,
+                y + height + border.b,
                 border.l,
                 *border.color.borrow(),
             );
             shapes::draw_line(
-                x + width + border.r,
-                *y,
-                x + width + border.r,
-                y + height,
+                x + width + border.r / 2.0,
+                *y - border.t,
+                x + width + border.r / 2.0,
+                y + height + border.b,
                 border.r,
                 *border.color.borrow(),
             );
             shapes::draw_line(
-                *x,
-                y - border.t,
-                x + width,
-                y - border.t,
+                *x - border.l,
+                y - border.t / 2.0,
+                x + width + border.r,
+                y - border.t / 2.0,
                 border.t,
                 *border.color.borrow(),
             );
             shapes::draw_line(
-                *x,
-                y + height + border.b,
-                x + width,
-                y + height + border.b,
+                *x - border.l,
+                y + height + border.b / 2.0,
+                x + width + border.r,
+                y + height + border.b / 2.0,
                 border.b,
                 *border.color.borrow(),
             );

@@ -1,7 +1,9 @@
+use std::rc::Rc;
+
 use macroquad::{input, window};
 use tokio::time::Instant;
 
-use self::component::{Axis, Center, Component, Input};
+use self::component::{Axis, Border, Center, Component, Input};
 
 use super::App;
 
@@ -20,10 +22,13 @@ pub async fn run(app: &mut App) {
             ..app_style.clone()
         },
         axis: Axis::Both,
-        child: Box::new(Input::new(Style {
-            width: 500.0,
-            ..app_style
-        })),
+        child: Box::new(Input::new(
+            Style {
+                width: 500.0,
+                ..app_style
+            },
+            Some(Border::new(2.0, Rc::clone(&app.style.theme.ghost))),
+        )),
     };
     root.build();
 

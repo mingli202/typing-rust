@@ -24,7 +24,7 @@ pub struct Input {
 }
 
 impl Input {
-    pub fn new(style: Style) -> Self {
+    pub fn new(style: Style, border: Option<Border>) -> Self {
         let fsize = *style.font_size.borrow();
 
         Input {
@@ -39,11 +39,7 @@ impl Input {
                 style: style.clone(),
                 child: Box::new(Text::new(style.clone(), "".to_string())),
                 padding: Padding::new(fsize / 3.0),
-                border: Some(
-                    Border::default()
-                        .b(2.0)
-                        .color(Rc::clone(&style.theme.ghost)),
-                ),
+                border,
             },
             style,
         }
@@ -236,17 +232,9 @@ impl Component for Input {
                 }
             }
 
-            self.container.border = Some(
-                Border::default()
-                    .b(2.0)
-                    .color(Rc::clone(&self.style.theme.text)),
-            );
+            self.container.border.as_mut().unwrap().color = Rc::clone(&self.style.theme.text);
         } else {
-            self.container.border = Some(
-                Border::default()
-                    .b(2.0)
-                    .color(Rc::clone(&self.style.theme.ghost)),
-            );
+            self.container.border.as_mut().unwrap().color = Rc::clone(&self.style.theme.ghost);
         }
 
         self.container.style.x = self.style.x;
@@ -349,7 +337,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::new(Style::default())
+        Input::new(Style::default(), None)
     }
 
     #[test]
