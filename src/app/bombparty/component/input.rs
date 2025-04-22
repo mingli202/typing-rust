@@ -70,7 +70,19 @@ impl Input {
         }
     }
 
-    fn remove_word(&mut self) {}
+    fn remove_word(&mut self) {
+        if let Some(line) = self.value.last_mut() {
+            line.words.pop();
+
+            if line.words.is_empty() {
+                self.value.pop();
+            }
+        }
+    }
+
+    fn remove_line(&mut self) {
+        self.value.pop();
+    }
 }
 
 impl Component for Input {
@@ -90,6 +102,10 @@ impl Component for Input {
                     KeyCode::Backspace => {
                         if keys.contains(&KeyCode::LeftAlt) || keys.contains(&KeyCode::RightAlt) {
                             self.remove_word();
+                        } else if keys.contains(&KeyCode::LeftSuper)
+                            || keys.contains(&KeyCode::RightSuper)
+                        {
+                            self.remove_line();
                         } else {
                             self.remove_last();
                         }
@@ -381,5 +397,62 @@ mod tests {
         input.remove_last();
         input.remove_last();
         assert_eq!(input.to_string(), "");
+    }
+
+    #[test]
+    fn input_remove_word() {
+        let mut input = input();
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
+        input.add_last(' ');
+        input.add_last('b');
+        input.add_last('c');
+        input.add_last('\u{000d}');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
+        input.add_last(' ');
+        input.add_last('b');
+        input.add_last('c');
+        assert_eq!(input.to_string(), "abc bc\nabc bc");
+
+        input.remove_word();
+        assert_eq!(input.to_string(), "abc bc\nabc");
+
+        input.remove_word();
+        assert_eq!(input.to_string(), "abc bc");
+
+        input.remove_word();
+        assert_eq!(input.to_string(), "abc");
+
+        input.remove_word();
+        assert_eq!(input.to_string(), "");
+
+        input.remove_word();
+    }
+
+    #[test]
+    fn input_remove_line() {
+        let mut input = input();
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('\u{000d}');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('\u{000d}');
+        input.add_last('a');
+        input.add_last('b');
+        assert_eq!(input.to_string(), "ab\nab\nab");
+
+        input.remove_line();
+        assert_eq!(input.to_string(), "ab\nab");
+
+        input.remove_line();
+        assert_eq!(input.to_string(), "ab");
+
+        input.remove_line();
+        assert_eq!(input.to_string(), "");
+        input.remove_line();
     }
 }
