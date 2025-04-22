@@ -15,8 +15,8 @@ pub struct Style {
     pub y: f32,
     pub width: f32,
     pub height: f32,
-    pub fill_width: bool,
-    pub fill_height: bool,
+    pub fit_width: bool,
+    pub fit_height: bool,
 }
 
 impl Style {

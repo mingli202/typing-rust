@@ -134,9 +134,20 @@ impl Input {
 
 impl Component for Input {
     fn build(&mut self) {
+        if self.style.width == 0.0 {
+            self.style.fit_width = true;
+        }
+        if self.style.height == 0.0 {
+            self.style.fit_height = true;
+        }
+
         self.container.build();
-        self.style.width = self.container.style.width;
-        self.style.height = self.container.style.height;
+        if self.style.fit_width {
+            self.style.width = self.container.style.width;
+        }
+        if self.style.fit_height {
+            self.style.height = self.container.style.height;
+        }
     }
     fn on_click_in(&mut self) {
         self.focused = true;

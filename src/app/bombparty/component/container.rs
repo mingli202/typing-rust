@@ -23,11 +23,22 @@ impl Container {
 
 impl Component for Container {
     fn build(&mut self) {
+        if self.style.width == 0.0 {
+            self.style.fit_width = true;
+        }
+        if self.style.height == 0.0 {
+            self.style.fit_height = true;
+        }
+
         self.child.build();
         let child = self.child.get_style_mut();
 
-        self.style.width = child.width + self.padding.l + self.padding.r;
-        self.style.height = child.height + self.padding.t + self.padding.b;
+        if self.style.fit_width {
+            self.style.width = child.width + self.padding.l + self.padding.r;
+        }
+        if self.style.fit_height {
+            self.style.height = child.height + self.padding.t + self.padding.b;
+        }
     }
     fn get_style(&self) -> &Style {
         &self.style
