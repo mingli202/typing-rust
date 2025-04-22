@@ -30,9 +30,3 @@ impl Style {
         }
     }
 }
-
-#[derive(Debug, Clone)]
-pub enum Val {
-    Abs(f32),
-    Percent(f32),
-}
