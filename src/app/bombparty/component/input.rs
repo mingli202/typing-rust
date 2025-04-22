@@ -7,6 +7,7 @@ use macroquad::{input, shapes};
 
 use crate::app::bombparty::style::Style;
 
+use super::container::{Container, Padding};
 use super::text::Text;
 use super::Component;
 
@@ -160,11 +161,15 @@ impl Component for Input {
             }
         }
 
-        let mut text = Text::new(self.style.clone(), self.to_string());
-        text.refresh();
+        let mut container = Container {
+            style: self.style.clone(),
+            padding: Padding::new(10.0),
+            child: Box::new(Text::new(self.style.clone(), self.to_string())),
+        };
+        container.refresh();
 
-        self.style.width = text.style.width;
-        self.style.height = text.style.height;
+        self.style.width = container.style.width;
+        self.style.height = container.style.height;
 
         shapes::draw_rectangle_lines(
             self.style.x,

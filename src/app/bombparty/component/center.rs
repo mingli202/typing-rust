@@ -1,11 +1,29 @@
 use crate::app::bombparty::style::Style;
 
-use super::Component;
+use super::{Axis, Component};
 
 pub struct Center {
     pub child: Box<dyn Component>,
     pub style: Style,
+    pub axis: Axis,
 }
+
+// impl Center {
+//     pub fn new(mut style: Style, axis: Axis, child: Box<dyn Component>) -> Self {
+//         let child_style = child.get_style_mut();
+//
+//         match axis {
+//             Axis::X => child_style.x = style.x + (style.width - child_style.width) / 2.0,
+//             Axis::Y => child_style.y = style.y + (style.height - child_style.height) / 2.0,
+//             Axis::Both => {
+//                 child_style.x = style.x + (style.width - child_style.width) / 2.0;
+//                 child_style.y = style.y + (style.height - child_style.height) / 2.0;
+//             }
+//         };
+//
+//         Center { style, axis, child }
+//     }
+// }
 
 impl Component for Center {
     fn get_style(&self) -> &Style {
@@ -16,12 +34,19 @@ impl Component for Center {
     }
     fn refresh(&mut self) {
         let child = self.child.get_style_mut();
-        child.x = self.style.x + (self.style.width - child.width) / 2.0;
-        child.y = self.style.y + (self.style.height - child.height) / 2.0;
+
+        match self.axis {
+            Axis::X => child.x = self.style.x + (self.style.width - child.width) / 2.0,
+            Axis::Y => child.y = self.style.y + (self.style.height - child.height) / 2.0,
+            Axis::Both => {
+                child.x = self.style.x + (self.style.width - child.width) / 2.0;
+                child.y = self.style.y + (self.style.height - child.height) / 2.0;
+            }
+        };
 
         self.child.refresh();
     }
-    fn while_hover(&mut self, is_mouse_pressed: bool) {
-        self.child.while_hover(is_mouse_pressed);
+    fn handle_hover(&mut self, is_mouse_pressed: bool) {
+        self.child.handle_hover(is_mouse_pressed);
     }
 }

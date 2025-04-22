@@ -1,4 +1,5 @@
 pub mod center;
+pub mod container;
 pub mod input;
 pub mod text;
 
@@ -22,7 +23,7 @@ pub trait Component {
 
         style.x <= x && x <= style.x + style.width && style.y <= y && y <= style.y + style.height
     }
-    fn while_hover(&mut self, is_mouse_pressed: bool) {
+    fn handle_hover(&mut self, is_mouse_pressed: bool) {
         if self.is_hover() {
             self.on_hover_in();
 
@@ -39,4 +40,10 @@ pub trait Component {
     }
 
     fn refresh(&mut self);
+}
+
+pub enum Axis {
+    Y,
+    X,
+    Both,
 }

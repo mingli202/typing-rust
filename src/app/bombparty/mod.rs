@@ -1,9 +1,9 @@
 use macroquad::{input, window};
 
 use self::component::center::Center;
-use self::component::{Component, Input};
+use self::component::{Axis, Component, Input};
 
-use super::App;
+use super::{util, App};
 
 pub mod component;
 
@@ -20,8 +20,10 @@ pub async fn run(app: &mut App) {
 
         for component in components.iter_mut() {
             component.refresh();
-            component.while_hover(is_mouse_pressed);
+            component.handle_hover(is_mouse_pressed);
         }
+
+        util::draw_midpoint();
 
         window::next_frame().await;
     }
@@ -34,6 +36,7 @@ pub fn bombparty(style: &crate::app::Style) -> Vec<Box<dyn Component>> {
             height: window::screen_height(),
             ..Style::from(style)
         },
+        axis: Axis::Both,
         child: Box::new(Input::new(Style {
             ..Style::from(style)
         })),
