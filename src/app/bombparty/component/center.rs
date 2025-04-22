@@ -8,24 +8,19 @@ pub struct Center {
     pub axis: Axis,
 }
 
-// impl Center {
-//     pub fn new(mut style: Style, axis: Axis, child: Box<dyn Component>) -> Self {
-//         let child_style = child.get_style_mut();
-//
-//         match axis {
-//             Axis::X => child_style.x = style.x + (style.width - child_style.width) / 2.0,
-//             Axis::Y => child_style.y = style.y + (style.height - child_style.height) / 2.0,
-//             Axis::Both => {
-//                 child_style.x = style.x + (style.width - child_style.width) / 2.0;
-//                 child_style.y = style.y + (style.height - child_style.height) / 2.0;
-//             }
-//         };
-//
-//         Center { style, axis, child }
-//     }
-// }
+impl Center {
+    pub fn new(style: Style, axis: Axis, child: Box<dyn Component>) -> Self {
+        let mut c = Center { style, axis, child };
+        c.build();
+
+        c
+    }
+}
 
 impl Component for Center {
+    fn build(&mut self) {
+        self.child.build();
+    }
     fn get_style(&self) -> &Style {
         &self.style
     }
