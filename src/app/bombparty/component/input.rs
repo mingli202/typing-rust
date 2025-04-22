@@ -19,18 +19,24 @@ pub struct Input {
     pub hold_time: Instant,
     pub last_key_pressed: Option<KeyCode>,
     pub last_char_pressed: Option<char>,
+    container: Container,
 }
 
 impl Input {
     pub fn new(style: Style) -> Self {
         Input {
-            style,
             value: vec![Line::default()],
             focused: true,
             location: Location::new(0, 0, 0),
             hold_time: Instant::now(),
             last_key_pressed: None,
             last_char_pressed: None,
+            container: Container {
+                style: style.clone(),
+                child: Box::new(Text::new(style.clone(), "".to_string())),
+                padding: Padding::new(10.0),
+            },
+            style,
         }
     }
 
@@ -94,6 +100,11 @@ impl Input {
 }
 
 impl Component for Input {
+    fn build(&mut self) {
+        self.container.build();
+        self.style.width = self.container.style.width;
+        self.style.height = self.container.style.height;
+    }
     fn on_click_in(&mut self) {
         self.focused = true;
     }
@@ -158,18 +169,14 @@ impl Component for Input {
                     }
                 }
                 input::clear_input_queue();
+                self.container.child = Box::new(Text::new(self.style.clone(), self.to_string()));
+                self.build();
             }
         }
 
-        let mut container = Container {
-            style: self.style.clone(),
-            padding: Padding::new(10.0),
-            child: Box::new(Text::new(self.style.clone(), self.to_string())),
-        };
-        container.refresh();
-
-        self.style.width = container.style.width;
-        self.style.height = container.style.height;
+        self.container.style.x = self.style.x;
+        self.container.style.y = self.style.y;
+        self.container.refresh();
 
         shapes::draw_rectangle_lines(
             self.style.x,
