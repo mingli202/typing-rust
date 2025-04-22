@@ -17,15 +17,12 @@ pub struct Container {
 
 impl Container {
     pub fn new(style: Style, child: Box<dyn Component>) -> Self {
-        let mut c = Container {
+        Container {
             child,
             style,
             padding: Padding::new(0.0),
             border: None,
-        };
-        c.build();
-
-        c
+        }
     }
 }
 

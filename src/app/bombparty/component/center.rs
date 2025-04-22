@@ -10,10 +10,7 @@ pub struct Center {
 
 impl Center {
     pub fn new(style: Style, axis: Axis, child: Box<dyn Component>) -> Self {
-        let mut c = Center { style, axis, child };
-        c.build();
-
-        c
+        Center { style, axis, child }
     }
 }
 

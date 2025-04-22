@@ -13,16 +13,12 @@ pub struct Text {
 
 impl Text {
     pub fn new(style: Style, text: String) -> Self {
-        let mut t = Text {
+        Text {
             style,
             text,
             lines: vec![],
             offset_y: 0.0,
-        };
-
-        t.build();
-
-        t
+        }
     }
 }
 
