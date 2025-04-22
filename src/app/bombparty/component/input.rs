@@ -117,8 +117,13 @@ impl Input {
         y += font_size / 3.0;
 
         if let Some(line) = self.value.last() {
-            let width =
-                text::measure_text(&line.to_string(), font.as_deref(), font_size as u16, 1.0).width;
+            let width = text::measure_text(
+                &line.to_string().replace("\t", "    "),
+                font.as_deref(),
+                font_size as u16,
+                1.0,
+            )
+            .width;
 
             x += width;
             y += (self.value.len() - 1) as f32 * font_size;
