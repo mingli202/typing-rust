@@ -7,6 +7,7 @@ use macroquad::input::KeyCode;
 use macroquad::{input, shapes, text};
 
 use crate::app::bombparty::style::Style;
+use crate::app::theme::Theme;
 
 use super::{Border, Component};
 use super::{Container, Padding, Text};
@@ -15,6 +16,7 @@ pub struct Input {
     pub style: Style,
     pub value: Vec<Line>,
     pub focused: bool,
+    pub placeholder: String,
     // location: Location,
     hold_time: Instant,
     last_key_pressed: Option<KeyCode>,
@@ -28,8 +30,9 @@ impl Input {
         let fsize = *style.font_size.borrow();
 
         Input {
-            value: vec![Line::default()],
-            focused: true,
+            value: vec![],
+            placeholder: "...".to_string(),
+            focused: false,
             // location: Location::new(0, 0, 0),
             hold_time: Instant::now(),
             cursor_timer: Instant::now(),
@@ -235,6 +238,22 @@ impl Component for Input {
             self.container.border.as_mut().unwrap().color = Rc::clone(&self.style.theme.text);
         } else {
             self.container.border.as_mut().unwrap().color = Rc::clone(&self.style.theme.ghost);
+        }
+
+        if self.value.is_empty() {
+            self.container.child = Box::new(Text::new(
+                Style {
+                    theme: Theme {
+                        text: Rc::clone(&self.style.theme.ghost),
+                        ghost: Rc::clone(&self.style.theme.ghost),
+                        bg: Rc::clone(&self.style.theme.bg),
+                        error: Rc::clone(&self.style.theme.error),
+                    },
+                    ..self.style.clone()
+                },
+                self.placeholder.clone(),
+            ));
+            self.build();
         }
 
         self.container.style.x = self.style.x;

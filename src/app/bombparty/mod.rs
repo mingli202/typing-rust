@@ -27,7 +27,11 @@ pub async fn run(app: &mut App) {
                 width: 500.0,
                 ..app_style
             },
-            Some(Border::new(2.0, Rc::clone(&app.style.theme.ghost))),
+            Some(
+                Border::default()
+                    .color(Rc::clone(&app.style.theme.ghost))
+                    .b(2.0),
+            ),
         )),
     };
     root.build();
