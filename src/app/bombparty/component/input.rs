@@ -117,7 +117,11 @@ impl Component for Input {
             let keys = input::get_keys_down();
 
             let key = match input::get_last_key_pressed() {
-                Some(k) => Some(k),
+                Some(k) => {
+                    self.last_key_pressed = None;
+                    self.last_char_pressed = None;
+                    Some(k)
+                }
                 None => {
                     if let Some(k) = self.last_key_pressed {
                         if keys.contains(&k) {

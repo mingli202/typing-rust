@@ -27,7 +27,7 @@ pub async fn run(app: &mut App) {
             component.handle_hover(is_mouse_pressed);
         }
 
-        util::draw_midpoint();
+        // util::draw_midpoint();
 
         window::next_frame().await;
     }
