@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::fmt::Display;
+use std::rc::Rc;
 use tokio::time::Instant;
 
 use macroquad::input::KeyCode;
@@ -7,17 +8,17 @@ use macroquad::{input, shapes, text};
 
 use crate::app::bombparty::style::Style;
 
-use super::Component;
+use super::{Border, Component};
 use super::{Container, Padding, Text};
 
 pub struct Input {
     pub style: Style,
     pub value: Vec<Line>,
     pub focused: bool,
-    pub location: Location,
-    pub hold_time: Instant,
-    pub last_key_pressed: Option<KeyCode>,
-    pub last_char_pressed: Option<char>,
+    // location: Location,
+    hold_time: Instant,
+    last_key_pressed: Option<KeyCode>,
+    last_char_pressed: Option<char>,
     container: Container,
     cursor_timer: Instant,
 }
@@ -29,7 +30,7 @@ impl Input {
         Input {
             value: vec![Line::default()],
             focused: true,
-            location: Location::new(0, 0, 0),
+            // location: Location::new(0, 0, 0),
             hold_time: Instant::now(),
             cursor_timer: Instant::now(),
             last_key_pressed: None,
@@ -38,6 +39,11 @@ impl Input {
                 style: style.clone(),
                 child: Box::new(Text::new(style.clone(), "".to_string())),
                 padding: Padding::new(fsize / 3.0),
+                border: Some(
+                    Border::default()
+                        .b(2.0)
+                        .color(Rc::clone(&style.theme.ghost)),
+                ),
             },
             style,
         }
@@ -229,20 +235,19 @@ impl Component for Input {
                     self.cursor_timer = Instant::now();
                 }
             }
-        }
 
-        shapes::draw_rectangle_lines(
-            self.style.x,
-            self.style.y,
-            self.style.width,
-            self.style.height,
-            2.0,
-            if self.focused {
-                *self.style.theme.text.borrow()
-            } else {
-                *self.style.theme.ghost.borrow()
-            },
-        );
+            self.container.border = Some(
+                Border::default()
+                    .b(2.0)
+                    .color(Rc::clone(&self.style.theme.text)),
+            );
+        } else {
+            self.container.border = Some(
+                Border::default()
+                    .b(2.0)
+                    .color(Rc::clone(&self.style.theme.ghost)),
+            );
+        }
 
         self.container.style.x = self.style.x;
         self.container.style.y = self.style.y;

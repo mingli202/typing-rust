@@ -1,3 +1,9 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use macroquad::color::Color;
+use macroquad::shapes;
+
 use crate::app::bombparty::Style;
 
 use super::Component;
@@ -6,6 +12,7 @@ pub struct Container {
     pub child: Box<dyn Component>,
     pub style: Style,
     pub padding: Padding,
+    pub border: Option<Border>,
 }
 
 impl Container {
@@ -14,6 +21,7 @@ impl Container {
             child,
             style,
             padding: Padding::new(0.0),
+            border: None,
         };
         c.build();
 
@@ -54,6 +62,49 @@ impl Component for Container {
         child.x = self.style.x + self.padding.l;
         child.y = self.style.y + self.padding.t;
 
+        if let Some(border) = &self.border {
+            let Style {
+                x,
+                y,
+                width,
+                height,
+                ..
+            } = &self.style;
+
+            shapes::draw_line(
+                x - border.l,
+                *y,
+                x - border.l,
+                y + height,
+                border.l,
+                *border.color.borrow(),
+            );
+            shapes::draw_line(
+                x + width + border.r,
+                *y,
+                x + width + border.r,
+                y + height,
+                border.r,
+                *border.color.borrow(),
+            );
+            shapes::draw_line(
+                *x,
+                y - border.t,
+                x + width,
+                y - border.t,
+                border.t,
+                *border.color.borrow(),
+            );
+            shapes::draw_line(
+                *x,
+                y + height + border.b,
+                x + width,
+                y + height + border.b,
+                border.b,
+                *border.color.borrow(),
+            );
+        }
+
         self.child.refresh();
     }
 
@@ -62,7 +113,7 @@ impl Component for Container {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 pub struct Padding {
     pub l: f32,
     pub r: f32,
@@ -117,4 +168,84 @@ impl Padding {
             ..Padding::default()
         }
     }
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct Border {
+    pub l: f32,
+    pub r: f32,
+    pub t: f32,
+    pub b: f32,
+    pub color: Rc<RefCell<Color>>,
+    pub style: BorderStyle,
+}
+
+impl Border {
+    pub fn new(border_thickness: f32, color: Rc<RefCell<Color>>) -> Border {
+        Border {
+            l: border_thickness,
+            r: border_thickness,
+            t: border_thickness,
+            b: border_thickness,
+            color,
+            ..Border::default()
+        }
+    }
+    pub fn x(self, border_thickness: f32) -> Border {
+        Border {
+            l: border_thickness,
+            r: border_thickness,
+            ..self
+        }
+    }
+    pub fn y(self, border_thickness: f32) -> Border {
+        Border {
+            t: border_thickness,
+            b: border_thickness,
+            ..self
+        }
+    }
+    pub fn l(self, border_thickness: f32) -> Border {
+        Border {
+            l: border_thickness,
+            ..self
+        }
+    }
+    pub fn r(self, border_thickness: f32) -> Border {
+        Border {
+            r: border_thickness,
+            ..self
+        }
+    }
+    pub fn t(self, border_thickness: f32) -> Border {
+        Border {
+            t: border_thickness,
+            ..self
+        }
+    }
+    pub fn b(self, border_thickness: f32) -> Border {
+        Border {
+            b: border_thickness,
+            ..self
+        }
+    }
+    pub fn style(self, border_style: BorderStyle) -> Border {
+        Border {
+            style: border_style,
+            ..self
+        }
+    }
+    pub fn color(self, border_color: Rc<RefCell<Color>>) -> Border {
+        Border {
+            color: border_color,
+            ..self
+        }
+    }
+}
+
+#[derive(Default, Debug, Clone)]
+pub enum BorderStyle {
+    #[default]
+    Solid,
+    Rounded,
 }
