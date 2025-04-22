@@ -5,7 +5,7 @@ use self::component::{Component, Input};
 
 use super::App;
 
-mod component;
+pub mod component;
 
 mod style;
 pub use style::Style;

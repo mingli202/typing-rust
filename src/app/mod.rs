@@ -20,7 +20,7 @@ pub use self::theme::ThemeName;
 mod text;
 mod util;
 
-mod bombparty;
+pub mod bombparty;
 mod endscreen;
 mod focus;
 mod theme_select;

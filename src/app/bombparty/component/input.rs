@@ -20,87 +20,53 @@ impl Input {
     pub fn new(style: Style) -> Self {
         Input {
             style,
-            value: vec![],
+            value: vec![Line::default()],
             focused: true,
             location: Location::new(0, 0, 0),
         }
     }
 
-    fn add_letter(&mut self, c: char) {
+    fn add_last(&mut self, c: char) {
         match c {
             '\u{000d}' => {
-                self.value.push(Line::new());
-                self.location.line_index += 1;
-                self.location.word_index = 0;
-                self.location.letter_index = 0;
+                self.value.push(Line::default());
             }
             ' ' => {
-                if self.location.line_index >= self.value.len() {
-                    self.value.push(Line::new());
+                if self.value.last().is_none() {
+                    self.value.push(Line::default());
                 }
-                let line = &mut self.value[self.location.line_index].words;
-                line.push(Word::new());
-                self.location.word_index += 1;
-                self.location.letter_index = 0;
+                self.value.last_mut().unwrap().words.push(Word::default());
             }
             _ => {
-                let Location {
-                    line_index,
-                    word_index,
-                    ..
-                } = self.location;
-
-                if line_index >= self.value.len() {
-                    self.value.push(Line::new());
+                if self.value.last().is_none() {
+                    self.value.push(Line::default());
                 }
-
-                if word_index >= self.value[line_index].words.len() {
-                    self.value[line_index].words.push(Word::new());
+                if self.value.last().unwrap().words.last().is_none() {
+                    self.value.last_mut().unwrap().words.push(Word::default());
                 }
-
-                let word = &mut self.value[line_index].words[word_index].letters;
-                word.push(Letter::new(c));
-
-                self.location.letter_index += 1;
+                self.value
+                    .last_mut()
+                    .unwrap()
+                    .words
+                    .last_mut()
+                    .unwrap()
+                    .letters
+                    .push(Letter::new(c));
             }
         };
     }
 
-    fn remove_letter(&mut self) {
-        let Location {
-            line_index,
-            word_index,
-            letter_index,
-        } = &mut self.location;
+    fn remove_last(&mut self) {
+        if let Some(line) = self.value.last_mut() {
+            if let Some(word) = line.words.last_mut() {
+                if word.letters.pop().is_none() {
+                    line.words.pop();
 
-        if *line_index >= self.value.len() {
-            return;
-        }
-
-        if self.value[*line_index].words[*word_index]
-            .letters
-            .pop()
-            .is_none()
-        {
-            if self.value[*line_index].words.pop().is_none() {
-                if self.value.pop().is_some() {
-                    *line_index -= 1;
-
-                    *word_index = self.value[*line_index].words.len();
-                    if *word_index > 0 {
-                        *word_index -= 1;
+                    if line.words.is_empty() {
+                        self.value.pop();
                     }
                 }
-            } else {
-                *word_index -= 1;
             }
-
-            *letter_index = self.value[*line_index].words[*word_index].letters.len();
-            if *letter_index > 0 {
-                *letter_index -= 1;
-            }
-        } else {
-            *letter_index -= 1;
         }
     }
 
@@ -125,12 +91,12 @@ impl Component for Input {
                         if keys.contains(&KeyCode::LeftAlt) || keys.contains(&KeyCode::RightAlt) {
                             self.remove_word();
                         } else {
-                            self.remove_letter();
+                            self.remove_last();
                         }
                     }
                     _ => {
                         if let Some(c) = input::get_char_pressed() {
-                            self.add_letter(c);
+                            self.add_last(c);
                         }
                     }
                 }
@@ -177,9 +143,11 @@ pub struct Line {
     pub words: Vec<Word>,
 }
 
-impl Line {
-    pub fn new() -> Self {
-        Line { words: vec![] }
+impl Default for Line {
+    fn default() -> Self {
+        Line {
+            words: vec![Word::default()],
+        }
     }
 }
 
@@ -189,15 +157,9 @@ impl Display for Line {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Word {
     pub letters: Vec<Letter>,
-}
-
-impl Word {
-    pub fn new() -> Self {
-        Word { letters: vec![] }
-    }
 }
 
 impl Display for Word {
@@ -224,10 +186,14 @@ impl Display for Letter {
 }
 
 #[derive(Clone, Debug)]
+/// Represents the current location of the cursor
 pub struct Location {
-    pub line_index: usize,   // current line
-    pub word_index: usize,   // current work in line
-    pub letter_index: usize, // current letter in word + 1
+    /// the current line
+    pub line_index: usize,
+    /// the current word in the line
+    pub word_index: usize,
+    /// the current letter in the word
+    pub letter_index: usize,
 }
 
 impl Location {
@@ -259,112 +225,161 @@ mod tests {
     #[test]
     fn input_constructor() {
         let input = input();
-        assert!(input.value.is_empty(), "empty vector");
-        assert_eq!(input.location.line_index, 0);
-        assert_eq!(input.location.word_index, 0);
-        assert_eq!(input.location.letter_index, 0);
+        assert_eq!(input.value.len(), 1, "empty vector");
+        // assert_eq!(input.location.line_index, 0);
+        // assert_eq!(input.location.word_index, 0);
+        // assert_eq!(input.location.letter_index, 0);
     }
 
     #[test]
     fn input_add_characters() {
         let mut input = input();
-        input.add_letter('a');
-        input.add_letter('b');
-        input.add_letter('c');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
         assert_eq!(input.to_string(), "abc");
-        assert_eq!(input.location.line_index, 0);
-        assert_eq!(input.location.word_index, 0);
-        assert_eq!(input.location.letter_index, 3);
+        // assert_eq!(input.location.line_index, 0);
+        // assert_eq!(input.location.word_index, 0);
+        // assert_eq!(input.location.letter_index, 2);
     }
 
     #[test]
     fn input_add_characters_2() {
         let mut input = input();
-        input.add_letter('a');
-        input.add_letter('b');
-        input.add_letter(' ');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last(' ');
         assert_eq!(input.to_string(), "ab ");
-        assert_eq!(input.location.line_index, 0);
-        assert_eq!(input.location.word_index, 1);
-        assert_eq!(input.location.letter_index, 0);
+        // assert_eq!(input.location.line_index, 0);
+        // assert_eq!(input.location.word_index, 1);
+        // assert_eq!(input.location.letter_index, 0);
 
-        input.add_letter('c');
-        input.add_letter('d');
-        input.add_letter('e');
+        input.add_last('c');
+        input.add_last('d');
+        input.add_last('e');
         assert_eq!(input.to_string(), "ab cde");
-        assert_eq!(input.location.line_index, 0);
-        assert_eq!(input.location.word_index, 1);
-        assert_eq!(input.location.letter_index, 3);
+        // assert_eq!(input.location.line_index, 0);
+        // assert_eq!(input.location.word_index, 1);
+        // assert_eq!(input.location.letter_index, 2);
     }
 
     #[test]
     fn input_add_line() {
         let mut input = input();
 
-        input.add_letter('a');
-        input.add_letter('b');
-        input.add_letter('c');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
         assert_eq!(input.to_string(), "abc");
 
-        input.add_letter('\u{000d}');
+        input.add_last('\u{000d}');
         assert_eq!(input.to_string(), "abc\n");
 
-        input.add_letter('a');
-        input.add_letter('b');
-        input.add_letter('c');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
         assert_eq!(input.to_string(), "abc\nabc");
-        assert_eq!(Location::new(1, 0, 3), input.location);
+        // assert_eq!(Location::new(1, 0, 2), input.location);
 
-        input.add_letter(' ');
-        input.add_letter('d');
-        input.add_letter('e');
+        input.add_last(' ');
+        input.add_last('d');
+        input.add_last('e');
         assert_eq!(input.to_string(), "abc\nabc de");
-        assert_eq!(Location::new(1, 1, 2), input.location);
+        // assert_eq!(Location::new(1, 1, 1), input.location);
     }
 
     #[test]
     fn input_add_empty_word() {
         let mut input = input();
 
-        input.add_letter(' ');
-        input.add_letter('a');
-        input.add_letter('b');
+        input.add_last(' ');
+        input.add_last('a');
+        input.add_last('b');
 
         assert_eq!(input.to_string(), " ab");
-        assert_eq!(Location::new(0, 1, 2), input.location);
+        // assert_eq!(Location::new(0, 1, 1), input.location);
 
-        input.add_letter(' ');
-        input.add_letter(' ');
-        input.add_letter(' ');
+        input.add_last(' ');
+        input.add_last(' ');
+        input.add_last(' ');
         assert_eq!(input.to_string(), " ab   ");
-        assert_eq!(Location::new(0, 4, 0), input.location);
+        // assert_eq!(Location::new(0, 4, 0), input.location);
 
-        input.add_letter('c');
+        input.add_last('c');
         assert_eq!(input.to_string(), " ab   c");
-        assert_eq!(Location::new(0, 4, 1), input.location);
+        // assert_eq!(Location::new(0, 4, 0), input.location);
     }
 
     #[test]
     fn input_add_empty_line() {
         let mut input = input();
 
-        input.add_letter('\u{000d}');
-        input.add_letter('a');
-        input.add_letter('b');
+        input.add_last('\u{000d}');
+        input.add_last('a');
+        input.add_last('b');
         assert_eq!(input.to_string(), "\nab");
-        assert_eq!(Location::new(1, 0, 2), input.location);
+        // assert_eq!(Location::new(1, 0, 1), input.location);
 
-        input.add_letter('\u{000d}');
-        input.add_letter('\u{000d}');
-        input.add_letter('\u{000d}');
+        input.add_last('\u{000d}');
+        input.add_last('\u{000d}');
+        input.add_last('\u{000d}');
         assert_eq!(input.to_string(), "\nab\n\n\n");
-        assert_eq!(Location::new(4, 0, 0), input.location);
+        // assert_eq!(Location::new(4, 0, 0), input.location);
 
-        input.add_letter('a');
-        input.add_letter('b');
-        input.add_letter(' ');
-        input.add_letter('a');
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last(' ');
+        input.add_last('a');
         assert_eq!(input.to_string(), "\nab\n\n\nab a");
-        assert_eq!(Location::new(4, 1, 1), input.location);
+        // assert_eq!(Location::new(4, 1, 0), input.location);
+    }
+
+    #[test]
+    fn input_delete_char() {
+        let mut input = input();
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
+        input.add_last('d');
+        assert_eq!(input.to_string(), "abcd");
+
+        input.remove_last();
+        assert_eq!(input.to_string(), "abc");
+        // assert_eq!(Location::new(0, 0, 2), input.location);
+
+        input.remove_last();
+        input.remove_last();
+        input.remove_last();
+        assert_eq!(input.to_string(), "");
+        // assert_eq!(Location::new(0, 0, 0), input.location);
+
+        input.remove_last();
+        assert_eq!(input.to_string(), "");
+    }
+
+    #[test]
+    fn input_delete_line() {
+        let mut input = input();
+        input.add_last('a');
+        input.add_last('b');
+        input.add_last('c');
+
+        input.add_last('\u{000d}');
+        assert_eq!(input.to_string(), "abc\n");
+
+        input.add_last('a');
+        assert_eq!(input.to_string(), "abc\na");
+
+        input.remove_last();
+        assert_eq!(input.to_string(), "abc\n");
+
+        input.remove_last();
+        assert_eq!(input.to_string(), "abc");
+
+        input.remove_last();
+        input.remove_last();
+        input.remove_last();
+        input.remove_last();
+        assert_eq!(input.to_string(), "");
     }
 }
