@@ -14,6 +14,7 @@ pub trait Component {
     fn on_click_out(&mut self) {}
     fn get_style(&self) -> &Style;
     fn get_style_mut(&mut self) -> &mut Style;
+    fn build(&mut self);
 
     fn on_hover_in(&mut self) {}
     fn on_hover_out(&mut self) {}
