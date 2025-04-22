@@ -8,6 +8,7 @@ pub struct Text {
     pub text: String,
     pub style: Style,
     lines: Vec<(String, f32, f32)>,
+    offset_y: f32,
 }
 
 impl Text {
@@ -16,6 +17,7 @@ impl Text {
             style,
             text,
             lines: vec![],
+            offset_y: 0.0,
         };
 
         t.build();
@@ -36,17 +38,23 @@ impl Component for Text {
 
         let mut liness = vec![];
 
+        self.offset_y = text::measure_text(
+            "q",
+            self.style.font.as_deref(),
+            *self.style.font_size.borrow() as u16,
+            1.0,
+        )
+        .height;
+
         for line in lines {
-            let TextDimensions {
-                width: w, offset_y, ..
-            } = text::measure_text(
+            let TextDimensions { width: w, .. } = text::measure_text(
                 line,
                 self.style.font.as_deref(),
                 *self.style.font_size.borrow() as u16,
                 1.0,
             );
 
-            liness.push((line.to_string(), 0.0, height + offset_y));
+            liness.push((line.to_string(), 0.0, height + self.offset_y));
 
             height += fsize;
 
