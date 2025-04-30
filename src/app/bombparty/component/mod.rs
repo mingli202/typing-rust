@@ -1,10 +1,12 @@
 pub mod center;
 pub mod container;
+pub mod flexbox;
 pub mod input;
 pub mod text;
 
 pub use center::Center;
 pub use container::*;
+pub use flexbox::FlexBox;
 pub use input::Input;
 pub use text::Text;
 
