@@ -9,6 +9,7 @@ use self::component::{Axis, Border, Center, Component, Container, FlexBox, Input
 use super::App;
 
 pub mod component;
+pub mod schemas;
 
 mod style;
 pub use style::Style;
@@ -31,15 +32,12 @@ pub async fn run(app: &mut App) {
                 border: Some(Border::new(2.0, Rc::clone(&app_style.theme.text))),
                 child: Box::new(Text::new(app_style.clone(), "Hello world".to_string())),
             }),
-            Box::new(Container {
-                style: app_style.clone(),
-                padding: Padding::new(10.0),
-                border: Some(Border::new(2.0, Rc::clone(&app_style.theme.text))),
-                child: Box::new(Text::new(app_style.clone(), "Hello world".to_string())),
-            }),
+            Box::new(Input::new(app_style.clone(), None)),
         ],
     );
     let mut root = Center::new(app_style.clone(), Axis::Both, Box::new(root));
+    root.style.width = window::screen_width();
+    root.style.height = window::screen_height();
 
     root.build();
 
