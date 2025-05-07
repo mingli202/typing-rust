@@ -18,7 +18,7 @@ use self::theme::Theme;
 pub use self::theme::ThemeName;
 
 mod text;
-mod util;
+pub mod util;
 
 pub mod bombparty;
 mod endscreen;

@@ -3,6 +3,7 @@
 use macroquad::color::Color;
 use macroquad::{input, shapes, window};
 
+use super::bombparty::schemas::NotFound;
 use super::Style;
 
 pub fn is_hover(style: &Style) -> bool {
@@ -42,4 +43,33 @@ pub fn draw_midpoint() {
         1.0,
         Color::new(1.0, 0.0, 0.0, 1.0),
     );
+}
+
+pub async fn exists(word: String) -> Option<bool> {
+    let re = reqwest::get(format!(
+        "https://api.dictionaryapi.dev/api/v2/entries/en/{}",
+        word
+    ))
+    .await;
+
+    if re.is_err() {
+        return None;
+    }
+
+    let re = re.unwrap().text().await;
+
+    if re.is_err() {
+        return None;
+    }
+
+    let txt = re.unwrap();
+
+    if txt.contains("1015") {
+        return None;
+    }
+
+    match serde_json::from_str::<NotFound>(&txt) {
+        Ok(_) => Some(false),
+        Err(_) => Some(true),
+    }
 }

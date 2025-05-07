@@ -135,6 +135,9 @@ impl Data {
 #[allow(unused, non_snake_case)]
 #[cfg(test)]
 mod tests {
+    use crate::app::bombparty::schemas::NotFound;
+    use crate::app::util;
+
     use super::*;
 
     use std::collections::HashSet;
@@ -142,82 +145,6 @@ mod tests {
     use serde::Deserialize;
     use tokio::task::JoinSet;
 
-    #[derive(Deserialize, Debug)]
-    struct Phonetic {
-        text: Option<String>,
-        audio: Option<String>,
-        sourceUrl: Option<String>,
-        license: Option<License>,
-    }
-
-    #[derive(Deserialize, Debug)]
-    struct License {
-        name: String,
-        url: String,
-    }
-
-    #[derive(Deserialize, Debug)]
-    struct Definition {
-        definition: String,
-        example: Option<String>,
-        synonyms: Vec<String>,
-        antonyms: Vec<String>,
-    }
-
-    #[derive(Deserialize, Debug)]
-    struct Meaning {
-        partOfSpeech: String,
-        definitions: Vec<Definition>,
-        synonyms: Vec<String>,
-        antonyms: Vec<String>,
-    }
-
-    #[derive(Deserialize, Debug)]
-    struct Res {
-        word: String,
-        phonetic: Option<String>,
-        phonetics: Vec<Phonetic>,
-        origin: Option<String>,
-        meanings: Vec<Meaning>,
-        license: Option<License>,
-        sourceUrls: Vec<String>,
-    }
-
-    #[derive(Deserialize, Debug)]
-    struct NotFound {
-        title: String,
-        message: String,
-        resolution: String,
-    }
-
-    pub async fn exists(word: String) -> Option<bool> {
-        let re = reqwest::get(format!(
-            "https://api.dictionaryapi.dev/api/v2/entries/en/{}",
-            word
-        ))
-        .await;
-
-        if re.is_err() {
-            return None;
-        }
-
-        let re = re.unwrap().text().await;
-
-        if re.is_err() {
-            return None;
-        }
-
-        let txt = re.unwrap();
-
-        if txt.contains("1015") {
-            return None;
-        }
-
-        match serde_json::from_str::<NotFound>(&txt) {
-            Ok(_) => Some(false),
-            Err(_) => Some(true),
-        }
-    }
     #[test]
     fn format() {
         let data = Data::new_offline(None, None).unwrap();
@@ -1079,12 +1006,12 @@ mod tests {
             let count = Arc::clone(&count);
 
             set.spawn(async move {
-                let mut res = exists(word.to_string()).await;
+                let mut res = util::exists(word.to_string()).await;
 
                 while res.is_none() {
                     // println!("some problem");
                     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                    res = exists(word.to_string()).await;
+                    res = util::exists(word.to_string()).await;
                 }
 
                 let mut count = count.lock().await;
