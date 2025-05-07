@@ -42,7 +42,11 @@ impl Input {
                 style: style.clone(),
                 child: Box::new(Text::new(style.clone(), "".to_string())),
                 padding: Padding::new(fsize / 3.0),
-                border,
+                border: if border.is_none() {
+                    Some(Border::new(2.0, Rc::clone(&style.theme.ghost)))
+                } else {
+                    border
+                },
             },
             style,
         }
