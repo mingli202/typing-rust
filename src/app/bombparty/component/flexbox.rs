@@ -36,6 +36,12 @@ impl Component for FlexBox {
         &mut self.style
     }
 
+    fn handle_hover(&mut self, is_mouse_pressed: bool) {
+        for child in self.children.iter_mut() {
+            child.handle_hover(is_mouse_pressed);
+        }
+    }
+
     fn build(&mut self) {
         if self.style.width == 0.0 {
             self.style.fit_width = true;
@@ -103,11 +109,28 @@ impl Component for FlexBox {
     }
 
     fn refresh(&mut self) {
+        let mut width = 0.0;
+        let mut height = 0.0;
+
         for (i, child) in self.children.iter_mut().enumerate() {
-            child.get_style_mut().x = self.children_dimensions[i].0 + self.style.x;
-            child.get_style_mut().y = self.children_dimensions[i].1 + self.style.y;
+            let style_child = child.get_style_mut();
+
+            style_child.x = self.children_dimensions[i].0 + self.style.x;
+            style_child.y = self.children_dimensions[i].1 + self.style.y;
+
+            if style_child.width > width {
+                width = style_child.width;
+            }
+
+            if style_child.height > height {
+                height = style_child.height;
+            }
 
             child.refresh();
+        }
+
+        if (self.style.width - width).abs() < 0.01 || (self.style.height - height) < 0.01 {
+            self.build();
         }
     }
 }
