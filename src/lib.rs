@@ -6,7 +6,7 @@ use data_provider::Data;
 
 use serde::{Deserialize, Serialize};
 
-use std::env::{self, Args};
+use std::env::Args;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
@@ -17,9 +17,7 @@ pub fn parse_args(mut args: Args) -> Result<(Data, Config), Box<dyn Error>> {
     let mut words_file = None;
     let mut quotes_file = None;
 
-    let mut config_fname: PathBuf = [env::var("HOME").unwrap().as_str(), ".typing_test.toml"]
-        .iter()
-        .collect();
+    let mut config_path: PathBuf = Config::get_config_path();
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -37,7 +35,7 @@ pub fn parse_args(mut args: Args) -> Result<(Data, Config), Box<dyn Error>> {
             "--help" | "-h" => help(),
             "--config" | "-c" => {
                 if let Some(f) = args.next() {
-                    config_fname = PathBuf::from(f);
+                    config_path = PathBuf::from(f);
                 }
             }
             _ => (),
@@ -46,7 +44,7 @@ pub fn parse_args(mut args: Args) -> Result<(Data, Config), Box<dyn Error>> {
 
     let data = Data::new_offline(words_file, quotes_file)?;
 
-    Ok((data, Config::new(config_fname.as_path())))
+    Ok((data, Config::new(config_path.as_path())))
 }
 
 fn help() {
@@ -107,9 +105,7 @@ fn default_font_size() -> f32 {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            config_file: [env::var("HOME").unwrap().as_str(), ".typing_test.toml"]
-                .iter()
-                .collect(),
+            config_file: Config::get_config_path(),
             theme: ThemeName::default(),
             font_size: 24.0,
             mode: Mode::Quote(Quote {
@@ -137,13 +133,10 @@ impl Config {
             Err(e) => {
                 match e.kind() {
                     io::ErrorKind::NotFound => {
-                        let config_fname: PathBuf =
-                            [env::var("HOME").unwrap().as_str(), ".typing_test.toml"]
-                                .iter()
-                                .collect();
+                        let config_path = Config::get_config_path();
 
                         if let Err(e) =
-                            fs::write(config_fname, toml::to_string(&Config::default()).unwrap())
+                            fs::write(config_path, toml::to_string(&Config::default()).unwrap())
                         {
                             println!("Can't create default config file. {}", e);
                         };
@@ -161,5 +154,16 @@ impl Config {
         if let Err(e) = fs::write(&self.config_file, toml::to_string(&self).unwrap()) {
             println!("Can't write to config file. {}", e);
         };
+    }
+
+    pub fn get_config_path() -> PathBuf {
+        let mut config_path = PathBuf::new();
+
+        if let Some(path) = dirs::home_dir() {
+            config_path.push(path);
+        }
+        config_path.push(".typing_test.toml");
+
+        config_path
     }
 }
