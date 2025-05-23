@@ -1,7 +1,7 @@
 use crate::data_provider::{Data, Quote};
 use crate::Config;
 use macroquad::color::Color;
-use macroquad::text::{load_ttf_font, Font};
+use macroquad::text::{load_ttf_font, load_ttf_font_from_bytes, Font};
 use macroquad::window;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -36,14 +36,14 @@ pub struct App {
 
 impl App {
     pub async fn new(data: Data, config: Config) -> Self {
-        let typing_font: Font =
-            load_ttf_font("/Users/vincentliu/Library/Fonts/SauceCodeProNerdFontMono-Regular.ttf")
-                .await
-                .unwrap();
+        let typing_font: Font = load_ttf_font_from_bytes(include_bytes!(
+            "/Users/vincentliu/Library/Fonts/SauceCodeProNerdFontMono-Regular.ttf"
+        ))
+        .unwrap();
 
-        let font: Font = load_ttf_font("/System/Library/Fonts/Helvetica.ttc")
-            .await
-            .unwrap();
+        let font: Font =
+            load_ttf_font_from_bytes(include_bytes!("/System/Library/Fonts/Helvetica.ttc"))
+                .unwrap();
 
         App {
             data,
