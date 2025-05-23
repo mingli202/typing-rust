@@ -8,10 +8,11 @@ repository = "https://github.com/mingli202/typing-rust"
 authors = ["mingli202"]
 
 [dependencies]
-macroquad = "0.4.13"
+macroquad = "0.4.14"
 rand = "0.8.5"
 serde = { version = "1.0.216", features = ["derive"] }
 toml = "0.8.19"
 serde_json = "1.0"
 reqwest = { version = "0.12.15", features = ["json"] }
 tokio = { version = "1.44.2", features = ["full"] }
+dirs = "6.0.0"
