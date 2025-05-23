@@ -21,7 +21,7 @@ fn window_conf() -> Conf {
         fullscreen: false,
         window_width: (height * 1.61) as i32,
         window_height: height as i32,
-        window_resizable: false,
+        window_resizable: true,
         high_dpi: true,
         ..default
     }
