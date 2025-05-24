@@ -49,12 +49,15 @@ impl Input {
                 },
             },
             style,
-        }
+        })
     }
 
     fn add_last(&mut self, c: char) {
         match c {
             '\u{000d}' => {
+                if self.value.is_empty() {
+                    self.value.push(Line::default());
+                }
                 self.value.push(Line::default());
             }
             ' ' => {
@@ -360,13 +363,13 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::new(Style::default(), None)
+        *Input::new(Style::default(), None)
     }
 
     #[test]
     fn input_constructor() {
         let input = input();
-        assert_eq!(input.value.len(), 1, "empty vector");
+        assert_eq!(input.value.len(), 0, "empty vector");
         // assert_eq!(input.location.line_index, 0);
         // assert_eq!(input.location.word_index, 0);
         // assert_eq!(input.location.letter_index, 0);
