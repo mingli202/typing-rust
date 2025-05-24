@@ -15,4 +15,4 @@ Tech Stack:
 
 Special thanks to Monkeytype for inspiring me to build this and providing the default words.
 
-[![Typing demo](https://img.youtube.com/vi/9dQt7AX20_4/0.jpg)](https://youtu.be/9dQt7AX20_4 )
+[![Typing demo](https://img.youtube.com/vi/qujeessD6Mg/0.jpg)](https://youtu.be/qujeessD6Mg)
