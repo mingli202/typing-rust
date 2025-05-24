@@ -30,9 +30,9 @@ pub async fn run(app: &mut App) {
                 style: app_style.clone(),
                 padding: Padding::new(10.0),
                 border: Some(Border::new(2.0, Rc::clone(&app_style.theme.text))),
-                child: Box::new(Text::new(app_style.clone(), "Hello world".to_string())),
+                child: Text::new(app_style.clone(), "Hello world".to_string()),
             }),
-            Box::new(Input::new(app_style.clone(), None)),
+            Input::new(app_style.clone(), None),
         ],
     );
     let mut root = Center::new(app_style.clone(), Axis::Both, Box::new(root));

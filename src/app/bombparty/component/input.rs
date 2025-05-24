@@ -26,10 +26,10 @@ pub struct Input {
 }
 
 impl Input {
-    pub fn new(style: Style, border: Option<Border>) -> Self {
+    pub fn new(style: Style, border: Option<Border>) -> Box<Self> {
         let fsize = *style.font_size.borrow();
 
-        Input {
+        Box::new(Input {
             value: vec![],
             placeholder: "".to_string(),
             focused: false,
@@ -40,7 +40,7 @@ impl Input {
             last_char_pressed: None,
             container: Container {
                 style: style.clone(),
-                child: Box::new(Text::new(style.clone(), "".to_string())),
+                child: Text::new(style.clone(), "".to_string()),
                 padding: Padding::new(fsize / 3.0),
                 border: if border.is_none() {
                     Some(Border::new(2.0, Rc::clone(&style.theme.ghost)))
@@ -228,7 +228,7 @@ impl Component for Input {
                     }
                 }
                 input::clear_input_queue();
-                self.container.child = Box::new(Text::new(self.style.clone(), self.to_string()));
+                self.container.child = Text::new(self.style.clone(), self.to_string());
                 self.build();
                 self.draw_cursor();
                 self.cursor_timer = Instant::now();
@@ -248,7 +248,7 @@ impl Component for Input {
         }
 
         if self.value.is_empty() {
-            self.container.child = Box::new(Text::new(
+            self.container.child = Text::new(
                 Style {
                     theme: Theme {
                         text: Rc::clone(&self.style.theme.ghost),
@@ -259,7 +259,7 @@ impl Component for Input {
                     ..self.style.clone()
                 },
                 self.placeholder.clone(),
-            ));
+            );
             self.build();
         }
 
