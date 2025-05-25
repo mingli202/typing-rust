@@ -73,3 +73,13 @@ pub async fn exists(word: String) -> Option<bool> {
         Err(_) => Some(true),
     }
 }
+
+pub trait F32Eq<Rhs = Self> {
+    fn eq_approx(&self, other: &Rhs) -> bool;
+}
+
+impl F32Eq for f32 {
+    fn eq_approx(&self, other: &Self) -> bool {
+        (self - other).abs() < 0.01
+    }
+}
