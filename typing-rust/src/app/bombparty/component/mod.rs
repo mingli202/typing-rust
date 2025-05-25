@@ -14,6 +14,8 @@ use types::StyledComponent;
 use super::Style;
 
 pub trait Component: StyledComponent {
+    fn on_init(&mut self) {}
+    fn on_destroy(&mut self) {}
     fn on_click_in(&mut self) {}
     fn on_click_out(&mut self) {}
 
@@ -59,4 +61,45 @@ pub enum Axis {
     Y,
     X,
     Both,
+}
+
+pub enum C {
+    Center(Center),
+    Input(Input),
+    FlexBox(FlexBox),
+    Text(Text),
+    Container(Container),
+}
+
+impl StyledComponent for C {
+    fn get_style(&self) -> &Style {
+        match self {
+            C::Text(c) => c.get_style(),
+            C::Center(c) => c.get_style(),
+            C::Container(c) => c.get_style(),
+            C::Input(c) => c.get_style(),
+            C::FlexBox(c) => c.get_style(),
+        }
+    }
+    fn get_style_mut(&mut self) -> &mut Style {
+        match self {
+            C::Text(c) => c.get_style_mut(),
+            C::Center(c) => c.get_style_mut(),
+            C::Container(c) => c.get_style_mut(),
+            C::Input(c) => c.get_style_mut(),
+            C::FlexBox(c) => c.get_style_mut(),
+        }
+    }
+}
+
+impl Component for C {
+    fn refresh(&mut self) {
+        match self {
+            C::Text(c) => c.refresh(),
+            C::Center(c) => c.refresh(),
+            C::Container(c) => c.refresh(),
+            C::Input(c) => c.refresh(),
+            C::FlexBox(c) => c.refresh(),
+        }
+    }
 }
