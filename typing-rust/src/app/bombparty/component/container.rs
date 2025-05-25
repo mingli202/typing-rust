@@ -7,8 +7,9 @@ use macroquad::shapes;
 use crate::app::bombparty::Style;
 use crate::app::util::F32Eq;
 
-use super::Component;
+use super::{Component, StyledComponent};
 
+#[derive(StyledComponent)]
 pub struct Container {
     pub child: Box<dyn Component>,
     pub style: Style,
@@ -90,13 +91,6 @@ impl Component for Container {
         if self.style.fit_height {
             self.style.height = child.height + self.padding.t + self.padding.b;
         }
-    }
-    fn get_style(&self) -> &Style {
-        &self.style
-    }
-
-    fn get_style_mut(&mut self) -> &mut Style {
-        &mut self.style
     }
 
     fn refresh(&mut self) {

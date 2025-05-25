@@ -10,13 +10,18 @@ pub use flexbox::FlexBox;
 pub use input::Input;
 pub use text::Text;
 
-use super::style::Style;
+use super::Style;
 
-pub trait Component {
-    fn on_click_in(&mut self) {}
-    fn on_click_out(&mut self) {}
+use typing_rust_macros::StyledComponent;
+
+pub trait StyledComponent {
     fn get_style(&self) -> &Style;
     fn get_style_mut(&mut self) -> &mut Style;
+}
+
+pub trait Component: StyledComponent {
+    fn on_click_in(&mut self) {}
+    fn on_click_out(&mut self) {}
 
     /// Building means setting the width and height of the Component
     fn build(&mut self) {}

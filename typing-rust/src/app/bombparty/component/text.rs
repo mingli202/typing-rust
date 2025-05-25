@@ -2,8 +2,9 @@ use macroquad::text::{self, TextDimensions, TextParams};
 
 use crate::app::bombparty::Style;
 
-use super::Component;
+use super::{Component, StyledComponent};
 
+#[derive(StyledComponent)]
 pub struct Text {
     pub text: String,
     pub style: Style,
@@ -63,12 +64,6 @@ impl Component for Text {
         self.style.height = height;
 
         self.lines = liness;
-    }
-    fn get_style_mut(&mut self) -> &mut Style {
-        &mut self.style
-    }
-    fn get_style(&self) -> &Style {
-        &self.style
     }
     fn refresh(&mut self) {
         for line in &self.lines {

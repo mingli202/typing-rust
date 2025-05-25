@@ -1,8 +1,9 @@
 use crate::app::bombparty::Style;
 use crate::app::util::F32Eq;
 
-use super::Component;
+use super::{Component, StyledComponent};
 
+#[derive(StyledComponent)]
 pub struct FlexBox {
     pub style: Style,
     pub flex_axis: FlexAxis,
@@ -29,14 +30,6 @@ impl FlexBox {
 }
 
 impl Component for FlexBox {
-    fn get_style(&self) -> &Style {
-        &self.style
-    }
-
-    fn get_style_mut(&mut self) -> &mut Style {
-        &mut self.style
-    }
-
     fn handle_hover(&mut self, is_mouse_pressed: bool) {
         for child in self.children.iter_mut() {
             child.handle_hover(is_mouse_pressed);

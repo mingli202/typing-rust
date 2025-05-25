@@ -1,7 +1,8 @@
-use crate::app::bombparty::style::Style;
+use crate::app::bombparty::Style;
 
-use super::{Axis, Component};
+use super::{Axis, Component, StyledComponent};
 
+#[derive(StyledComponent)]
 pub struct Center {
     pub child: Box<dyn Component>,
     pub style: Style,
@@ -17,12 +18,6 @@ impl Center {
 impl Component for Center {
     fn build(&mut self) {
         self.child.build();
-    }
-    fn get_style(&self) -> &Style {
-        &self.style
-    }
-    fn get_style_mut(&mut self) -> &mut Style {
-        &mut self.style
     }
     fn refresh(&mut self) {
         let child = self.child.get_style_mut();

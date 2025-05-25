@@ -9,9 +9,10 @@ use macroquad::{input, shapes, text};
 use crate::app::bombparty::style::Style;
 use crate::app::theme::Theme;
 
-use super::{Border, Component};
+use super::{Border, Component, StyledComponent};
 use super::{Container, Padding, Text};
 
+#[derive(StyledComponent)]
 pub struct Input {
     pub style: Style,
     pub value: Vec<Line>,
@@ -266,13 +267,6 @@ impl Component for Input {
         self.container.style.x = self.style.x;
         self.container.style.y = self.style.y;
         self.container.refresh();
-    }
-
-    fn get_style(&self) -> &Style {
-        &self.style
-    }
-    fn get_style_mut(&mut self) -> &mut Style {
-        &mut self.style
     }
 }
 
