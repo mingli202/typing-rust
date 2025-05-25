@@ -72,7 +72,7 @@ pub async fn run(app: &mut App) {
                     input::clear_input_queue();
                     match focus {
                         NextButton => {
-                            app.state.mode.next(&app.data);
+                            app.state.mode.next(&mut app.data);
                             typingbox.refresh(app.state.mode.get_inner());
                             wpm = 0.0;
                             app.state.incremental_wpm.clear();
@@ -125,7 +125,7 @@ pub async fn run(app: &mut App) {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 NextButton => {
-                    app.state.mode.next(&app.data);
+                    app.state.mode.next(&mut app.data);
                     typingbox.refresh(app.state.mode.get_inner());
                     wpm = 0.0;
                     app.state.incremental_wpm.clear();
@@ -147,7 +147,7 @@ pub async fn run(app: &mut App) {
             if let Some(mode) = &mode_select.next_mode_selected {
                 if *mode != app.state.mode {
                     app.state.mode = mode.clone();
-                    app.state.mode.next(&app.data);
+                    app.state.mode.next(&mut app.data);
                     typingbox.refresh(app.state.mode.get_inner());
                     wpm = 0.0;
                     app.state.incremental_wpm.clear();

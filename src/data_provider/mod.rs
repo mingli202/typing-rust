@@ -16,6 +16,7 @@ pub struct Quote {
 pub struct Data {
     words: Vec<String>,
     quotes: Vec<Quote>,
+    rng: ThreadRng,
 }
 
 impl Data {
@@ -64,7 +65,11 @@ impl Data {
         .filter(|q| !q.quote.is_empty())
         .collect();
 
-        Ok(Data { words, quotes })
+        Ok(Data {
+            words,
+            quotes,
+            rng: rand::thread_rng(),
+        })
     }
 
     pub fn new_online(words_file: String) -> Result<Self, Box<dyn Error>> {
@@ -76,21 +81,22 @@ impl Data {
         Ok(Data {
             words,
             quotes: vec![],
+            rng: rand::thread_rng(),
         })
     }
 
-    pub fn get_random_word(&self) -> &str {
-        let mut rng = rand::thread_rng();
-        self.words.choose(&mut rng).unwrap()
+    pub fn get_random_word(&mut self) -> &str {
+        let rng = &mut self.rng;
+        self.words.choose(rng).unwrap()
     }
 
-    pub fn get_random_quote(&self) -> &Quote {
-        let mut rng = rand::thread_rng();
-        self.quotes.choose(&mut rng).unwrap()
+    pub fn get_random_quote(&mut self) -> &Quote {
+        let rng = &mut self.rng;
+        self.quotes.choose(rng).unwrap()
     }
 
-    pub fn get_n_random_words(&self, n: usize) -> Vec<&String> {
-        let mut rng = rand::thread_rng();
+    pub fn get_n_random_words(&mut self, n: usize) -> Vec<&String> {
+        let rng = &mut self.rng;
 
         let mut v = Vec::with_capacity(n);
 
@@ -110,8 +116,8 @@ impl Data {
         v
     }
 
-    pub fn get_n_random_quotes(&self, n: usize) -> Vec<&Quote> {
-        let mut rng = rand::thread_rng();
+    pub fn get_n_random_quotes(&mut self, n: usize) -> Vec<&Quote> {
+        let rng = &mut self.rng;
 
         let mut v = Vec::with_capacity(n);
 
@@ -1039,14 +1045,11 @@ mod tests {
 
     #[test]
     fn random_words_and_quotes() {
-        let data = Data::new_offline(None, None).unwrap();
-        let random_words = data.get_n_random_words(10);
-        let random_quotes = data.get_n_random_quotes(10);
-
-        assert_eq!(10, random_words.len());
-        assert_eq!(10, random_quotes.len());
-
+        let mut data = Data::new_offline(None, None).unwrap();
         let mut last = String::new();
+
+        let random_words = data.get_n_random_words(10);
+        assert_eq!(10, random_words.len());
 
         for word in random_words {
             if last == *word {
@@ -1054,6 +1057,9 @@ mod tests {
             }
             last = (*word).clone();
         }
+
+        let random_quotes = data.get_n_random_quotes(10);
+        assert_eq!(10, random_quotes.len());
 
         for quote in random_quotes {
             if last == *quote.quote {

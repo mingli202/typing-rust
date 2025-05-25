@@ -48,7 +48,7 @@ pub async fn run(app: &mut App) {
                 KeyCode::Tab => focus.next(),
                 KeyCode::Enter => match focus {
                     NextButton => {
-                        app.state.mode.next(&app.data);
+                        app.state.mode.next(&mut app.data);
                         app.state.screen = Screen::TypingTest;
                         return;
                     }
@@ -84,7 +84,7 @@ pub async fn run(app: &mut App) {
                     if let Some(c) = input::get_char_pressed() {
                         match c {
                             'n' => {
-                                app.state.mode.next(&app.data);
+                                app.state.mode.next(&mut app.data);
                                 app.state.screen = Screen::TypingTest;
                                 return;
                             }
@@ -103,7 +103,7 @@ pub async fn run(app: &mut App) {
         if input::is_mouse_button_pressed(MouseButton::Left) {
             match focus {
                 NextButton => {
-                    app.state.mode.next(&app.data);
+                    app.state.mode.next(&mut app.data);
                     app.state.screen = Screen::TypingTest;
                     return;
                 }

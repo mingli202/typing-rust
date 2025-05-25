@@ -69,7 +69,7 @@ impl App {
     }
 
     pub async fn main_loop(&mut self) -> Result<(), Box<dyn Error>> {
-        self.state.mode.next(&self.data);
+        self.state.mode.next(&mut self.data);
 
         loop {
             match self.state.screen {
@@ -138,16 +138,16 @@ pub enum Mode {
 }
 
 impl Mode {
-    pub fn new(data: &Data) -> Self {
+    pub fn new(data: &mut Data) -> Self {
         // Self::with_quote(data)
         Self::with_words(data, 10)
     }
 
-    pub fn with_quote(data: &Data) -> Self {
+    pub fn with_quote(data: &mut Data) -> Self {
         Mode::Quote(data.get_random_quote().clone())
     }
 
-    pub fn with_words(data: &Data, n: usize) -> Self {
+    pub fn with_words(data: &mut Data, n: usize) -> Self {
         let words = data.get_n_random_words(n);
         Mode::Words {
             n,
@@ -166,7 +166,7 @@ impl Mode {
         }
     }
 
-    pub fn next(&mut self, data: &Data) {
+    pub fn next(&mut self, data: &mut Data) {
         let new_mode = match self {
             Mode::Words { n, .. } => Mode::Words {
                 s: data
