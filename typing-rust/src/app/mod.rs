@@ -14,8 +14,7 @@ mod theme;
 mod style;
 pub use style::{BorderParams, Style, Value};
 
-use self::theme::Theme;
-pub use self::theme::ThemeName;
+pub use self::theme::*;
 
 mod text;
 pub mod util;

@@ -4,10 +4,9 @@ use std::rc::Rc;
 use macroquad::color::Color;
 use macroquad::shapes;
 
-use crate::app::bombparty::Style;
 use crate::app::util::F32Eq;
 
-use super::{Component, StyledComponent};
+use super::{Component, Style, StyledComponent};
 
 #[derive(StyledComponent)]
 pub struct Container {

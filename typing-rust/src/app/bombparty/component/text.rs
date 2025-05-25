@@ -1,8 +1,6 @@
 use macroquad::text::{self, TextDimensions, TextParams};
 
-use crate::app::bombparty::Style;
-
-use super::{Component, StyledComponent};
+use super::{Component, Style, StyledComponent};
 
 #[derive(StyledComponent)]
 pub struct Text {

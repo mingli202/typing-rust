@@ -1,6 +1,4 @@
-use crate::app::bombparty::Style;
-
-use super::{Axis, Component, StyledComponent};
+use super::{Axis, Component, Style, StyledComponent};
 
 #[derive(StyledComponent)]
 pub struct Center {

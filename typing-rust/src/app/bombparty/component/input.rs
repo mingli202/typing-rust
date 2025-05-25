@@ -6,11 +6,9 @@ use tokio::time::Instant;
 use macroquad::input::KeyCode;
 use macroquad::{input, shapes, text};
 
-use crate::app::bombparty::style::Style;
-use crate::app::theme::Theme;
+use crate::app::Theme;
 
-use super::{Border, Component, StyledComponent};
-use super::{Container, Padding, Text};
+use super::{Border, Component, Container, Padding, Style, StyledComponent, Text};
 
 #[derive(StyledComponent)]
 pub struct Input {
