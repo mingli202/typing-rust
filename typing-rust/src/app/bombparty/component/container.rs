@@ -3,10 +3,11 @@ use std::rc::Rc;
 
 use macroquad::color::Color;
 use macroquad::shapes;
+use types::StyledComponent;
 
 use crate::app::util::F32Eq;
 
-use super::{Component, Style, StyledComponent};
+use super::{Component, Style};
 
 #[derive(StyledComponent)]
 pub struct Container {

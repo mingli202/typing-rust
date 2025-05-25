@@ -11,8 +11,8 @@ use super::App;
 pub mod component;
 pub mod schemas;
 
-mod style;
-pub use style::*;
+pub mod style;
+use style::Style;
 
 pub async fn run(app: &mut App) {
     let app_style = Style::from(&app.style);

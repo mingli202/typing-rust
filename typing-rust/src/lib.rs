@@ -1,6 +1,6 @@
 pub mod app;
 pub mod data_provider;
-use self::app::{Mode, ThemeName};
+use self::app::{theme::ThemeName, Mode};
 use self::data_provider::Quote;
 use data_provider::Data;
 

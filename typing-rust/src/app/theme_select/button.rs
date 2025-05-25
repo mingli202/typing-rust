@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use macroquad::text::{self, Font};
 
-use crate::app::style::{BorderParams, Style};
+use crate::app::style::*;
 use crate::app::text::PrintOptions;
 use crate::app::theme::{Theme, ThemeName};
 use crate::app::{self, Value};

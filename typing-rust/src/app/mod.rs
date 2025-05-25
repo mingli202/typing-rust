@@ -9,12 +9,12 @@ use std::error::Error;
 use std::fmt::Display;
 use std::rc::Rc;
 use std::time::Duration;
-mod theme;
 
-mod style;
-pub use style::{BorderParams, Style, Value};
+pub mod style;
+use style::{BorderParams, Style, Value};
 
-pub use self::theme::*;
+pub mod theme;
+use self::theme::*;
 
 mod text;
 pub mod util;

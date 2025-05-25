@@ -4,10 +4,9 @@ use macroquad::color::Color;
 use macroquad::text::{self, Font};
 use macroquad::window;
 
-use crate::app::style::Style;
 use crate::app::text::PrintOptions;
 use crate::app::theme::Theme;
-use crate::app::{self, util, BorderParams, Mode, Value};
+use crate::app::{self, util, BorderParams, Mode, Style, Value};
 use crate::data_provider::Quote;
 
 pub struct ModeSelect {

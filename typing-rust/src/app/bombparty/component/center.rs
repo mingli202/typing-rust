@@ -1,4 +1,6 @@
-use super::{Axis, Component, Style, StyledComponent};
+use types::StyledComponent;
+
+use super::{Axis, Component, Style};
 
 #[derive(StyledComponent)]
 pub struct Center {

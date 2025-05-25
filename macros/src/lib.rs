@@ -10,10 +10,10 @@ pub fn style_component_derive(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         impl StyledComponent for #name {
-            fn get_style(&self) -> &crate::app::bombparty::style::Style {
+            fn get_style(&self) -> &types::style::bombparty::Style {
                 &self.style
             }
-            fn get_style_mut(&mut self) -> &mut crate::app::bombparty::style::Style {
+            fn get_style_mut(&mut self) -> &mut types::style::bombparty::Style {
                 &mut self.style
             }
         }
