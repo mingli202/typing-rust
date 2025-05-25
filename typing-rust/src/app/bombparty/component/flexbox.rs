@@ -18,14 +18,14 @@ impl FlexBox {
         flex_axis: FlexAxis,
         gap: f32,
         children: Vec<Box<dyn Component>>,
-    ) -> Box<Self> {
-        Box::new(FlexBox {
+    ) -> Self {
+        FlexBox {
             style,
             flex_axis,
             gap,
             children,
             children_dimensions: vec![],
-        })
+        }
     }
 }
 

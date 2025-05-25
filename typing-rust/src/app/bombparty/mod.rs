@@ -62,10 +62,11 @@ fn menu(style: Style) -> C {
             FlexAxis::Y,
             10.0,
             vec![
-                Text::new(style.clone(), "Hello world".to_string()),
-                Text::new(style.clone(), "Hello world again".to_string()),
+                Text::new(style.clone(), "Hello world".to_string()).boxed(),
+                Text::new(style.clone(), "Hello world again".to_string()).boxed(),
             ],
-        ),
+        )
+        .boxed(),
     );
 
     root.style.width = window::screen_width();

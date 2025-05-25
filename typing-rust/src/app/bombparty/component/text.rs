@@ -11,13 +11,13 @@ pub struct Text {
 }
 
 impl Text {
-    pub fn new(style: Style, text: String) -> Box<Self> {
-        Box::new(Text {
+    pub fn new(style: Style, text: String) -> Self {
+        Text {
             style,
             text,
             lines: vec![],
             offset_y: 0.0,
-        })
+        }
     }
 }
 

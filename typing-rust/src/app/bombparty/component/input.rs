@@ -25,10 +25,10 @@ pub struct Input {
 }
 
 impl Input {
-    pub fn new(style: Style, border: Option<Border>) -> Box<Self> {
+    pub fn new(style: Style, border: Option<Border>) -> Self {
         let fsize = *style.font_size.borrow();
 
-        Box::new(Input {
+        Input {
             value: vec![],
             placeholder: "".to_string(),
             focused: false,
@@ -39,7 +39,7 @@ impl Input {
             last_char_pressed: None,
             container: Container {
                 style: style.clone(),
-                child: Text::new(style.clone(), "".to_string()),
+                child: Text::new(style.clone(), "".to_string()).boxed(),
                 padding: Padding::new(fsize / 3.0),
                 border: if border.is_none() {
                     Some(Border::new(2.0, Rc::clone(&style.theme.ghost)))
@@ -48,7 +48,7 @@ impl Input {
                 },
             },
             style,
-        })
+        }
     }
 
     fn add_last(&mut self, c: char) {
@@ -227,7 +227,7 @@ impl Component for Input {
                     }
                 }
                 input::clear_input_queue();
-                self.container.child = Text::new(self.style.clone(), self.to_string());
+                self.container.child = Text::new(self.style.clone(), self.to_string()).boxed();
                 self.build();
                 self.draw_cursor();
                 self.cursor_timer = Instant::now();
@@ -258,7 +258,8 @@ impl Component for Input {
                     ..self.style.clone()
                 },
                 self.placeholder.clone(),
-            );
+            )
+            .boxed();
             self.build();
         }
 
@@ -355,7 +356,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        *Input::new(Style::default(), None)
+        Input::new(Style::default(), None)
     }
 
     #[test]

@@ -18,13 +18,13 @@ pub struct Container {
 }
 
 impl Container {
-    pub fn new(style: Style, child: Box<dyn Component>) -> Box<Self> {
-        Box::new(Container {
+    pub fn new(style: Style, child: Box<dyn Component>) -> Self {
+        Container {
             child,
             style,
             padding: Padding::new(0.0),
             border: None,
-        })
+        }
     }
 
     fn draw_border(&mut self) {
