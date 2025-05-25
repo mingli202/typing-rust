@@ -1,14 +1,22 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use proc_macro::TokenStream;
+use syn::DeriveInput;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[proc_macro_derive(StyledComponent)]
+pub fn style_component_derive(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input as DeriveInput);
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+    let name = input.ident;
+
+    let expanded = quote::quote! {
+        impl StyledComponent for #name {
+            fn get_style(&self) -> &Style {
+                &self.style
+            }
+            fn get_style_mut(&mut self) -> &mut Style {
+                &mut self.style
+            }
+        }
+    };
+
+    expanded.into()
 }
