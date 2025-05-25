@@ -47,6 +47,13 @@ pub trait Component {
 
     /// Refreshes the x and y positions and render the Component
     fn refresh(&mut self);
+
+    fn boxed(self) -> Box<Self>
+    where
+        Self: Sized,
+    {
+        Box::new(self)
+    }
 }
 
 pub enum Axis {
