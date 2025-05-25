@@ -6,8 +6,6 @@ edition = "2024"
 [dependencies]
 syn = "2"
 quote = "1.0"
-macroquad = "0.4.13"
-serde = { version = "1.0.216", features = ["derive"] }
 
 [lib]
 proc-macro = true
