@@ -17,6 +17,8 @@ pub trait Component {
     fn on_click_out(&mut self) {}
     fn get_style(&self) -> &Style;
     fn get_style_mut(&mut self) -> &mut Style;
+
+    /// Building means setting the width and height of the Component
     fn build(&mut self) {}
 
     fn on_hover_in(&mut self) {}
@@ -43,6 +45,7 @@ pub trait Component {
         }
     }
 
+    /// Refreshes the x and y positions and render the Component
     fn refresh(&mut self);
 }
 
