@@ -1,4 +1,5 @@
 use crate::app::bombparty::Style;
+use crate::app::util::F32Eq;
 
 use super::Component;
 
@@ -16,14 +17,14 @@ impl FlexBox {
         flex_axis: FlexAxis,
         gap: f32,
         children: Vec<Box<dyn Component>>,
-    ) -> Self {
-        FlexBox {
+    ) -> Box<Self> {
+        Box::new(FlexBox {
             style,
             flex_axis,
             gap,
             children,
             children_dimensions: vec![],
-        }
+        })
     }
 }
 
@@ -75,6 +76,8 @@ impl Component for FlexBox {
                         height = *h;
                     }
                 }
+
+                width += self.gap * (0.max(self.children.len() - 1) as f32);
             }
             FlexAxis::Y => {
                 let mut y = 0.0;
@@ -97,6 +100,8 @@ impl Component for FlexBox {
                         width = *w;
                     }
                 }
+
+                height += self.gap * (0.max(self.children.len() - 1) as f32);
             }
         }
 
@@ -118,18 +123,35 @@ impl Component for FlexBox {
             style_child.x = self.children_dimensions[i].0 + self.style.x;
             style_child.y = self.children_dimensions[i].1 + self.style.y;
 
-            if style_child.width > width {
-                width = style_child.width;
-            }
+            match self.flex_axis {
+                FlexAxis::X => {
+                    if style_child.height > height {
+                        height = style_child.height;
+                    }
 
-            if style_child.height > height {
-                height = style_child.height;
+                    width += style_child.width;
+
+                    if i != 0 {
+                        width += self.gap;
+                    }
+                }
+                FlexAxis::Y => {
+                    if style_child.width > width {
+                        width = style_child.width;
+                    }
+
+                    height += style_child.height;
+
+                    if i != 0 {
+                        height += self.gap;
+                    }
+                }
             }
 
             child.refresh();
         }
 
-        if (self.style.width - width).abs() < 0.01 || (self.style.height - height) < 0.01 {
+        if !self.style.width.eq_approx(&width) || !self.style.height.eq_approx(&height) {
             self.build();
         }
     }
