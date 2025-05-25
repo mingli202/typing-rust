@@ -5,6 +5,7 @@ use macroquad::color::Color;
 use macroquad::shapes;
 
 use crate::app::bombparty::Style;
+use crate::app::util::F32Eq;
 
 use super::Component;
 
@@ -16,49 +17,16 @@ pub struct Container {
 }
 
 impl Container {
-    pub fn new(style: Style, child: Box<dyn Component>) -> Self {
-        Container {
+    pub fn new(style: Style, child: Box<dyn Component>) -> Box<Self> {
+        Box::new(Container {
             child,
             style,
             padding: Padding::new(0.0),
             border: None,
-        }
-    }
-}
-
-impl Component for Container {
-    fn build(&mut self) {
-        if self.style.width == 0.0 {
-            self.style.fit_width = true;
-        }
-        if self.style.height == 0.0 {
-            self.style.fit_height = true;
-        }
-
-        self.child.build();
-        let child = self.child.get_style_mut();
-
-        if self.style.fit_width {
-            self.style.width = child.width + self.padding.l + self.padding.r;
-        }
-        if self.style.fit_height {
-            self.style.height = child.height + self.padding.t + self.padding.b;
-        }
-    }
-    fn get_style(&self) -> &Style {
-        &self.style
+        })
     }
 
-    fn get_style_mut(&mut self) -> &mut Style {
-        &mut self.style
-    }
-
-    fn refresh(&mut self) {
-        let child = self.child.get_style_mut();
-
-        child.x = self.style.x + self.padding.l;
-        child.y = self.style.y + self.padding.t;
-
+    fn draw_border(&mut self) {
         if let Some(border) = &self.border {
             let Style {
                 x,
@@ -101,6 +69,52 @@ impl Component for Container {
                 *border.color.borrow(),
             );
         }
+    }
+}
+
+impl Component for Container {
+    fn build(&mut self) {
+        if self.style.width == 0.0 {
+            self.style.fit_width = true;
+        }
+        if self.style.height == 0.0 {
+            self.style.fit_height = true;
+        }
+
+        self.child.build();
+        let child = self.child.get_style_mut();
+
+        if self.style.fit_width {
+            self.style.width = child.width + self.padding.l + self.padding.r;
+        }
+        if self.style.fit_height {
+            self.style.height = child.height + self.padding.t + self.padding.b;
+        }
+    }
+    fn get_style(&self) -> &Style {
+        &self.style
+    }
+
+    fn get_style_mut(&mut self) -> &mut Style {
+        &mut self.style
+    }
+
+    fn refresh(&mut self) {
+        let child = self.child.get_style_mut();
+
+        child.x = self.style.x + self.padding.l;
+        child.y = self.style.y + self.padding.t;
+
+        let child_width = child.width + self.padding.l + self.padding.r;
+        let child_height = child.height + self.padding.l + self.padding.r;
+
+        if child_width.eq_approx(&self.style.width) || child_height.eq_approx(&self.style.width) {
+            self.style.width = child_width;
+            self.style.height = child_width;
+            self.build();
+        }
+
+        self.draw_border();
 
         self.child.refresh();
     }
