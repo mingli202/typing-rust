@@ -9,6 +9,7 @@ pub enum SizingType {
     Fixed(i32),
 }
 
+/// Determines the width and height of the layout
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
 pub struct Sizing {
     width: SizingType,
@@ -21,15 +22,17 @@ impl Sizing {
     }
 }
 
+/// Whether to oriente the children vertially or horizontally
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
-pub enum FlexDirection {
+pub enum Direction {
     #[default]
     Vertical,
     Horizontal,
 }
 
+/// How to align the children of this layout
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
-pub enum FlexAlignment {
+pub enum Alignment {
     #[default]
     Start,
     End,
@@ -39,13 +42,13 @@ pub enum FlexAlignment {
 
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
 pub struct Flex {
-    direction: FlexDirection,
-    alignment: FlexAlignment,
+    direction: Direction,
+    alignment: Alignment,
     gap: i32,
 }
 
 impl Flex {
-    pub fn new(direction: FlexDirection, alignment: FlexAlignment, gap: i32) -> Self {
+    pub fn new(direction: Direction, alignment: Alignment, gap: i32) -> Self {
         Flex {
             direction,
             alignment,
@@ -53,10 +56,10 @@ impl Flex {
         }
     }
 
-    pub fn with_direction(self, direction: FlexDirection) -> Self {
+    pub fn with_direction(self, direction: Direction) -> Self {
         Flex::new(direction, self.alignment, self.gap)
     }
-    pub fn with_alignment(self, alignment: FlexAlignment) -> Self {
+    pub fn with_alignment(self, alignment: Alignment) -> Self {
         Flex::new(self.direction, alignment, self.gap)
     }
     pub fn with_gap(self, gap: i32) -> Self {
