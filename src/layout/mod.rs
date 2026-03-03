@@ -83,6 +83,13 @@ pub struct ComputedLayout {
 }
 
 impl ComputedLayout {
+    pub fn new(bounding_box: BoundingBox, children: Vec<ComputedLayout>) -> Self {
+        ComputedLayout {
+            bounding_box,
+            children,
+        }
+    }
+
     pub fn get_max_width_height(&self) -> (i32, i32) {
         let ((min_x, max_x), (min_y, max_y)) = self.get_min_max_x_y();
 
@@ -174,16 +181,45 @@ impl Layout {
         ComputedLayout::default()
     }
 
-    fn compute_size(self) -> ComputedLayout {
-        let children = self.children.into_iter().map(|child| child.compute_size());
+    fn compute_size(self, parent_width: i32, parent_height: i32) -> ComputedLayout {
+        let children: Vec<ComputedLayout> = self
+            .children
+            .into_iter()
+            .map(|child| child.compute_size(parent_width, parent_height))
+            .collect();
+
+        let computed_layout = ComputedLayout::new(
+            BoundingBox {
+                top: 0,
+                left: 0,
+                width: 0,
+                height: 0,
+            },
+            children,
+        );
 
         let width = self.sizing.width;
+        let height = self.sizing.height;
+
+        if matches!(width, SizingType::Fit) || matches!(height, SizingType::Fit) {
+            let (max_width, max_height) = computed_layout.get_max_width_height();
+
+            let width = match width {
+                SizingType::Fit => max_width,
+                SizingType::Grow => parent_width,
+                SizingType::Fixed(w) => w,
+            };
+
+            let height = match height {
+                SizingType::Fit => max_height,
+                SizingType::Grow => parent_height,
+                SizingType::Fixed(w) => w,
+            };
+        }
 
         // match width {
         //     SizingType::Fit =>
         // }
-
-        let height = self.sizing.height;
 
         ComputedLayout::default()
     }
