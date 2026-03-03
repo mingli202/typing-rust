@@ -82,6 +82,35 @@ pub struct ComputedLayout {
     children: Vec<ComputedLayout>,
 }
 
+impl ComputedLayout {
+    pub fn get_max_width_height(&self) -> (i32, i32) {
+        let ((min_x, max_x), (min_y, max_y)) = self.get_min_max_x_y();
+
+        (i32::abs(max_x - min_x), i32::abs(max_y - min_y))
+    }
+
+    fn get_min_max_x_y(&self) -> ((i32, i32), (i32, i32)) {
+        let BoundingBox {
+            left,
+            top,
+            width,
+            height,
+        } = self.bounding_box;
+
+        self.children
+            .iter()
+            .fold(((left, left + width), (top, top + height)), |acc, child| {
+                let ((child_min_x, child_max_x), (child_min_y, child_max_y)) =
+                    child.get_min_max_x_y();
+                let ((min_x, max_x), (min_y, max_y)) = acc;
+                (
+                    (i32::min(child_min_x, min_x), i32::max(child_max_x, max_x)),
+                    (i32::min(child_min_y, min_y), i32::max(child_max_y, max_y)),
+                )
+            })
+    }
+}
+
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
 pub struct Layout {
     sizing: Sizing,
@@ -132,16 +161,30 @@ impl Layout {
         };
 
         ComputedLayout {
-            bounding_box,
             children: self
                 .children
                 .into_iter()
-                .map(move |child| child.compute_child(&bounding_box))
+                .map(|child| child.compute_child(&bounding_box))
                 .collect(),
+            bounding_box,
         }
     }
 
     fn compute_child(self, parent_bounding_box: &BoundingBox) -> ComputedLayout {
+        ComputedLayout::default()
+    }
+
+    fn compute_size(self) -> ComputedLayout {
+        let children = self.children.into_iter().map(|child| child.compute_size());
+
+        let width = self.sizing.width;
+
+        // match width {
+        //     SizingType::Fit =>
+        // }
+
+        let height = self.sizing.height;
+
         ComputedLayout::default()
     }
 }
