@@ -1,4 +1,4 @@
-# typing-rust (in-progress)
+# typing-rust
 
 Try it with `cargo install typing_test` and run `typing_test`
 
@@ -16,3 +16,11 @@ Tech Stack:
 Special thanks to Monkeytype for inspiring me to build this and providing the default words.
 
 [![Typing demo](https://img.youtube.com/vi/qujeessD6Mg/0.jpg)](https://youtu.be/qujeessD6Mg)
+
+Layout todos
+- Composable layout
+- Not reliant on gui, similar to clay
+- Width/height that fit content or grow to fill everything
+- Flex layout to align items
+- Flex items: center, between, start, end
+- Padding/gap
