@@ -69,7 +69,7 @@ impl Flex {
 
 /// The bounding rectangle relative to its parent
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
-pub struct BoundingRect {
+pub struct BoundingBox {
     top: i32,
     left: i32,
     width: i32,
@@ -78,7 +78,7 @@ pub struct BoundingRect {
 
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
 pub struct ComputedLayout {
-    bounding_rect: BoundingRect,
+    bounding_box: BoundingBox,
     children: Vec<ComputedLayout>,
 }
 
@@ -124,22 +124,24 @@ impl Layout {
             _ => panic!("Root layout must have a fixed height"),
         };
 
+        let bounding_box = BoundingBox {
+            top: 0,
+            left: 0,
+            width,
+            height,
+        };
+
         ComputedLayout {
-            bounding_rect: BoundingRect {
-                top: 0,
-                left: 0,
-                width,
-                height,
-            },
+            bounding_box,
             children: self
                 .children
                 .into_iter()
-                .map(move |child| child.compute_child())
+                .map(move |child| child.compute_child(&bounding_box))
                 .collect(),
         }
     }
 
-    fn compute_child(self) -> ComputedLayout {
+    fn compute_child(self, parent_bounding_box: &BoundingBox) -> ComputedLayout {
         ComputedLayout::default()
     }
 }
@@ -173,7 +175,7 @@ mod layout_test {
         let computed_layout = layout.compute();
 
         let expected = ComputedLayout {
-            bounding_rect: BoundingRect {
+            bounding_box: BoundingBox {
                 top: 0,
                 left: 0,
                 width: 100,
@@ -181,7 +183,7 @@ mod layout_test {
             },
             children: vec![
                 ComputedLayout {
-                    bounding_rect: BoundingRect {
+                    bounding_box: BoundingBox {
                         top: 0,
                         left: 0,
                         width: 10,
@@ -190,7 +192,7 @@ mod layout_test {
                     children: vec![],
                 },
                 ComputedLayout {
-                    bounding_rect: BoundingRect {
+                    bounding_box: BoundingBox {
                         top: 10,
                         left: 0,
                         width: 10,
@@ -199,7 +201,7 @@ mod layout_test {
                     children: vec![],
                 },
                 ComputedLayout {
-                    bounding_rect: BoundingRect {
+                    bounding_box: BoundingBox {
                         top: 40,
                         left: 0,
                         width: 10,
