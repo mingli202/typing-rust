@@ -15,6 +15,12 @@ pub struct Sizing {
     height: SizingType,
 }
 
+impl Sizing {
+    pub fn new(width: SizingType, height: SizingType) -> Self {
+        Sizing { width, height }
+    }
+}
+
 #[derive(Default, Debug, Clone, PartialEq, PartialOrd)]
 pub enum FlexDirection {
     #[default]
@@ -36,6 +42,26 @@ pub struct Flex {
     direction: FlexDirection,
     alignment: FlexAlignment,
     gap: i32,
+}
+
+impl Flex {
+    pub fn new(direction: FlexDirection, alignment: FlexAlignment, gap: i32) -> Self {
+        Flex {
+            direction,
+            alignment,
+            gap,
+        }
+    }
+
+    pub fn with_direction(self, direction: FlexDirection) -> Self {
+        Flex::new(direction, self.alignment, self.gap)
+    }
+    pub fn with_alignment(self, alignment: FlexAlignment) -> Self {
+        Flex::new(self.direction, alignment, self.gap)
+    }
+    pub fn with_gap(self, gap: i32) -> Self {
+        Flex::new(self.direction, self.alignment, gap)
+    }
 }
 
 /// The bounding rectangle relative to its parent
