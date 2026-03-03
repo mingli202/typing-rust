@@ -96,6 +96,12 @@ impl ComputedLayout {
         (i32::abs(max_x - min_x), i32::abs(max_y - min_y))
     }
 
+    pub fn get_children_max_width_height(&self) -> (i32, i32) {
+        let ((min_x, max_x), (min_y, max_y)) = self.get_children_min_max_x_y();
+
+        (i32::abs(max_x - min_x), i32::abs(max_y - min_y))
+    }
+
     fn get_min_max_x_y(&self) -> ((i32, i32), (i32, i32)) {
         let BoundingBox {
             left,
@@ -104,17 +110,43 @@ impl ComputedLayout {
             height,
         } = self.bounding_box;
 
-        self.children
-            .iter()
-            .fold(((left, left + width), (top, top + height)), |acc, child| {
-                let ((child_min_x, child_max_x), (child_min_y, child_max_y)) =
-                    child.get_min_max_x_y();
-                let ((min_x, max_x), (min_y, max_y)) = acc;
-                (
-                    (i32::min(child_min_x, min_x), i32::max(child_max_x, max_x)),
-                    (i32::min(child_min_y, min_y), i32::max(child_max_y, max_y)),
-                )
-            })
+        let (min_x, max_x, min_y, max_y) = (left, left + width, top, top + height);
+
+        let ((child_min_x, child_max_x), (child_min_y, child_max_y)) =
+            self.get_children_min_max_x_y();
+
+        (
+            (i32::min(child_min_x, min_x), i32::max(child_max_x, max_x)),
+            (i32::min(child_min_y, min_y), i32::max(child_max_y, max_y)),
+        )
+    }
+
+    fn get_children_min_max_x_y(&self) -> ((i32, i32), (i32, i32)) {
+        let mut first = self.children.iter().take(1);
+        let rest = self.children.iter().skip(1);
+
+        match first.next() {
+            Some(child) => {
+                let BoundingBox {
+                    top,
+                    left,
+                    width,
+                    height,
+                } = child.bounding_box;
+
+                rest.fold(((left, left + width), (top, top + height)), |acc, child| {
+                    let ((child_min_x, child_max_x), (child_min_y, child_max_y)) =
+                        child.get_min_max_x_y();
+
+                    let ((min_x, max_x), (min_y, max_y)) = acc;
+                    (
+                        (i32::min(child_min_x, min_x), i32::max(child_max_x, max_x)),
+                        (i32::min(child_min_y, min_y), i32::max(child_max_y, max_y)),
+                    )
+                })
+            }
+            None => ((0, 0), (0, 0)),
+        }
     }
 }
 
