@@ -215,6 +215,34 @@ impl Layout {
     }
 
     fn compute_child(self, parent_bounding_box: &BoundingBox) -> ComputedLayout {
+        let computed_layout = self.compute_size(parent_bounding_box);
+
+        computed_layout
+    }
+
+    fn compute_flex(self) -> Layout {
+        let Flex {
+            direction,
+            alignment,
+            gap,
+        } = self.flex;
+
+        match alignment {
+            Alignment::Start => {}
+            Alignment::End => {}
+            Alignment::Center => {}
+            Alignment::Between => {}
+        }
+
+        Layout::default()
+    }
+
+    fn align(self, x: i32, y: i32) -> Layout {
+        Layout::default()
+    }
+
+    /// Computes the final size of this layout
+    fn compute_size(self, parent_bounding_box: &BoundingBox) -> ComputedLayout {
         let mut bounding_box = BoundingBox {
             top: 0,
             left: 0,
@@ -251,78 +279,7 @@ impl Layout {
             }
         }
 
-        let Flex {
-            direction,
-            alignment,
-            gap,
-        } = self.flex;
-
-        match direction {
-            Direction::Vertical => {}
-            Direction::Horizontal => {}
-        }
-
-        ComputedLayout::default()
-    }
-
-    fn compute_flex(self) -> Layout {
-        let Flex {
-            direction,
-            alignment,
-            gap,
-        } = self.flex;
-
-        match alignment {
-            Alignment::Start => {}
-            Alignment::End => {}
-            Alignment::Center => {}
-            Alignment::Between => {}
-        }
-
-        Layout::default()
-    }
-
-    fn align(self, x: i32, y: i32) -> Layout {
-        Layout::default()
-    }
-
-    /// Computes the final size of this layout
-    fn compute_size(self, parent_width: i32, parent_height: i32) -> ComputedLayout {
-        let children: Vec<ComputedLayout> = self
-            .children
-            .into_iter()
-            .map(|child| child.compute_size(parent_width, parent_height))
-            .collect();
-
-        let width = self.sizing.width;
-        let height = self.sizing.height;
-
-        let (children_max_width, children_max_height) =
-            ComputedLayout::get_children_max_width_height(&children);
-
-        let computed_layout = ComputedLayout::default().with_children(children);
-
-        let width = match width {
-            SizingType::Fit => children_max_width,
-            SizingType::Grow => parent_width,
-            SizingType::Fixed(w) => w,
-        };
-
-        let height = match height {
-            SizingType::Fit => children_max_height,
-            SizingType::Grow => parent_height,
-            SizingType::Fixed(w) => w,
-        };
-
-        ComputedLayout {
-            bounding_box: BoundingBox {
-                top: 0,
-                left: 0,
-                width,
-                height,
-            },
-            children: computed_layout.children,
-        }
+        ComputedLayout::new(bounding_box, children)
     }
 }
 
