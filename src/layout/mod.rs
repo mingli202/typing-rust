@@ -204,20 +204,13 @@ impl Layout {
             height,
         };
 
-        ComputedLayout {
-            children: self
-                .children
-                .into_iter()
-                .map(|child| child.compute_child(&bounding_box))
-                .collect(),
-            bounding_box,
-        }
+        self.compute_child(&bounding_box)
     }
 
     fn compute_child(self, parent_bounding_box: &BoundingBox) -> ComputedLayout {
         let computed_layout = self.compute_size(parent_bounding_box);
 
-        computed_layout
+        ComputedLayout::default()
     }
 
     fn compute_flex(self) -> Layout {
