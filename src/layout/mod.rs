@@ -283,7 +283,7 @@ impl Layout {
     }
 
     fn align(self, x: i32, y: i32) -> Layout {
-        Layout::defaul()
+        Layout::default()
     }
 
     /// Computes the final size of this layout
@@ -297,9 +297,10 @@ impl Layout {
         let width = self.sizing.width;
         let height = self.sizing.height;
 
-        let computed_layout = ComputedLayout::default().with_children(children);
         let (children_max_width, children_max_height) =
-            computed_layout.get_children_max_width_height();
+            ComputedLayout::get_children_max_width_height(&children);
+
+        let computed_layout = ComputedLayout::default().with_children(children);
 
         let width = match width {
             SizingType::Fit => children_max_width,
@@ -320,7 +321,7 @@ impl Layout {
                 width,
                 height,
             },
-            children,
+            children: computed_layout.children,
         }
     }
 }
